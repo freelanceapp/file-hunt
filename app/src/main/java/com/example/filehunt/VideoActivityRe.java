@@ -200,8 +200,10 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
                     return true;
                 case R.id.action_select:
                     selectAll();
+                    return  true;
                 case  R.id.action_Share:
                     shareMultipleVideo();
+                    return  true;
                 default:
                     return false;
             }
