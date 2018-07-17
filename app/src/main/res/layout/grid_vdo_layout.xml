@@ -1,0 +1,41 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/LinearLayout1"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_margin="@dimen/dp3"
+        android:id="@+id/video_frame"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/transparent"
+        >
+
+        <ImageView android:id="@+id/vdoThumbNail"
+            android:src="@drawable/logo"
+            android:layout_margin="@dimen/dp3"
+            android:scaleType="centerCrop"
+            android:layout_width="80dp"
+            android:layout_height="80dp"/>
+
+        <ImageButton
+            android:id="@+id/play_button"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:src="@mipmap/ic_play_media"
+            />
+
+        <CheckBox android:id="@+id/itemCheckBoxVdo" android:layout_width="wrap_content"
+            android:layout_gravity="center|bottom"
+            android:layout_marginTop="-30dp"
+            android:visibility="gone"
+            android:checked="true"
+            android:buttonTint="@color/green_900"
+            android:layout_height="wrap_content"
+            />
+
+    </FrameLayout>
+</LinearLayout>

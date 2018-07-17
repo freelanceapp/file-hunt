@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+       <RelativeLayout
+           android:padding="@dimen/dp10"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content">
+           <RelativeLayout
+               android:id="@+id/header"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content">
+               <TextView
+                   android:paddingBottom="@dimen/dp10"
+                   android:text="Details"
+                   android:textSize="@dimen/sp20"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content" />
+           </RelativeLayout>
+           <ScrollView
+               android:layout_below="@+id/header"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content">
+               <LinearLayout
+                   android:orientation="vertical"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content">
+
+                   <!--name layout-->
+                   <LinearLayout
+                       android:orientation="vertical"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content">
+                       <TextView
+
+                           android:text="Name"
+                           android:textSize="@dimen/sp16"
+                           android:textColor="@color/black"
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content" />
+
+                       <TextView
+                           android:id="@+id/FileName"
+                           android:text="FileName"
+                           android:textSize="@dimen/sp14"
+                           android:textColor="@color/button_disable_color_light"
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content" />
+
+                   </LinearLayout>
+                   <!--name layout-->
+
+                   <!--path layout-->
+               <LinearLayout
+                   android:orientation="vertical"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content">
+                   <TextView
+                       android:text="Location"
+                       android:textSize="@dimen/sp16"
+                       android:textColor="@color/black"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content" />
+
+                   <TextView
+                       android:id="@+id/FilePath"
+                       android:text="file path "
+                       android:textSize="@dimen/sp14"
+                       android:textColor="@color/button_disable_color_light"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content" />
+
+               </LinearLayout>
+                   <!--path layout-->
+
+                   <!--size layout-->
+                   <LinearLayout
+                       android:orientation="vertical"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content">
+                       <TextView
+                           android:text="Size"
+                           android:textSize="@dimen/sp16"
+                           android:textColor="@color/black"
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content" />
+
+                       <TextView
+                           android:id="@+id/FileSize"
+                           android:text=""
+                           android:textSize="@dimen/sp14"
+                           android:textColor="@color/button_disable_color_light"
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content" />
+
+                   </LinearLayout>
+                   <!--size layout-->
+
+                   <!--oreintation-->
+                   <LinearLayout
+                       android:orientation="vertical"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content">
+                       <TextView
+                           android:text="Oreintation"
+                           android:textSize="@dimen/sp16"
+                           android:textColor="@color/black"
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content" />
+
+                       <TextView
+                           android:id="@+id/ort"
+                           android:text=""
+                           android:textSize="@dimen/sp14"
+                           android:textColor="@color/button_disable_color_light"
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content" />
+
+                   </LinearLayout>
+                   <!--resolution layout-->
+
+                   <!--resolutionlayout-->
+                   <LinearLayout
+                       android:orientation="vertical"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content">
+                       <TextView
+                           android:text="Resolution"
+                           android:textSize="@dimen/sp16"
+                           android:textColor="@color/black"
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content" />
+
+                       <TextView
+                           android:id="@+id/Resolution"
+                           android:text=""
+                           android:textSize="@dimen/sp14"
+                           android:textColor="@color/button_disable_color_light"
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content" />
+
+                   </LinearLayout>
+                   <!--resolution layout-->
+
+
+                   <!--date layout-->
+                   <LinearLayout
+                       android:orientation="vertical"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content">
+                       <TextView
+                           android:text="Date"
+                           android:textSize="@dimen/sp16"
+                           android:textColor="@color/black"
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content" />
+
+                       <TextView
+                           android:id="@+id/FileDate"
+                           android:text=""
+                           android:textSize="@dimen/sp14"
+                           android:textColor="@color/button_disable_color_light"
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content" />
+
+                   </LinearLayout>
+                   <!--date layout-->
+
+
+
+               </LinearLayout>
+
+           </ScrollView>
+
+
+
+       </RelativeLayout>
+
+</RelativeLayout>

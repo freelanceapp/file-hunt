@@ -1,0 +1,23 @@
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:orientation="vertical" >
+
+<ImageView android:id="@+id/iv_image"
+    android:src="@drawable/logo"
+    android:layout_margin="@dimen/dp3"
+    android:scaleType="centerCrop"
+    android:layout_width="80dp"
+    android:layout_height="80dp"/>
+
+    <CheckBox android:id="@+id/itemCheckBox" android:layout_width="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="-30dp"
+        android:visibility="gone"
+        android:checked="true"
+        android:buttonTint="@color/green_900"
+        android:layout_height="wrap_content"
+        />
+
+</LinearLayout>
