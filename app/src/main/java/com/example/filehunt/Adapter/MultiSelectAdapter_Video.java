@@ -57,15 +57,12 @@ public class MultiSelectAdapter_Video extends RecyclerView.Adapter<MultiSelectAd
         Grid_Model Img = VdoList.get(position);
 
 
-        Bitmap thumb = ThumbnailUtils.createVideoThumbnail(Img.getImgPath(),
+                Bitmap thumb = ThumbnailUtils.createVideoThumbnail(Img.getImgPath(),
                 MediaStore.Images.Thumbnails.MINI_KIND);
 
                 holder.iv_image.setImageBitmap(thumb);
 
-
-
-
-        if(selected_VdoList.contains(VdoList.get(position)))
+                if(selected_VdoList.contains(VdoList.get(position)))
             holder.itemCheckBox.setVisibility(View.VISIBLE);
         else
             holder.itemCheckBox.setVisibility(View.GONE);
