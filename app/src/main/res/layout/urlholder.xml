@@ -14,5 +14,21 @@
 //select and share
 http://www.androhub.com/select-and-share-multiple-images/
 
+
+//storage library
+https://github.com/sromku/android-storage
+
+
+//share file  on noighat and above  version  // to be implemented
+https://proandroiddev.com/sharing-files-though-intents-are-you-ready-for-nougat-70f7e9294a0b
+
+http://stacktips.com/tutorials/android/listing-all-sdcard-filenames-with-extensions-in-android
+
+
+
+recycleview fully explained new way
+https://github.com/codepath/android_guides/wiki/Using-the-RecyclerView
+
+
     -->
 </android.support.constraint.ConstraintLayout>

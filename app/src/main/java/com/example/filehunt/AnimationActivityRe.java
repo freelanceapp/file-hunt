@@ -505,10 +505,10 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
     @Override
     public void onAnimSelected(Model_Anim docs) {
 
-        openDocument(docs.getFilePath());
+        openanimationFile(docs.getFilePath());
 
     }
-    public void openDocument(String name) {
+    public void openanimationFile(String name) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         File file = new File(name);
         String extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());

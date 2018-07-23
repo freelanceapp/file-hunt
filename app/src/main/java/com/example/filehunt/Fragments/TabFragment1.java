@@ -29,6 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.filehunt.AnimationActivityRe;
+import com.example.filehunt.ApkActivityRe;
 import com.example.filehunt.Category_Explore_Activity;
 import com.example.filehunt.DocsActivityRe;
 import com.example.filehunt.MainActivity;
@@ -230,6 +231,11 @@ public class TabFragment1 extends Fragment {
                         Intent i = new Intent(getActivity(), AnimationActivityRe.class);
                         startActivity(i);
 
+                    }
+                    else  if(position==7)
+                    {
+                        Intent i = new Intent(getActivity(), ApkActivityRe.class);
+                        startActivity(i);
                     }
                     else {
                         Intent i = new Intent(getActivity(), Category_Explore_Activity.class);
