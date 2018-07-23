@@ -28,6 +28,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.filehunt.AnimationActivityRe;
 import com.example.filehunt.Category_Explore_Activity;
 import com.example.filehunt.DocsActivityRe;
 import com.example.filehunt.MainActivity;
@@ -218,13 +219,21 @@ public class TabFragment1 extends Fragment {
                 public void onClick(View v) {
 
 
-                    if(position!=3) {
-                        Intent i = new Intent(getActivity(), Category_Explore_Activity.class);
-                        i.putExtra(POSITION, position);
-                        startActivity(i);
-                    }else
+
+                    if(position==3)
                     {
                         Intent i = new Intent(getActivity(), DocsActivityRe.class);
+                        startActivity(i);
+                    }
+                    else  if(position==5)
+                    {
+                        Intent i = new Intent(getActivity(), AnimationActivityRe.class);
+                        startActivity(i);
+
+                    }
+                    else {
+                        Intent i = new Intent(getActivity(), Category_Explore_Activity.class);
+                        i.putExtra(POSITION, position);
                         startActivity(i);
                     }
 

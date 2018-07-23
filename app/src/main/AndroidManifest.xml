@@ -33,6 +33,7 @@
         <activity android:name=".VideoActivityRe" android:screenOrientation="portrait"></activity>
         <activity android:name=".AudioActivityRe" android:screenOrientation="portrait"></activity>
         <activity android:name=".DocsActivityRe" android:screenOrientation="portrait"></activity>
+        <activity android:name=".AnimationActivityRe" android:screenOrientation="portrait"></activity>
 
     </application>
 
