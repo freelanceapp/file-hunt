@@ -172,6 +172,7 @@ Files with the same name already exist. Do you want to overwrite them?
 Operation completed. Files will be uploaded in the background
 </string>
     <string name="menu_item_delete">Delete</string>
+    <string name="action_search">Search</string>
     <string name="rar_extract_message">Extraction not supported for encrypted RAR files</string>
     <!--taken from filemangaer app-->
 </resources>

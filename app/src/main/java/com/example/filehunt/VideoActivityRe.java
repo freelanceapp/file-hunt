@@ -2,14 +2,19 @@ package com.example.filehunt;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -48,6 +53,7 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
     AlertDialogHelper alertDialogHelper;
     int int_position;
     ArrayList<String> Intent_Video_List;
+    ArrayList<String> thumbList;
     Context mcontext;
 
     @Override
@@ -59,24 +65,42 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
        
         int_position = getIntent().getIntExtra("value", 0);
 
-        Intent_Video_List = Category_Explore_Activity.al_images.get(int_position).getAl_imagepath();
+          Intent_Video_List = Category_Explore_Activity.al_images.get(int_position).getAl_imagepath();
+          thumbList= Category_Explore_Activity.al_images.get(int_position).getAl_vdoThumb();// this list  will be part  of  Intent_Video_List using setter getter
+          data_load();
 
-         data_load();
+
 
         alertDialogHelper =new AlertDialogHelper(this);
         multiSelectAdapter = new MultiSelectAdapter_Video(this,vidioList,multiselect_list);
 
 
 
-        AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));
+       // AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));  // did not work on high resolution phones
+
+
+        //set the width of column 20 %  of width of screen
+        int columnWidthPercent=(getScreenWidth()*20)/100;
+        AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this,columnWidthPercent);
         recyclerView.setLayoutManager(layoutManager);
+        //set the width of column 20 %  of width of screen
+
+
+
+
+//        //set the number of columns as  per  width of screen
+//         int columnCount=getScreenWidth()/100;
+//        System.out.println(""+columnCount);
+//        recyclerView.setLayoutManager(new GridLayoutManager(this, columnCount));
+//        //set the number of columns as  per  width of screen
+
+
+
+
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-
-
-
-
-
         recyclerView.setAdapter(multiSelectAdapter);
+
+
 
         recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
             @Override
@@ -143,12 +167,15 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
 
     public void data_load() {
 
-        for (int i = 0; i < Intent_Video_List.size(); i++) {
+        for (int i = 0; i < Intent_Video_List.size(); i++)
+        {
             Grid_Model gridImg = new Grid_Model();
-            gridImg.setImgPath(Intent_Video_List.get(i));
+            if(i<thumbList.size())
+            gridImg.setImgBitmap(thumbList.get(i));
             vidioList.add(gridImg);
         }
     }
+
 
 
     public void multi_select(int position) {
@@ -361,7 +388,6 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
 
         for(int i=0;i<multiselect_list.size();i++)
         {
-
             File file = new File(multiselect_list.get(i).getImgPath());
             Uri uri = Uri.fromFile(file);
             files.add(uri);
@@ -374,5 +400,14 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
              Toast.makeText(mcontext, "No files to share", Toast.LENGTH_SHORT).show();
          }
 
+    }
+     private  int getScreenWidth() {
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int height = displayMetrics.heightPixels;
+        int width = displayMetrics.widthPixels;
+        System.out.println(width);
+        return  width;
     }
 }

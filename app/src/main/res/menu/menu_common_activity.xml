@@ -2,6 +2,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.filehunt.PhotosActivityRe">
+
+
+    <item
+        android:id="@+id/action_search"
+        android:icon="@mipmap/ic_search_black_24dp"
+        android:orderInCategory="100"
+        android:title="@string/action_search"
+        app:showAsAction="always"
+        app:actionViewClass="android.support.v7.widget.SearchView" />
+
     <item  android:id="@+id/item1"
         android:title="Copy"/>
     <item  android:id="@+id/item2"

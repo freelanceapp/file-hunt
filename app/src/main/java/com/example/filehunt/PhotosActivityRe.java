@@ -9,7 +9,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -65,18 +67,30 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
 
         alertDialogHelper =new AlertDialogHelper(this);
         multiSelectAdapter = new MultiSelectAdapter(this,img_ImgList,multiselect_list);
+        //  AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));   // did not work on high resolution phones
+
+
+        //set the width of column 20 %  of width of screen
+            int columnWidthPercent=(getScreenWidth()*20)/100;
+            AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this,columnWidthPercent);
+            recyclerView.setLayoutManager(layoutManager);
+        //set the width of column 20 %  of width of screen
+
+
+//        //set the number of columns as  per  width of screen
+//         int columnCount=getScreenWidth()/100;
+//        System.out.println(""+columnCount);
+//        recyclerView.setLayoutManager(new GridLayoutManager(this, columnCount));
+//        //set the number of columns as  per  width of screen
 
 
 
-        AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));
-        recyclerView.setLayoutManager(layoutManager);
+
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-
-
-
-
-
+        recyclerView.getItemAnimator().setChangeDuration(0);
         recyclerView.setAdapter(multiSelectAdapter);
+
+
 
         recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
             @Override
@@ -382,5 +396,14 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
              Toast.makeText(mcontext, "No files to share", Toast.LENGTH_SHORT).show();
          }
 
+    }
+    private  int getScreenWidth() {
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int height = displayMetrics.heightPixels;
+        int width = displayMetrics.widthPixels;
+        System.out.println(width);
+        return  width;
     }
 }

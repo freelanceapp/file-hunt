@@ -15,6 +15,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.filehunt.Model.Grid_Model;
 import com.example.filehunt.R;
+import com.example.filehunt.Utils.Utility;
 
 import java.util.ArrayList;
 
@@ -56,11 +57,23 @@ public class MultiSelectAdapter_Video extends RecyclerView.Adapter<MultiSelectAd
     public void onBindViewHolder(MyViewHolder holder, int position) {
         Grid_Model Img = VdoList.get(position);
 
+                   //  long t1=System.currentTimeMillis();
 
-                Bitmap thumb = ThumbnailUtils.createVideoThumbnail(Img.getImgPath(),
-                MediaStore.Images.Thumbnails.MINI_KIND);
+                    if(Img.getImgBitmapStr()!=null)
+                    {
+                        Glide.with(mContext).load("file://" + Img.getImgBitmapStr())
+                                .skipMemoryCache(false)
+                                .into(holder.iv_image);
+                    }
 
-                holder.iv_image.setImageBitmap(thumb);
+
+                  // holder.iv_image.setImageBitmap(Img.getImgBitmap());
+
+//                long t2=System.currentTimeMillis();
+//                long timeTaken=t2-t1;
+//                String time= Utility.convertDuration(timeTaken);
+//                System.out.println(""+time);
+
 
                 if(selected_VdoList.contains(VdoList.get(position)))
             holder.itemCheckBox.setVisibility(View.VISIBLE);

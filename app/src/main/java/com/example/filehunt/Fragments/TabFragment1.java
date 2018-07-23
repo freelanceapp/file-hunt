@@ -29,6 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.filehunt.Category_Explore_Activity;
+import com.example.filehunt.DocsActivityRe;
 import com.example.filehunt.MainActivity;
 import com.example.filehunt.Model.category_Model;
 import com.example.filehunt.R;
@@ -176,7 +177,7 @@ public class TabFragment1 extends Fragment {
 
 
         new LoadApkTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        new LoadrecentTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+       // new LoadrecentTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         new LoadDownloadTask(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
@@ -217,9 +218,17 @@ public class TabFragment1 extends Fragment {
                 public void onClick(View v) {
 
 
-                    Intent  i =  new Intent(getActivity(), Category_Explore_Activity.class);
-                    i.putExtra(POSITION,position);
-                    startActivity(i);
+                    if(position!=3) {
+                        Intent i = new Intent(getActivity(), Category_Explore_Activity.class);
+                        i.putExtra(POSITION, position);
+                        startActivity(i);
+                    }else
+                    {
+                        Intent i = new Intent(getActivity(), DocsActivityRe.class);
+                        startActivity(i);
+                    }
+
+
                 }
             });
 
@@ -518,12 +527,35 @@ public class TabFragment1 extends Fragment {
 
     private int listDocs()
     {
+
         ArrayList<String> docs = new ArrayList<>();
         final String[] projection = {MediaStore.Files.FileColumns.DATA};
         Cursor cursor = getContext().getContentResolver().query(MediaStore.Files.getContentUri("external"),
                 projection, null, null, null);
-        String[] types = new String[]{"pdf",      // if any file type needed add extension here and task is done
-                "doc", "docx", "rtf", "txt", "wpd", "wps"};
+        String[] types = new String[]{"pdf",  "doc", "docx", "rtf", "txt", "wpd", "wps","xls","xlsx","json","dot","dotx","docm","dotm",
+                "xlt",
+                "xla",
+
+                "xltx",
+                "xlsm",
+                "xltm",
+                "xlam",
+                "xlsb",
+
+                "ppt",
+                "pot",
+                "pps",
+                "ppa",
+
+                "pptx",
+                "potx",
+                "ppsx",
+                "ppam",
+                "pptm",
+                "potm",
+                "ppsm",
+                "mdb "   };     // if any file type needed add extension here and task is done
+
         if (cursor == null) {
             System.out.println("docs data count" + 0);
             return 0;
@@ -532,8 +564,8 @@ public class TabFragment1 extends Fragment {
                 String FileType="";
                 String path = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA));
                 String[] filePath=   path.split("/");
-                 String FileName=filePath[filePath.length-1];
-                 String[] s1=FileName.split("\\.");
+                String FileName=filePath[filePath.length-1];
+                String[] s1=FileName.split("\\.");
                 if(s1.length==1)
                  FileType=s1[0];
                 else if(s1.length==2)
@@ -541,7 +573,7 @@ public class TabFragment1 extends Fragment {
 
 
                 System.out.println("ArrayLength-> "+s1.length);
-                if (path != null && Arrays.asList(types).contains(FileType)) {    //need to work here
+                if (path != null && Arrays.asList(types).contains(FileType)) {
                     docs.add(path);
                 }
             }

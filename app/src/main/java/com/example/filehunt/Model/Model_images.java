@@ -4,11 +4,22 @@ import java.util.ArrayList;
 
 
 
-public class Model_images {
+public class Model_images
+{
     String str_folder;
     ArrayList<String> al_imagepath;
 
+    ArrayList<String> FileDuaration;
+    ArrayList<String> al_vdoThumb;
 
+
+    public ArrayList<String> getAl_vdoThumb() {
+        return al_vdoThumb;
+    }
+
+    public void setAl_vdoThumb(ArrayList<String> al_vdoThumb) {
+        this.al_vdoThumb = al_vdoThumb;
+    }
 
     public void setStr_folder(String str_folder) {
         this.str_folder = str_folder;
@@ -21,6 +32,13 @@ public class Model_images {
     public void setAl_imagepath(ArrayList<String> al_imagepath) {
         this.al_imagepath = al_imagepath;
     }
+    public void setAl_FileDuration(ArrayList<String> FileDuaration) {
+        this.FileDuaration = FileDuaration;
+    }
+    public ArrayList<String>  getAl_FileDuration (){
+      return FileDuaration;
+    }
+
     public String getDate_modified() {
         return date_modified;
     }

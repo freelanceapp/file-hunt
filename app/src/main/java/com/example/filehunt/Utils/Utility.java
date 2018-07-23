@@ -247,6 +247,35 @@ public class Utility extends  Activity
         else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {  return 270; }
         return 0;
     }
+    public static  String convertDuration(long duration) {
+
+
+        //convert the song duration into string reading hours, mins seconds
+        int dur = (int)duration;
+
+        int hrs = (dur / 3600000);
+        int mns = (dur / 60000) % 60000;
+        int scs = dur % 60000 / 1000;
+
+        String songTime = String.format("%02d:%02d:%02d", hrs, mns, scs);
+        return  songTime;
+    }
+    public static String getMimiTypefromPath(String path)
+    {
+        File file = new File(path);
+        String extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
+        String mimetype = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+        return  mimetype;
+    }
+
+    public static String getFileExtensionfromPath(String path)
+    {
+        File file = new File(path);
+        String extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
+        return extension;
+    }
+
+
 
 
 }
