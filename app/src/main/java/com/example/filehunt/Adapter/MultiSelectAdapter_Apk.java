@@ -90,11 +90,11 @@ public class MultiSelectAdapter_Apk extends RecyclerView.Adapter<MultiSelectAdap
 
 
         if(selected_ApkList.contains(ApkList.get(position))) {
-            holder.chbx.setVisibility(View.GONE);  // for time being checkbox not shown   layout backgroud being changed
+            holder.chbx.setVisibility(View.VISIBLE);  // for time being checkbox not shown   layout backgroud being changed
             holder.rellayout.setBackgroundColor(mContext.getResources().getColor(R.color.gradation_04_light));
         }
         else {
-            holder.chbx.setVisibility(View.GONE); // for time being checkbox not shown   layout backgroud being changed
+            holder.chbx.setVisibility(View.INVISIBLE); // for time being checkbox not shown   layout backgroud being changed
             holder.rellayout.setBackgroundColor(mContext.getResources().getColor(R.color.white));
         }
 

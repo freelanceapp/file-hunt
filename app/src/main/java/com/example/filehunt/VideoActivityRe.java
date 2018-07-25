@@ -1,5 +1,6 @@
 package com.example.filehunt;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -14,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.util.DisplayMetrics;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -37,7 +39,7 @@ import java.util.ArrayList;
 import static com.example.filehunt.Class.Constants.PATH;
 
 
-public class VideoActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener {
+public class VideoActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener ,MultiSelectAdapter_Video.VdoListener {
 
     ActionMode mActionMode;
     Menu context_menu;
@@ -55,6 +57,7 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
     ArrayList<String> Intent_Video_List;
     ArrayList<String> thumbList;
     Context mcontext;
+    private SearchView searchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +75,7 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
 
 
         alertDialogHelper =new AlertDialogHelper(this);
-        multiSelectAdapter = new MultiSelectAdapter_Video(this,vidioList,multiselect_list);
+        multiSelectAdapter = new MultiSelectAdapter_Video(this,vidioList,multiselect_list,this);
 
 
 
@@ -110,9 +113,9 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
 
                 else {
                     //send the file to player
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Category_Explore_Activity.al_images.get(int_position).getAl_imagepath().get(position)));
-                    intent.setDataAndType(Uri.parse(Category_Explore_Activity.al_images.get(int_position).getAl_imagepath().get(position)), "video/*");
-                    startActivity(intent);
+//                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Category_Explore_Activity.al_images.get(int_position).getAl_imagepath().get(position)));
+//                    intent.setDataAndType(Uri.parse(Category_Explore_Activity.al_images.get(int_position).getAl_imagepath().get(position)), "video/*");
+//                    startActivity(intent);
                 }
             }
 
@@ -135,12 +138,39 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
 
     }
 
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-       getMenuInflater().inflate(R.menu.menu_common_activity, menu);
+        getMenuInflater().inflate(R.menu.menu_common_activity, menu);
+
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        searchView = (SearchView) menu.findItem(R.id.action_search)
+                .getActionView();
+        searchView.setSearchableInfo(searchManager
+                .getSearchableInfo(getComponentName()));
+        searchView.setMaxWidth(Integer.MAX_VALUE);
+
+        // listening to search query text change
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // filter recycler view when query submitted
+                multiSelectAdapter.getFilter().filter(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String query) {
+                // filter recycler view when text is changed
+                multiSelectAdapter.getFilter().filter(query);
+                return false;
+            }
+        });
+
+
         return true;
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -149,18 +179,10 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-
-//        switch (id) {
-//            case android.R.id.home:
-//                onBackPressed();
-//                return true;
-//            case R.id.action_settings:
-//                Toast.makeText(getApplicationContext(),"Settings Click",Toast.LENGTH_SHORT).show();
-//                return true;
-//            case R.id.action_exit:
-//                onBackPressed();
-//                return true;
-//        }
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_search) {
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -409,5 +431,21 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         int width = displayMetrics.widthPixels;
         System.out.println(width);
         return  width;
+    }
+
+    @Override
+    public void onVdoSelected(Grid_Model vdoModel) {
+
+
+        // //function not being used can be deleted as  this code  is a part  of utility  now
+
+
+                    // send the file to player
+//                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(vdoModel.getImgBitmapStr()));
+//                    intent.setDataAndType(Uri.parse(vdoModel.getImgBitmapStr()), "video/*");
+//                    startActivity(intent);
+
+             Utility.OpenFile(mcontext,vdoModel.getImgBitmapStr());
+
     }
 }

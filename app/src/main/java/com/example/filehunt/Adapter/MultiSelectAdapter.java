@@ -8,9 +8,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Filter;
+import android.widget.Filterable;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -25,10 +28,12 @@ import java.util.ArrayList;
 
 
 
-public class MultiSelectAdapter extends RecyclerView.Adapter<MultiSelectAdapter.MyViewHolder> {
+public class MultiSelectAdapter extends RecyclerView.Adapter<MultiSelectAdapter.MyViewHolder>  implements Filterable {
 
     public ArrayList<Grid_Model> ImgList=new ArrayList<>();
+    public ArrayList<Grid_Model> ImgListfiltered=new ArrayList<>();
     public ArrayList<Grid_Model> selected_ImgList=new ArrayList<>();
+    private ImgListener listener;
     Context mContext;
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -40,15 +45,24 @@ public class MultiSelectAdapter extends RecyclerView.Adapter<MultiSelectAdapter.
 
              iv_image=(ImageView)view.findViewById(R.id.iv_image);
              itemCheckBox=(CheckBox)view.findViewById(R.id.itemCheckBox);
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // send selected docs in callback
+                    listener.onImageSelected(ImgListfiltered.get(getAdapterPosition()));
+                }
+            });
 
              }
     }
 
 
-    public MultiSelectAdapter(Context context, ArrayList<Grid_Model> ImgList, ArrayList<Grid_Model> selectedImgList) {
+    public MultiSelectAdapter(Context context, ArrayList<Grid_Model> ImgList, ArrayList<Grid_Model> selectedImgList,ImgListener listener ) {
         this.mContext=context;
         this.ImgList = ImgList;
+        this.ImgListfiltered=ImgList;
         this.selected_ImgList = selectedImgList;
+        this.listener = listener;
     }
 
     @Override
@@ -61,18 +75,16 @@ public class MultiSelectAdapter extends RecyclerView.Adapter<MultiSelectAdapter.
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
-        Grid_Model Img = ImgList.get(position);
+        Grid_Model Img = ImgListfiltered.get(position);
 
 
-        Glide.with(mContext).load("file://" +Img.getImgPath())
+                 Glide.with(mContext).load("file://" +Img.getImgPath())
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .skipMemoryCache(false)
                 .into(holder.iv_image);
 
 
-
-
-        if(selected_ImgList.contains(ImgList.get(position)))
+                 if(selected_ImgList.contains(ImgList.get(position)))
             holder.itemCheckBox.setVisibility(View.VISIBLE);
         else
             holder.itemCheckBox.setVisibility(View.INVISIBLE);
@@ -81,12 +93,53 @@ public class MultiSelectAdapter extends RecyclerView.Adapter<MultiSelectAdapter.
 
     @Override
     public int getItemCount() {
-        return ImgList.size();
+        return ImgListfiltered.size();
     }
 
     @Override
     public long getItemId(int position) {
         return super.getItemId(position);
     }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter()
+        {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                String charString = charSequence.toString();
+                if (charString.isEmpty()) {
+                    ImgListfiltered = ImgList;
+                } else {
+                    ArrayList<Grid_Model> filteredList = new ArrayList<>();
+                    for (Grid_Model row : ImgList) {
+
+                        //condition to search for
+                        if (row.getImgPath().toLowerCase().contains(charString.toLowerCase())) {
+                            filteredList.add(row);
+                        }
+                    }
+
+                    ImgListfiltered = filteredList;
+                }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = ImgListfiltered;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                ImgListfiltered = (ArrayList<Grid_Model>) filterResults.values;
+                notifyDataSetChanged();
+            }
+        };
+    }
+
+    public interface ImgListener {
+        void onImageSelected(Grid_Model imgModel);
+    }
+
+
 }
 

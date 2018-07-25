@@ -274,6 +274,24 @@ public class Utility extends  Activity
         String extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
         return extension;
     }
+    public static void OpenFile(Context ctx,String path)
+    {
+
+        Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+        File file = new File(path);
+        String extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
+        String mimetype = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+
+        if (extension.equalsIgnoreCase("") || mimetype == null) {
+            // if there is no extension or there is no definite mimetype, still try to open the file
+            intent.setDataAndType(Uri.fromFile(file), "text/*");
+        } else {
+            intent.setDataAndType(Uri.fromFile(file), mimetype);
+        }
+        // custom message for the intent
+        ctx.startActivity(Intent.createChooser(intent, "Choose an Application:"));
+
+    }
 
 
 

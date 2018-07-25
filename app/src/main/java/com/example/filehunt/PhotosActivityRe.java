@@ -1,5 +1,6 @@
 package com.example.filehunt;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -11,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.util.DisplayMetrics;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -35,7 +37,7 @@ import java.util.List;
 import static com.example.filehunt.Class.Constants.PATH;
 
 
-public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener {
+public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener ,MultiSelectAdapter.ImgListener {
 
     ActionMode mActionMode;
     Menu context_menu;
@@ -47,7 +49,7 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
 
     ArrayList<Grid_Model> img_ImgList = new ArrayList<>();
     ArrayList<Grid_Model> multiselect_list = new ArrayList<>();
-
+    private SearchView searchView;
     AlertDialogHelper alertDialogHelper;
     int int_position;
     ArrayList<String> Intent_Images_List;
@@ -58,7 +60,7 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photos_activity_re);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-       mcontext=PhotosActivityRe.this;
+        mcontext=PhotosActivityRe.this;
         int_position = getIntent().getIntExtra("value", 0);
 
         Intent_Images_List = Category_Explore_Activity.al_images.get(int_position).getAl_imagepath();
@@ -66,7 +68,7 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         data_load();
 
         alertDialogHelper =new AlertDialogHelper(this);
-        multiSelectAdapter = new MultiSelectAdapter(this,img_ImgList,multiselect_list);
+        multiSelectAdapter = new MultiSelectAdapter(this,img_ImgList,multiselect_list,this);
         //  AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));   // did not work on high resolution phones
 
 
@@ -99,9 +101,9 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
                     multi_select(position);
 
                 else {
-                    Intent intent = new Intent(getApplicationContext(), SingleViewMediaActivity.class);
-                    intent.putExtra(PATH, Category_Explore_Activity.al_images.get(int_position).getAl_imagepath().get(position));
-                    startActivity(intent);
+//                    Intent intent = new Intent(getApplicationContext(), SingleViewMediaActivity.class);
+//                    intent.putExtra(PATH, Category_Explore_Activity.al_images.get(int_position).getAl_imagepath().get(position));
+//                    startActivity(intent);
                 }
             }
 
@@ -124,12 +126,39 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
 
     }
 
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-       getMenuInflater().inflate(R.menu.menu_common_activity, menu);
+        getMenuInflater().inflate(R.menu.menu_common_activity, menu);
+
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        searchView = (SearchView) menu.findItem(R.id.action_search)
+                .getActionView();
+        searchView.setSearchableInfo(searchManager
+                .getSearchableInfo(getComponentName()));
+        searchView.setMaxWidth(Integer.MAX_VALUE);
+
+        // listening to search query text change
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // filter recycler view when query submitted
+                multiSelectAdapter.getFilter().filter(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String query) {
+                // filter recycler view when text is changed
+                multiSelectAdapter.getFilter().filter(query);
+                return false;
+            }
+        });
+
+
         return true;
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -138,18 +167,10 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-
-//        switch (id) {
-//            case android.R.id.home:
-//                onBackPressed();
-//                return true;
-//            case R.id.action_settings:
-//                Toast.makeText(getApplicationContext(),"Settings Click",Toast.LENGTH_SHORT).show();
-//                return true;
-//            case R.id.action_exit:
-//                onBackPressed();
-//                return true;
-//        }
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_search) {
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -405,5 +426,14 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         int width = displayMetrics.widthPixels;
         System.out.println(width);
         return  width;
+    }
+
+    @Override
+    public void onImageSelected(Grid_Model imgModel) {
+
+        Intent intent = new Intent(getApplicationContext(), SingleViewMediaActivity.class);
+       // intent.putExtra(PATH, Category_Explore_Activity.al_images.get(int_position).getAl_imagepath().get(position));
+        intent.putExtra(PATH, imgModel.getImgPath());
+        startActivity(intent);
     }
 }

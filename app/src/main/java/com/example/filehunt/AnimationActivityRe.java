@@ -505,9 +505,11 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
     @Override
     public void onAnimSelected(Model_Anim docs) {
 
-        openanimationFile(docs.getFilePath());
-
+       //openanimationFile(docs.getFilePath());
+         Utility.OpenFile(mcontext,docs.getFilePath());
     }
+
+    //function not being used can be deleted as  this code  is a part  of utility  now
     public void openanimationFile(String name) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         File file = new File(name);

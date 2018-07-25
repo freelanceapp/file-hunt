@@ -1,5 +1,6 @@
 package com.example.filehunt;
 
+import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +15,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,7 +36,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 
-public class AudioActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener {
+public class AudioActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener ,MultiSelectAdapter_Audio.AudioListener {
 
     ActionMode mActionMode;
     Menu context_menu;
@@ -51,6 +53,7 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
     int int_position;
     ArrayList<String> Intent_Audio_List;
     ArrayList<String> Intent_duration_List;
+    private SearchView searchView;
 
     Context mcontext;
 
@@ -65,10 +68,10 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
 
          Intent_Audio_List = Category_Explore_Activity.al_images.get(int_position).getAl_imagepath();
          Intent_duration_List=Category_Explore_Activity.al_images.get(int_position).getAl_FileDuration();
-        data_load();
+         data_load();
 
         alertDialogHelper =new AlertDialogHelper(this);
-        multiSelectAdapter = new MultiSelectAdapter_Audio(this,audioList,multiselect_list);
+        multiSelectAdapter = new MultiSelectAdapter_Audio(this,audioList,multiselect_list,this);
 
 
 
@@ -94,21 +97,7 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
 
                 else {
 
-                    try {
-                        Intent intent = new Intent();
-                        intent.setAction(android.content.Intent.ACTION_VIEW);
-                        String path=Category_Explore_Activity.al_images.get(int_position).getAl_imagepath().get(position);
-                        System.out.println(path);//  some  issue  player is not being called always
-                        intent.setDataAndType(Uri.parse(Category_Explore_Activity.al_images.get(int_position).getAl_imagepath().get(position)), "audio/*");
-                        startActivity(intent);
-                    }catch (ActivityNotFoundException e)
-                    {
-                        Toast.makeText(mcontext, "Player Not Found", Toast.LENGTH_SHORT).show();
-                    }
-                    catch (Exception e)
-                    {
 
-                    }
                 }
             }
 
@@ -131,13 +120,38 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
 
     }
 
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-       getMenuInflater().inflate(R.menu.menu_common_activity, menu);
+        getMenuInflater().inflate(R.menu.menu_common_activity, menu);
+
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        searchView = (SearchView) menu.findItem(R.id.action_search)
+                .getActionView();
+        searchView.setSearchableInfo(searchManager
+                .getSearchableInfo(getComponentName()));
+        searchView.setMaxWidth(Integer.MAX_VALUE);
+
+        // listening to search query text change
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // filter recycler view when query submitted
+                multiSelectAdapter.getFilter().filter(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String query) {
+                // filter recycler view when text is changed
+                multiSelectAdapter.getFilter().filter(query);
+                return false;
+            }
+        });
+
+
         return true;
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -145,18 +159,10 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-
-//        switch (id) {
-//            case android.R.id.home:
-//                onBackPressed();
-//                return true;
-//            case R.id.action_settings:
-//                Toast.makeText(getApplicationContext(),"Settings Click",Toast.LENGTH_SHORT).show();
-//                return true;
-//            case R.id.action_exit:
-//                onBackPressed();
-//                return true;
-//        }
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_search) {
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -173,7 +179,6 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
             model.setAudiFileName(f.getName());
             if(i<Intent_duration_List.size())
             model.setAudioFileDuration(Intent_duration_List.get(i));
-
             audioList.add(model);
         }
     }
@@ -401,6 +406,30 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
          {
              Toast.makeText(mcontext, "No files to share", Toast.LENGTH_SHORT).show();
          }
+
+    }
+
+    @Override
+    public void onAudioSelected(Model_Audio audioModel) {
+
+
+        // //function not being used can be deleted as  this code  is a part  of utility  now
+//        try {
+//            Intent intent = new Intent();
+//            intent.setAction(android.content.Intent.ACTION_VIEW);
+//            String path=audioModel.getAudioPath();
+//            intent.setDataAndType(Uri.parse(path), "audio/*");
+//            startActivity(intent);
+//        }catch (ActivityNotFoundException e)
+//        {
+//            Toast.makeText(mcontext, "Application Not Found", Toast.LENGTH_SHORT).show();
+//        }
+//        catch (Exception e)
+//        {
+//
+//        }
+
+        Utility.OpenFile(mcontext,audioModel.getAudioPath());
 
     }
 }

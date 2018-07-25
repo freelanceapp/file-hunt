@@ -15,8 +15,9 @@
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="@string/app_name"
+
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".SplashActivity"  >
@@ -35,6 +36,7 @@
         <activity android:name=".DocsActivityRe" android:screenOrientation="portrait"></activity>
         <activity android:name=".AnimationActivityRe" android:screenOrientation="portrait"></activity>
         <activity android:name=".ApkActivityRe" android:screenOrientation="portrait"></activity>
+        <activity android:name=".DownloadActivityRe" android:screenOrientation="portrait"></activity>
 
     </application>
 

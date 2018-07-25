@@ -28,8 +28,15 @@
     android:gravity="center"
     android:layout_height="wrap_content">
     <TextView
+        android:layout_toLeftOf="@+id/chbx"
+        android:paddingRight="@dimen/dp5"
+        android:layout_alignParentLeft="true"
         android:id="@+id/AudioFileName"
         android:text="FileName"
+        android:gravity="start"
+        android:paddingTop="@dimen/dp5"
+        android:paddingBottom="@dimen/dp5"
+
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <TextView
@@ -60,11 +67,10 @@
         android:id="@+id/chbx"
         android:layout_alignParentRight="true"
         android:checked="true"
+        android:visibility="invisible"
         android:layout_above="@+id/FileMdate"
-        android:visibility="gone"
         android:layout_marginBottom="@dimen/dp2"
         android:buttonTint="@color/green_900"
-        android:layout_centerInParent="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 

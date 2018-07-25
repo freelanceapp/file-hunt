@@ -9,6 +9,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -20,10 +22,12 @@ import com.example.filehunt.Utils.Utility;
 import java.util.ArrayList;
 
 
-public class MultiSelectAdapter_Video extends RecyclerView.Adapter<MultiSelectAdapter_Video.MyViewHolder> {
+public class MultiSelectAdapter_Video extends RecyclerView.Adapter<MultiSelectAdapter_Video.MyViewHolder>  implements Filterable {
 
     public ArrayList<Grid_Model> VdoList=new ArrayList<>();
+    public ArrayList<Grid_Model> VdoListfiltered=new ArrayList<>();
     public ArrayList<Grid_Model> selected_VdoList=new ArrayList<>();
+    private  VdoListener listener;
     Context mContext;
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -36,13 +40,23 @@ public class MultiSelectAdapter_Video extends RecyclerView.Adapter<MultiSelectAd
              iv_image=(ImageView)view.findViewById(R.id.vdoThumbNail);
              itemCheckBox=(CheckBox)view.findViewById(R.id.itemCheckBoxVdo);
 
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // send selected docs in callback
+                    listener.onVdoSelected(VdoListfiltered.get(getAdapterPosition()));
+                }
+            });
+
              }
     }
 
-     public MultiSelectAdapter_Video(Context context, ArrayList<Grid_Model> VdoList, ArrayList<Grid_Model> selectedVdoList) {
+     public MultiSelectAdapter_Video(Context context, ArrayList<Grid_Model> VdoList, ArrayList<Grid_Model> selectedVdoList,VdoListener listener) {
         this.mContext=context;
         this.VdoList = VdoList;
+        this.VdoListfiltered=VdoList;
         this.selected_VdoList = selectedVdoList;
+        this.listener=listener;
     }
 
     @Override
@@ -55,13 +69,13 @@ public class MultiSelectAdapter_Video extends RecyclerView.Adapter<MultiSelectAd
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
-        Grid_Model Img = VdoList.get(position);
+        Grid_Model Img = VdoListfiltered.get(position);
 
                    //  long t1=System.currentTimeMillis();
 
                     if(Img.getImgBitmapStr()!=null)
                     {
-                        Glide.with(mContext).load("file://" + Img.getImgBitmapStr())
+                             Glide.with(mContext).load("file://" + Img.getImgBitmapStr())
                                 .skipMemoryCache(false)
                                 .into(holder.iv_image);
                     }
@@ -83,7 +97,49 @@ public class MultiSelectAdapter_Video extends RecyclerView.Adapter<MultiSelectAd
 
     @Override
     public int getItemCount() {
-        return VdoList.size();
+        return VdoListfiltered.size();
     }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter()
+        {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                String charString = charSequence.toString();
+                if (charString.isEmpty()) {
+                    VdoListfiltered = VdoList;
+                } else {
+                    ArrayList<Grid_Model> filteredList = new ArrayList<>();
+                    for (Grid_Model row : VdoList) {
+
+                        //condition to search for
+                        if (row.getImgBitmapStr().toLowerCase().contains(charString.toLowerCase())) {
+                            filteredList.add(row);
+                        }
+                    }
+
+                    VdoListfiltered= filteredList;
+                }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = VdoListfiltered;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                VdoListfiltered = (ArrayList<Grid_Model>) filterResults.values;
+                notifyDataSetChanged();
+            }
+        };
+    }
+
+    public interface VdoListener {
+        void onVdoSelected(Grid_Model imgModel);
+    }
+
+
+
 }
 

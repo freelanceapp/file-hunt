@@ -32,6 +32,7 @@ import com.example.filehunt.AnimationActivityRe;
 import com.example.filehunt.ApkActivityRe;
 import com.example.filehunt.Category_Explore_Activity;
 import com.example.filehunt.DocsActivityRe;
+import com.example.filehunt.DownloadActivityRe;
 import com.example.filehunt.MainActivity;
 import com.example.filehunt.Model.category_Model;
 import com.example.filehunt.R;
@@ -151,6 +152,7 @@ public class TabFragment1 extends Fragment {
     private void getCategories()
     {
 
+         cat_List.clear();
 
          cat_Img=new category_Model("Images",pngList.size()+jpgList.size()+flashlList.size()+" items",R.mipmap.ic_images);
          cat_Apk=new category_Model("Apk",apkList.size()+" items",R.mipmap.ic_apk);
@@ -224,6 +226,11 @@ public class TabFragment1 extends Fragment {
                     if(position==3)
                     {
                         Intent i = new Intent(getActivity(), DocsActivityRe.class);
+                        startActivity(i);
+                    }
+                    else  if(position==4)
+                    {
+                        Intent i = new Intent(getActivity(), DownloadActivityRe.class);
                         startActivity(i);
                     }
                     else  if(position==5)
@@ -307,7 +314,7 @@ public class TabFragment1 extends Fragment {
                 if (listFile[i].isDirectory()) {
                     walkdir(listFile[i]);
                 } else {
-                    j++;
+                    //j++;
 
                     /*
                           M4A is a file extension for an audio file encoded with advanced audio coding (AAC) which is a lossy compression. M4A was generally

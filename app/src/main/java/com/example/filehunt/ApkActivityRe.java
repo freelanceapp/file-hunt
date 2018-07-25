@@ -423,9 +423,11 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
     @Override
     public void onApkSelected (Model_Apk model_apk) {
 
-        openapk(model_apk.getFilePath());
-
+      //  openapk(model_apk.getFilePath());
+          Utility.OpenFile(mcontext,model_apk.getFilePath());
     }
+
+    //function not being used can be deleted as  this code  is a part  of utility  now
     public void openapk(String name) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         File file = new File(name);

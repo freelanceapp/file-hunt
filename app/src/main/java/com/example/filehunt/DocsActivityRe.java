@@ -487,9 +487,11 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
     @Override
     public void onDocsSelected(Model_Docs docs) {
 
-        openDocument(docs.getFilePath());
+       // openDocument(docs.getFilePath());
+        Utility.OpenFile(mcontext,docs.getFilePath());
 
     }
+    //function not being used can be deleted as  this code  is a part  of utility  now
     public void openDocument(String name) {
         Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
         File file = new File(name);

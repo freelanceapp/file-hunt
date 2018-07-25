@@ -108,11 +108,11 @@ public class MultiSelectAdapter_Docs extends RecyclerView.Adapter<MultiSelectAda
 
 
         if(selected_DocsList.contains(DocsList.get(position))) {
-            holder.chbx.setVisibility(View.GONE);  // for time being checkbox not shown   layout backgroud being changed
+            holder.chbx.setVisibility(View.VISIBLE);  // for time being checkbox not shown   layout backgroud being changed
             holder.rellayout.setBackgroundColor(mContext.getResources().getColor(R.color.gradation_04_light));
         }
         else {
-            holder.chbx.setVisibility(View.GONE); // for time being checkbox not shown   layout backgroud being changed
+            holder.chbx.setVisibility(View.INVISIBLE); // for time being checkbox not shown   layout backgroud being changed
             holder.rellayout.setBackgroundColor(mContext.getResources().getColor(R.color.white));
         }
 

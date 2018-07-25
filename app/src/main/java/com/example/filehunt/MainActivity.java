@@ -1,5 +1,6 @@
 package com.example.filehunt;
 
+import android.app.Fragment;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -9,10 +10,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.filehunt.Adapter.PagerAdapter;
+import com.example.filehunt.Fragments.TabFragment2;
 
 
 public class MainActivity extends AppCompatActivity {
 
+    int check = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,9 +50,36 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                // TODO Auto-generated method stub
+                check = position;
+            }
+            @Override
+            public void onPageScrolled(int arg0, float arg1, int arg2) {
+                // TODO Auto-generated method stub
+            }
+            @Override
+            public void onPageScrollStateChanged(int arg0) {
+                // TODO Auto-generated method stub
+            }
+        });
     }
 
+    @Override
+    public void onBackPressed() {
+     super.onBackPressed();
 
-
-
+//        switch (check) {
+//            case 0:
+//                finish();
+//                break;
+//            case 1:
+//              // TabFragment2.onBackPressed();
+//              // TabFragment2 obj = new TabFragment2();
+//             //  obj.onBackPressed();
+//                break;
+//        }
+    }
 }
