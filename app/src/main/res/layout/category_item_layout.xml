@@ -16,16 +16,15 @@
            android:clickable="true"
            android:focusable="true"
            android:background="?android:attr/selectableItemBackground"
-
            android:id="@+id/container_Layout"
            android:paddingLeft="@dimen/dp10"
            android:paddingRight="@dimen/dp10"
-          android:paddingTop="@dimen/dp10"
+           android:paddingTop="@dimen/dp10"
            android:paddingBottom="@dimen/dp10"
            android:layout_width="wrap_content"
            android:layout_height="wrap_content">
            <ImageView
-               android:src="@mipmap/ic_images"
+               android:src="@mipmap/cat_ic_image"
                android:layout_alignParentLeft="true"
                android:id="@+id/cat_Icon"
                android:layout_width="@dimen/dp50"

@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
+    android:background="@color/grey_ebebeb"
     android:weightSum="100"
     android:orientation="vertical">
 
@@ -20,7 +20,7 @@
         android:padding="@dimen/dp20"
         android:layout_weight="25"
         android:id="@+id/storege_section"
-        android:background="@color/e5e5e5"
+        android:background="@color/white"
         android:layout_width="match_parent"
         android:layout_height="0dp">
         <RelativeLayout
@@ -30,17 +30,17 @@
    <TextView
        android:id="@+id/internalTxt"
        android:layout_alignParentLeft="true"
-       android:textSize="@dimen/sp12"
+       android:textSize="@dimen/sp18"
        android:layout_alignParentTop="true"
        android:text="@string/internalstorage"
        android:layout_width="wrap_content"
        android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/avlbTxt"
-            android:layout_marginTop="@dimen/dp20"
+            android:layout_marginTop="@dimen/dp30"
             android:layout_below="@+id/internalTxt"
             android:layout_alignParentLeft="true"
-            android:textSize="@dimen/sp10"
+            android:textSize="@dimen/sp12"
             android:layout_alignParentTop="true"
             android:text="@string/avlbl"
             android:layout_alignBaseline="@+id/avlbMemory"
@@ -52,7 +52,7 @@
             android:layout_marginTop="@dimen/dp20"
             android:layout_toRightOf="@+id/avlbTxt"
             android:layout_marginLeft="@dimen/dp10"
-            android:textSize="@dimen/sp16"
+            android:textSize="@dimen/sp12"
             android:layout_alignParentTop="true"
             android:text=""
             android:layout_width="wrap_content"
@@ -63,7 +63,7 @@
             android:layout_marginTop="@dimen/dp20"
             android:layout_below="@+id/internalTxt"
             android:layout_alignParentRight="true"
-            android:textSize="@dimen/sp10"
+            android:textSize="@dimen/sp12"
             android:layout_alignParentTop="true"
             android:text=""
             android:layout_alignBaseline="@+id/avlbMemory"

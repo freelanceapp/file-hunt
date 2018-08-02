@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#ebebeb</color>
+    <color name="colorPrimaryDark">#d6d5d5</color>
+    <color name="colorAccent">#f26522</color>
 
     <color name="white">#ffffff</color>
 
@@ -719,5 +719,8 @@
     <color name="tab_color_title_base">@color/grey_a100</color>
     <color name="main_storage_text">#b7000000</color>
     <color name="storage_detail_text">#89000000</color>
+
+    <color name="grey_ebebeb">#d6d5d5</color>
+    <color name="grey_eb">#FFEBEBEB</color>
     <!--takem from filemanager app-->
 </resources>

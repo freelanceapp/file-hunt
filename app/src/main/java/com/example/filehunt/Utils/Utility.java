@@ -8,13 +8,20 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
 import android.support.media.ExifInterface;
+import android.support.v4.content.FileProvider;
+import android.support.v7.app.AppCompatActivity;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
+import android.webkit.MimeTypeMap;
+
+import com.example.filehunt.AnimationActivityRe;
+import com.example.filehunt.R;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -23,6 +30,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -292,6 +300,131 @@ public class Utility extends  Activity
         ctx.startActivity(Intent.createChooser(intent, "Choose an Application:"));
 
     }
+
+
+
+    public static void ShareSingleFile(String name,Context ctx,String authority)
+    {
+        //share the file for  NoughtAndAll
+
+        Uri uri=null;
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        File file = new File(name);
+        String extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
+        String mimetype = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+        {
+            uri = Uri.fromFile(file);
+            if (uri != null) {
+                if (extension.equalsIgnoreCase("") || mimetype == null) {
+                    // if there is no extension or there is no definite mimetype, still try to open the file
+                    intent.setType("text/*");
+                    intent.putExtra(Intent.EXTRA_STREAM, uri);
+                } else {
+                    intent.setType(mimetype);
+                    intent.putExtra(Intent.EXTRA_STREAM, uri);
+                }
+                // custom message for the intent
+               ctx.startActivity(Intent.createChooser(intent, "Choose an Application:"));
+            }
+        }
+        else {
+
+            // in case of Android N and above Uri will be  made through provider written in Manifest file;
+            uri = FileProvider.getUriForFile(ctx, authority,
+                    file);
+
+            if(uri !=null) {
+                if (extension.equalsIgnoreCase("") || mimetype == null) {
+                    // if there is no extension or there is no definite mimetype, still try to open the file
+                    intent.setType("text/*");
+                    intent.putExtra(Intent.EXTRA_STREAM, uri);
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                } else {
+                    intent.setType(mimetype);
+                    intent.putExtra(Intent.EXTRA_STREAM, uri);
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                }
+                // custom message for the intent
+                ctx. startActivity(Intent.createChooser(intent, "Choose an Application:"));
+            }
+            //
+
+        }
+
+
+    }
+    public static void OpenFileWithNoughtAndAll(String name,Context ctx,String authority)
+    {
+        Uri uri=null;
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        File file = new File(name);
+        String extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
+        String mimetype = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+        {
+            uri = Uri.fromFile(file);
+            if (uri != null) {
+                if (extension.equalsIgnoreCase("") || mimetype == null) {
+                    // if there is no extension or there is no definite mimetype, still try to open the file
+                    intent.setDataAndType(uri, "text/*");
+                } else {
+                    intent.setDataAndType(uri, mimetype);
+                }
+                // custom message for the intent
+                ctx.startActivity(Intent.createChooser(intent, "Choose an Application:"));
+            }
+        }
+        else {
+
+            // in case of Android N and above Uri will be  made through provider written in Manifest file;
+            uri = FileProvider.getUriForFile(ctx, authority,
+                    file);
+
+            if(uri !=null) {
+                if (extension.equalsIgnoreCase("") || mimetype == null) {
+                    // if there is no extension or there is no definite mimetype, still try to open the file
+                    intent.setDataAndType(uri, "text/*");
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                } else {
+                    intent.setDataAndType(uri, mimetype);
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                }
+                // custom message for the intent
+                ctx. startActivity(Intent.createChooser(intent, "Choose an Application:"));
+            }
+            //
+
+        }
+
+
+    }
+    public static int getOrintatin(File f)
+    {
+        try {
+            Uri contentUri = Uri.fromFile(f);
+            int orientation = Utility.getBitmapOrientation(contentUri);
+            return orientation;
+        }catch (Exception e)
+        {
+            return  0;
+        }
+
+
+
+    }
+    public static void setActivityTitle(Context ctx,String title)
+    {
+        ((AppCompatActivity)ctx).getSupportActionBar().setTitle(title);
+    }
+  public static String putStrinBrckt(String str)
+  {
+
+      return "("+str+")";
+  }
 
 
 

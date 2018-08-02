@@ -13,6 +13,17 @@ public class Model_images
     ArrayList<String> al_vdoThumb;
 
 
+
+    ArrayList<String> alVdoDuration;
+
+    public ArrayList<String> getAlVdoDuration() {
+        return alVdoDuration;
+    }
+
+    public void setAlVdoDuration(ArrayList<String> alVdoDuration) {
+        this.alVdoDuration = alVdoDuration;
+    }
+
     public ArrayList<String> getAl_vdoThumb() {
         return al_vdoThumb;
     }

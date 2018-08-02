@@ -18,6 +18,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,19 +34,16 @@ import com.example.filehunt.ApkActivityRe;
 import com.example.filehunt.Category_Explore_Activity;
 import com.example.filehunt.DocsActivityRe;
 import com.example.filehunt.DownloadActivityRe;
-import com.example.filehunt.MainActivity;
 import com.example.filehunt.Model.category_Model;
 import com.example.filehunt.R;
+import com.example.filehunt.RecentActivityRe;
 import com.example.filehunt.Utils.EqualSpacingItemDecoration;
-import com.example.filehunt.Utils.GridSpacingItemDecoration;
-import com.example.filehunt.Utils.ItemOffsetDecoration;
 import com.example.filehunt.Utils.Utility;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -154,14 +152,14 @@ public class TabFragment1 extends Fragment {
 
          cat_List.clear();
 
-         cat_Img=new category_Model("Images",pngList.size()+jpgList.size()+flashlList.size()+" items",R.mipmap.ic_images);
-         cat_Apk=new category_Model("Apk",apkList.size()+" items",R.mipmap.ic_apk);
-         cat_Animation=new category_Model("Animation",giflList.size()+" items",R.mipmap.ic_animation);
-         cat_Audio=new category_Model("Audio",mp3List.size()+" items",R.mipmap.ic_audio);
-         cat_Video=new category_Model("Video",mp4List.size()+" items",R.mipmap.ic_video);
-         cat_Download=new category_Model("Download",downLoadList.size()+" items",R.mipmap.ic_download);
-         cat_Document=new category_Model("Document",pptlList.size()+wordList.size()+pdfList.size()+txtList.size()+" items",R.mipmap.ic_document);
-         cat_Recent=new category_Model("Recent",recentFiles.size()+" items",R.mipmap.ic_recent);
+         cat_Img=new category_Model("Images",pngList.size()+jpgList.size()+flashlList.size()+" items",R.mipmap.cat_ic_image);
+         cat_Apk=new category_Model("Apk",apkList.size()+" items",R.mipmap.cat_ic_apk);
+         cat_Animation=new category_Model("Animation",giflList.size()+" items",R.mipmap.cat_ic_animation);
+         cat_Audio=new category_Model("Audio",mp3List.size()+" items",R.mipmap.cat_ic_music);
+         cat_Video=new category_Model("Video",mp4List.size()+" items",R.mipmap.cat_ic_vdo);
+         cat_Download=new category_Model("Download",downLoadList.size()+" items",R.mipmap.cat_ic_download);
+         cat_Document=new category_Model("Document",pptlList.size()+wordList.size()+pdfList.size()+txtList.size()+" items",R.mipmap.cat_ic_docs);
+         cat_Recent=new category_Model("Recent",recentFiles.size()+" items",R.mipmap.cat_ic_recent);
 
         cat_List.add(cat_Img);
         cat_List.add(cat_Video);
@@ -173,15 +171,17 @@ public class TabFragment1 extends Fragment {
         cat_List.add(cat_Apk);
 
         adapter= new categoryAdapter(cat_List);
+       //int col_spacing=getScreenWidth()/50;
         category_recycler_view.setLayoutManager(new GridLayoutManager(getActivity(), 2));
-        category_recycler_view.addItemDecoration(new EqualSpacingItemDecoration(16, EqualSpacingItemDecoration.GRID));
+        category_recycler_view.addItemDecoration(new EqualSpacingItemDecoration(20, EqualSpacingItemDecoration.GRID));
+
         category_recycler_view.setAdapter(adapter);
         adapter.notifyDataSetChanged();
         fillProgressBar();
 
 
         new LoadApkTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-       // new LoadrecentTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new LoadrecentTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         new LoadDownloadTask(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
@@ -205,7 +205,7 @@ public class TabFragment1 extends Fragment {
         @Override
         public categoryViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View itemView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.category_item_layout, parent, false);
+                    .inflate(R.layout.category_item_layout1, parent, false);
 
             return new categoryViewHolder(itemView);
         }
@@ -215,7 +215,11 @@ public class TabFragment1 extends Fragment {
         {
             holder.catName.setText(catList.get(position).getCatName());
             holder.catIcon.setImageResource(catList.get(position).getCat_icon());
-            holder.itemCount.setText(catList.get(position).getIteCount());
+            holder.itemCount.setText(Utility.putStrinBrckt(catList.get(position).getIteCount()));
+
+             ViewGroup.LayoutParams params =  holder.container_Layout.getLayoutParams();
+             params.width=getScreenWidth()*50/100;
+             holder.container_Layout.setLayoutParams(params);
 
             holder.container_Layout.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -238,6 +242,11 @@ public class TabFragment1 extends Fragment {
                         Intent i = new Intent(getActivity(), AnimationActivityRe.class);
                         startActivity(i);
 
+                    }
+                    else if(position==6)
+                    {
+                        Intent i = new Intent(getActivity(), RecentActivityRe.class);
+                        startActivity(i);
                     }
                     else  if(position==7)
                     {
@@ -377,7 +386,7 @@ public class TabFragment1 extends Fragment {
            long per= AvailableInternalMemory / (TotalInternalMemory/100);
            System.out.print("Memory Stats--> Total "+TotalInternalMemory+" Avaailable"+AvailableInternalMemory+""+per);
           // avlbMemory.setText(Utility.formatSize(Utility.getAvailableInternalMemorySize()));
-           avlbMemory.setText(Utility.humanReadableByteCount(Utility.getAvailableInternalMemorySize(),true));
+           avlbMemory.setText(Utility.humanReadableByteCount(Utility.getAvailableInternalMemorySize(),true)+"("+per+"%)");
            // totalMemmory.setText("Total "+Utility.formatSize(Utility.getTotalInternalMemorySize()));
             totalMemmory.setText("Total "+Utility.humanReadableByteCount(Utility.getTotalInternalMemorySize(),true));
            int progress=100 -(int) per;
@@ -453,7 +462,7 @@ public class TabFragment1 extends Fragment {
         protected void onPostExecute(Integer count) {
             super.onPostExecute(count);
 
-                  cat_Img=new category_Model("Images",count+" items",R.mipmap.ic_images);
+                  cat_Img=new category_Model("Images",count+" items",R.mipmap.cat_ic_image);
                   cat_List.set(0,cat_Img);
                   adapter.notifyDataSetChanged();
 
@@ -496,7 +505,7 @@ public class TabFragment1 extends Fragment {
         protected void onPostExecute(Integer count) {
             super.onPostExecute(count);
 
-            cat_Video=new category_Model("Video",count+" items",R.mipmap.ic_video);
+            cat_Video=new category_Model("Video",count+" items",R.mipmap.cat_ic_vdo);
             cat_List.set(1,cat_Video);
             adapter.notifyDataSetChanged();
 
@@ -538,7 +547,7 @@ public class TabFragment1 extends Fragment {
         protected void onPostExecute(Integer count) {
             super.onPostExecute(count);
 
-            cat_Document=new category_Model("Document",count+" items",R.mipmap.ic_document);
+            cat_Document=new category_Model("Document",count+" items",R.mipmap.cat_ic_docs);
             cat_List.set(3,cat_Document);
             adapter.notifyDataSetChanged();
 
@@ -617,7 +626,7 @@ public class TabFragment1 extends Fragment {
         @Override
         protected void onPostExecute(Integer count) {
             super.onPostExecute(count);
-            cat_Audio = new category_Model("Audio", count + " items", R.mipmap.ic_audio);
+            cat_Audio = new category_Model("Audio", count + " items", R.mipmap.cat_ic_music);
             cat_List.set(2, cat_Audio);
             adapter.notifyDataSetChanged();
 
@@ -671,7 +680,7 @@ public class TabFragment1 extends Fragment {
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
 
-                cat_Download = new category_Model("Download", downLoadList.size() + " items", R.mipmap.ic_download);
+                cat_Download = new category_Model("Download", downLoadList.size() + " items", R.mipmap.cat_ic_download);
                 cat_List.set(4, cat_Download);
                 adapter.notifyDataSetChanged();
 
@@ -692,7 +701,7 @@ public class TabFragment1 extends Fragment {
         @Override
         protected void onPostExecute(Integer count) {
             super.onPostExecute(count);
-            cat_Animation=new category_Model("Animation",count+" items",R.mipmap.ic_animation);
+            cat_Animation=new category_Model("Animation",count+" items",R.mipmap.cat_ic_animation);
             cat_List.set(5, cat_Animation);
             adapter.notifyDataSetChanged();
 
@@ -734,7 +743,7 @@ public class TabFragment1 extends Fragment {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
 
-            cat_Recent=new category_Model("Recent",recentFiles.size()+" items",R.mipmap.ic_recent);
+            cat_Recent=new category_Model("Recent",recentFiles.size()+" items",R.mipmap.cat_ic_recent);
             cat_List.set(6, cat_Recent);
             adapter.notifyDataSetChanged();
 
@@ -755,7 +764,7 @@ public class TabFragment1 extends Fragment {
         protected void onPostExecute(Integer count) {
             super.onPostExecute(count);
 
-            cat_Apk=new category_Model("Apk",count+" items",R.mipmap.ic_apk);
+            cat_Apk=new category_Model("Apk",count+" items",R.mipmap.cat_ic_apk);
             cat_List.set(7, cat_Apk);
             adapter.notifyDataSetChanged();
 
@@ -807,6 +816,19 @@ public class TabFragment1 extends Fragment {
                 } while(songCursor.moveToNext());
             }
         }
+
+    private  int getScreenWidth() {
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        // int height = displayMetrics.heightPixels;
+        int width = displayMetrics.widthPixels;
+        System.out.println(width);
+        return  width;
     }
+
+}
+
+
 
 

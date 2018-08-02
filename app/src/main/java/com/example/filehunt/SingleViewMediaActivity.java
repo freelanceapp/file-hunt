@@ -3,6 +3,7 @@ package com.example.filehunt;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.app.WallpaperManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -49,12 +50,13 @@ public class SingleViewMediaActivity extends AppCompatActivity {
     String imgPath;
     ProgressDialog dialog;
     Uri shareUri;
+    Context mcontext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.singleviewmedia);
-
+        mcontext=SingleViewMediaActivity.this;
         singleImage=(SubsamplingScaleImageView)findViewById(R.id.singleImage);
 
         imgPath = getIntent().getStringExtra(PATH);
@@ -87,7 +89,11 @@ public class SingleViewMediaActivity extends AppCompatActivity {
                  getImagedetails();
                 return true;
             case R.id.item3:
-                shareImage(shareUri);
+               // shareImage(shareUri);
+                if(imgPath!=null)
+                {
+                    Utility.ShareSingleFile(imgPath,mcontext,getResources().getString(R.string.file_provider_authority));
+                }
                 return true;
 
             default:
@@ -126,13 +132,14 @@ public class SingleViewMediaActivity extends AppCompatActivity {
         FileSize.setText(Utility.formatSize(f.length()));
         FileDate.setText(Utility.LongToDate((f.lastModified())));
         Resolution.setText(w+"*"+h);
-        Oreintation.setText(String.valueOf(getOrintatin(f))+"");
+        Oreintation.setText(String.valueOf(Utility.getOrintatin(f))+"");
 
         dialog.show();
 
     }
     // Share image
-    private void shareImage(Uri imagePath) {
+    private void shareImage(Uri imagePath)
+    {
         Intent sharingIntent = new Intent(Intent.ACTION_SEND);
         sharingIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         sharingIntent.setType("image/*");

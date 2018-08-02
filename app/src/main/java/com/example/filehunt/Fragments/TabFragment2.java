@@ -30,15 +30,17 @@ public class TabFragment2 extends Fragment  implements  Adapter_Storage.ItemList
 
 
     private   File path = new File(Environment.getExternalStorageDirectory() + "");
-    ArrayList<String> str = new ArrayList<String>();
+    private   File initial_path = new File(Environment.getExternalStorageDirectory() + "");
+    static ArrayList<String> str = new ArrayList<String>();
+    static ArrayList<File> pathList=new ArrayList<>();
     private static final String TAG = "F_PATH";
     private Item[] fileList;
     private ArrayList<Item> fileList1;
 
     private Boolean firstLvl = true;
-    RecyclerView recyclerView;
+     RecyclerView recyclerView;
     Context mcontext;
-   Adapter_Storage multiSelectAdapter;
+     Adapter_Storage multiSelectAdapter;
     TextView currentPath;
 
     @Nullable
@@ -57,14 +59,30 @@ public class TabFragment2 extends Fragment  implements  Adapter_Storage.ItemList
         recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
         recyclerView.addItemDecoration(new DividerItemDecoration(mcontext, DividerItemDecoration.VERTICAL));
         fileList1=new ArrayList<>();
-
+//        setCurrentDispPath();
+//        pathList.add(path);
         loadFileList();
-        setCurrentDispPath();
+
 
         multiSelectAdapter=new Adapter_Storage(mcontext,fileList1,this);
         recyclerView.setAdapter(multiSelectAdapter);
     }
 
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+       if(isVisibleToUser) {
+
+           System.out.println("VISIBLE");
+           setCurrentDispPath();
+           pathList.clear();
+           pathList.add(path);
+       }
+       else {
+           pathList.clear();
+       }
+
+    }
 
     private void setCurrentDispPath() {
 
@@ -73,34 +91,45 @@ public class TabFragment2 extends Fragment  implements  Adapter_Storage.ItemList
 
 
     }
-    public  void onBackPressed() {
 
-       System.out.print("method executed");
-      // changePathOnBaclPress();
+    public   int onBackPressed() {
+
+        return  changePathOnBackPress();
     }
-    public  void changePathOnBaclPress()
-    {
-        if (str.isEmpty())
+    public int  changePathOnBackPress() {
+
+
+        int listSize=pathList.size();
+
+      if (pathList.size() ==1 )
         {
-           // firstLvl = true;
-             // getActivity().finish();
-        }
-              else {
-
-
-            String s = str.remove(str.size() - 1);
-            path = new File(path.toString().substring(0,
-                    path.toString().lastIndexOf(s)));
-
+            path=initial_path;
+           // pathList.clear();
+            //pathList.add(initial_path);
             loadFileList();
             multiSelectAdapter.notifyDataSetChanged();
+            setCurrentDispPath();
+            return 0;
+
+        }
+        else
+        {
+
+                path=pathList.get(pathList.size()-2);
+                pathList.remove(pathList.size()-2);
+                loadFileList();
+                multiSelectAdapter.notifyDataSetChanged();
+        }
+        setCurrentDispPath();
+        return listSize;
+
+
         }
 
-    }
 
 
-
-    private void loadFileList() {
+    private   void loadFileList() {
+        fileList1.clear();
         try {
             path.mkdirs();
         } catch (SecurityException e) {
@@ -114,42 +143,45 @@ public class TabFragment2 extends Fragment  implements  Adapter_Storage.ItemList
                 public boolean accept(File dir, String filename) {
                     File sel = new File(dir, filename);
                     // Filters based on whether the file is hidden or not
-                    return (sel.isFile() || sel.isDirectory()) && !sel.isHidden();
+                   // return (sel.isFile() || sel.isDirectory()) && !sel.isHidden(); // does  not allow hidden files to be displayed ;
+                    return (sel.isFile() || sel.isDirectory()) ;
 
                 }
             };
 
             String[] fList = path.list(filter);
-            fileList = new Item[fList.length];
-            for (int i = 0; i < fList.length; i++) {
-                fileList[i] = new Item(fList[i], R.mipmap.file_icon);
-                 Item model=new Item(fList[i], R.mipmap.file_icon);
-                // Convert into file path
-                File sel = new File(path, fList[i]);
+            if (fList !=null) {
+                fileList = new Item[fList.length];
+                for (int i = 0; i < fList.length; i++) {
+                    fileList[i] = new Item(fList[i], R.mipmap.file_icon);
+                    Item model = new Item(fList[i], R.mipmap.file_icon);
+                    // Convert into file path
+                    File sel = new File(path, fList[i]);
 
-                // Set drawables
-                if (sel.isDirectory()) {
+                    // Set drawables
+                    if (sel.isDirectory()) {
 
 
-                     model.setIcon(R.mipmap.directory_icon);
-                     model.setFile(fList[i]);
-                     model.setItemcount(sel.listFiles().length);
-                     model.setFileModifiedDate(Utility.LongToDate(sel.lastModified()));
-                    // model.setFilePath(sel.getAbsolutePath());
-                     model.setIsDirecoty(true);
+                        model.setIcon(R.mipmap.directory_icon);
+                        model.setFile(fList[i]);
+                        model.setItemcount(sel.listFiles().length);
+                        model.setFileModifiedDate(Utility.LongToDate(sel.lastModified()));
+                        // model.setFilePath(sel.getAbsolutePath());
+                        model.setIsDirecoty(true);
 
-                    Log.d("DIRECTORY", fileList[i].file);
-                } else {
-                    Log.d("FILE", fileList[i].file);
+                        Log.d("DIRECTORY", fileList[i].file);
+                    } else {
+                        Log.d("FILE", fileList[i].file);
 
-                    model.setFile(fList[i]);
-                    model.setFileModifiedDate(Utility.LongToDate(sel.lastModified()));
-                    model.setFilesize(Utility.humanReadableByteCount(sel.length(),true));
-                    model.setFilePath(sel.getAbsolutePath());
-                    model.setIsDirecoty(false);
+                        model.setFile(fList[i]);
+                        model.setFileModifiedDate(Utility.LongToDate(sel.lastModified()));
+                        model.setFilesize(Utility.humanReadableByteCount(sel.length(), true));
+                        model.setFilePath(sel.getAbsolutePath());
+                        model.setIsDirecoty(false);
 
+                    }
+                    fileList1.add(model);
                 }
-                fileList1.add(model);
             }
 
             System.out.print(""+fileList);
@@ -184,6 +216,7 @@ public class TabFragment2 extends Fragment  implements  Adapter_Storage.ItemList
              fileList1.clear();
              path = new File(sel + "");
 
+             pathList.add(path);
             loadFileList();
             setCurrentDispPath();
 
@@ -192,7 +225,8 @@ public class TabFragment2 extends Fragment  implements  Adapter_Storage.ItemList
         }
         else{
 
-            Utility.OpenFile(getActivity(),Item_model.getFilePath());
+            //Utility.OpenFile(getActivity(),Item_model.getFilePath());
+            Utility.OpenFileWithNoughtAndAll(Item_model.getFilePath(),getActivity(),getActivity().getResources().getString(R.string.file_provider_authority));
         }
 
     }

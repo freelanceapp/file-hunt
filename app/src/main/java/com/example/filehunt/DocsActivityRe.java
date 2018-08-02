@@ -1,5 +1,6 @@
 package com.example.filehunt;
 
+import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
@@ -23,13 +25,16 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.filehunt.Adapter.MultiSelectAdapter_Docs;
 import com.example.filehunt.Adapter.MultiSelectAdapter_Video;
 import com.example.filehunt.Model.Grid_Model;
+import com.example.filehunt.Model.Model_Audio;
 import com.example.filehunt.Model.Model_Docs;
 import com.example.filehunt.Utils.AlertDialogHelper;
+import com.example.filehunt.Utils.AsynctaskUtility;
 import com.example.filehunt.Utils.AutoFitGridLayoutManager;
 import com.example.filehunt.Utils.RecyclerItemClickListener;
 import com.example.filehunt.Utils.Utility;
@@ -39,7 +44,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 
-public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener,MultiSelectAdapter_Docs.DocsListener {
+public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener,MultiSelectAdapter_Docs.DocsListener,AsynctaskUtility.AsyncResponse {
 
     ActionMode mActionMode;
     Menu context_menu;
@@ -57,31 +62,22 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
     ArrayList<Model_Docs> Intent_Docs_List;
     private SearchView searchView;
     Context mcontext;
-
+       int DOCUMENTS=4;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photos_activity_re);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mcontext=DocsActivityRe.this;
+        Utility.setActivityTitle(mcontext,getResources().getString(R.string.document));
        
 //           int_position = getIntent().getIntExtra("value", 0);
-            FetchDocuments();
+             new AsynctaskUtility<Model_Docs>(mcontext,this,DOCUMENTS).execute();
         
-          //data_load();
+
 
         alertDialogHelper =new AlertDialogHelper(this);
-        multiSelectAdapter = new MultiSelectAdapter_Docs(this,docsList,multiselect_list,this);
-        // AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));  // did not work on high resolution phones
 
-
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
-        recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
-                DividerItemDecoration.VERTICAL));
-
-        // recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setAdapter(multiSelectAdapter);
 
 
 
@@ -208,6 +204,47 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
         multiSelectAdapter.DocsList=docsList;
         multiSelectAdapter.notifyDataSetChanged();
     }
+    private void DispDetailsDialog( Model_Docs fileProperty )
+    {
+
+        if(fileProperty.getFilePath() !=null)
+        {
+
+            String[] splitPath = fileProperty.getFilePath().split("/");
+            String fName = splitPath[splitPath.length - 1];
+
+            Dialog dialog = new Dialog(DocsActivityRe.this);
+            dialog.setContentView(R.layout.file_property_dialog);
+            // Set dialog title
+
+            TextView FileName = dialog.findViewById(R.id.FileName);
+            TextView FilePath = dialog.findViewById(R.id.FilePath);
+            TextView FileSize = dialog.findViewById(R.id.FileSize);
+            TextView FileDate = dialog.findViewById(R.id.FileDate);
+            TextView Resolution = dialog.findViewById(R.id.Resolution);
+            TextView resltxt=dialog.findViewById(R.id.resltxt);
+
+            TextView Oreintation = dialog.findViewById(R.id.ort);
+            TextView oreinttxt=dialog.findViewById(R.id.oreinttxt);
+
+            Oreintation.setVisibility(View.GONE);
+            oreinttxt.setVisibility(View.GONE);
+            resltxt.setVisibility(View.GONE);
+            Resolution.setVisibility(View.GONE);
+
+
+
+
+            FileName.setText(fName);
+            FilePath.setText(fileProperty.getFilePath());
+            FileSize.setText(fileProperty.getFileSize());
+            FileDate.setText(fileProperty.getFileMDate());
+
+
+
+            dialog.show();
+        }
+    }
 
     private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
 
@@ -235,8 +272,12 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
                     selectAll();
                     return  true;
                 case  R.id.action_Share:
-                    shareMultipleDocs();
+                    shareMultipleDocsWithNoughatAndAll();
                     return  true;
+                case R.id.action_details:
+                    if(multiselect_list.size()==1)//diplay details only for one selected image for now
+                        DispDetailsDialog(multiselect_list.get(0));
+                    return true;
                 default:
                     return false;
             }
@@ -299,6 +340,26 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
     public void onNeutralClick(int from) {
 
     }
+
+
+    // function from  AsynTaskUtility
+    @Override
+    public void processFinish(ArrayList output) {
+
+                   docsList=output;
+
+        multiSelectAdapter = new MultiSelectAdapter_Docs(this,docsList,multiselect_list,this);
+        // AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));  // did not work on high resolution phones
+
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+        recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
+        recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
+                DividerItemDecoration.VERTICAL));
+
+        recyclerView.setAdapter(multiSelectAdapter);
+    }
+
     private class DeleteFileTask extends AsyncTask<Void,Void,Integer>
     {
         ArrayList<Model_Docs> multiselect_list;
@@ -401,7 +462,49 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
          }
 
     }
+    private void shareMultipleDocsWithNoughatAndAll() {
 
+        if(multiselect_list.size()>0)
+        {
+            Intent sharingIntent = new Intent();
+            sharingIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
+            sharingIntent.setType("*/*");
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+            {
+                ArrayList<Uri> files = new ArrayList<Uri>();
+
+                for (int i = 0; i < multiselect_list.size(); i++) {
+                    File file = new File(multiselect_list.get(i).getFilePath());
+                    Uri uri = Uri.fromFile(file);
+                    files.add(uri);
+                }
+                sharingIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
+                startActivity(sharingIntent);
+            }
+            else
+            {
+                ArrayList<Uri> files = new ArrayList<Uri>();
+
+                for (int i = 0; i < multiselect_list.size(); i++)
+                {
+                    File file = new File(multiselect_list.get(i).getFilePath());
+                    Uri uri = FileProvider.getUriForFile(mcontext, getResources().getString(R.string.file_provider_authority), file);
+                    files.add(uri);
+                }
+                sharingIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
+                sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(sharingIntent);
+
+            }
+
+        }
+        else
+        {
+            Toast.makeText(mcontext, "No files to share", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+      //now this function is in  asyncTask class;
     private void FetchDocuments()
     {
         String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension("pdf");
@@ -487,8 +590,9 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
     @Override
     public void onDocsSelected(Model_Docs docs) {
 
-       // openDocument(docs.getFilePath());
-        Utility.OpenFile(mcontext,docs.getFilePath());
+
+        // Utility.OpenFile(mcontext,model_apk.getFilePath()); // open file below  Android N
+        Utility.OpenFileWithNoughtAndAll(docs.getFilePath() ,mcontext,getResources().getString(R.string.file_provider_authority));
 
     }
     //function not being used can be deleted as  this code  is a part  of utility  now

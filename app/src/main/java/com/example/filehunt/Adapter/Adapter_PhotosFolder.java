@@ -23,12 +23,13 @@ public class Adapter_PhotosFolder extends ArrayAdapter<Model_images> {
     Context context;
     ViewHolder viewHolder;
     ArrayList<Model_images> al_menu = new ArrayList<>();
+   int media_position;
 
-
-    public Adapter_PhotosFolder(Context context, ArrayList<Model_images> al_menu) {
+    public Adapter_PhotosFolder(Context context, ArrayList<Model_images> al_menu, int media_position) {
         super(context, R.layout.adapter_photosfolder, al_menu);
         this.al_menu = al_menu;
         this.context = context;
+        this.media_position=media_position;
 
 
     }
@@ -84,12 +85,16 @@ public class Adapter_PhotosFolder extends ArrayAdapter<Model_images> {
             viewHolder.tv_foldersize.setText(al_menu.get(position).getAl_imagepath().size()+"");
 
 
-
+   if (media_position==2)
+   {
+       viewHolder.iv_image.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_music));
+   }
+   else {
         Glide.with(context).load("file://" + al_menu.get(position).getAl_imagepath().get(0))
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .skipMemoryCache(true)
                 .into(viewHolder.iv_image);
-
+   }
 
         return convertView;
 

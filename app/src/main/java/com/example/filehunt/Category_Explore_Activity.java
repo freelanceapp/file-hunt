@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.example.filehunt.Adapter.Adapter_PhotosFolder;
 import com.example.filehunt.Model.Model_Docs;
 import com.example.filehunt.Model.Model_images;
+import com.example.filehunt.Utils.AsynctaskUtility;
 import com.example.filehunt.Utils.Utility;
 
 import java.text.SimpleDateFormat;
@@ -34,13 +35,16 @@ import static com.example.filehunt.Class.Constants.IMAGES;
 import static com.example.filehunt.Class.Constants.POSITION;
 import static com.example.filehunt.Class.Constants.VIDEO;
 
-public class Category_Explore_Activity extends AppCompatActivity {
+public class Category_Explore_Activity extends AppCompatActivity implements AsynctaskUtility.AsyncResponse {
 
     int position;
     Context ctx;
     boolean boolean_folder;
     GridView gv_folder;
     Adapter_PhotosFolder obj_adapter;
+    int AUDIO=3;
+    int VIDEO=2;
+    int IMAGES=1;
     public static ArrayList<Model_images> al_images = new ArrayList<>();
 
     Uri uri;
@@ -60,19 +64,25 @@ public class Category_Explore_Activity extends AppCompatActivity {
         switch (position)
         {
             case 0:
-                Load_Media(position);
+                Utility.setActivityTitle(ctx,getResources().getString(R.string.picture));
+                new AsynctaskUtility<Model_images>(ctx,this,IMAGES).execute();
+
                 break;
             case 1:
-                FetchVideos();
+                Utility.setActivityTitle(ctx,getResources().getString(R.string.video));
+                new AsynctaskUtility<Model_images>(ctx,this,VIDEO).execute();
                     break;
             case 2:
-               FetchAudio();
+                Utility.setActivityTitle(ctx,getResources().getString(R.string.audio));
+                new AsynctaskUtility<Model_images>(ctx,this,AUDIO).execute();
                 break;
             case 3:
 
                 break;
 
                 }
+
+
 
                 gv_folder.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -103,7 +113,7 @@ public class Category_Explore_Activity extends AppCompatActivity {
 
 
         }
-
+    // not being used;
       public ArrayList<Model_images>  Load_Media(int  MediaType)
     {
         al_images.clear();
@@ -179,20 +189,21 @@ public class Category_Explore_Activity extends AppCompatActivity {
 ////            }
 ////        }
 
-        obj_adapter = new Adapter_PhotosFolder(getApplicationContext(),al_images);
+        obj_adapter = new Adapter_PhotosFolder(getApplicationContext(),al_images,position);
         gv_folder.setAdapter(obj_adapter);
         return al_images;
     }
+    //not being used
     private  ArrayList<Model_images>   FetchVideos()
     {
         al_images.clear();
         int int_position = 0;
         Cursor cursor;
-        int column_index_data, column_index_folder_name,column_index_date_modified,thumb;
+        int column_index_data, column_index_folder_name,column_index_date_modified,thumb,column_index_duration;
         String absolutePathOfImage = null;
         uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
 
-        String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME,MediaStore.MediaColumns.DATE_MODIFIED,MediaStore.Video.Thumbnails.DATA};
+        String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME,MediaStore.MediaColumns.DATE_MODIFIED,MediaStore.Video.Thumbnails.DATA,MediaStore.Video.VideoColumns.DURATION};
 
         final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
         cursor = getApplicationContext().getContentResolver().query( uri, projection, null, null, orderBy + " DESC");
@@ -201,12 +212,14 @@ public class Category_Explore_Activity extends AppCompatActivity {
         column_index_folder_name = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
         column_index_date_modified= cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED);
         thumb= cursor.getColumnIndexOrThrow(MediaStore.Video.Thumbnails.DATA);
+        column_index_duration=cursor.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DURATION);
 
         while (cursor.moveToNext()) {
             absolutePathOfImage = cursor.getString(column_index_data);
             Log.e("Column", absolutePathOfImage);
             Log.e("Folder", cursor.getString(column_index_folder_name));
                  String thumbstr=cursor.getString(thumb);
+                 long duration=cursor.getLong(column_index_duration);
 
 
             for (int i = 0; i < al_images.size(); i++) {
@@ -224,23 +237,36 @@ public class Category_Explore_Activity extends AppCompatActivity {
 
                 ArrayList<String> al_path = new ArrayList<>();
                 ArrayList<String> al_vdoThumb = new ArrayList<>();
+                ArrayList<String> al_duration = new ArrayList<>();
+
                 al_path.addAll(al_images.get(int_position).getAl_imagepath());
                 al_vdoThumb.addAll(al_images.get(int_position).getAl_vdoThumb());
+                al_duration.addAll(al_images.get(int_position).getAlVdoDuration());
+
                 al_path.add(absolutePathOfImage);
                 al_vdoThumb.add(thumbstr);
+                al_duration.add(Utility.convertDuration(duration));
+
                 al_images.get(int_position).setAl_imagepath(al_path);
                 al_images.get(int_position).setAl_vdoThumb(al_vdoThumb);
+                al_images.get(int_position).setAlVdoDuration(al_duration);
 
             } else {
                 ArrayList<String> al_path = new ArrayList<>();
                 ArrayList<String> al_vdoThumb = new ArrayList<>();
+                ArrayList<String> al_duration = new ArrayList<>();
+
                 al_path.add(absolutePathOfImage);
                 al_vdoThumb.add(thumbstr);
+                al_duration.add(Utility.convertDuration(duration));
+
                 Model_images obj_model = new Model_images();
                 obj_model.setStr_folder(cursor.getString(column_index_folder_name));
                 obj_model.setDate_modified(LongToDate(cursor.getString(column_index_date_modified)));
                 obj_model.setAl_imagepath(al_path);
                 obj_model.setAl_vdoThumb(al_vdoThumb);
+                obj_model.setAlVdoDuration(al_duration);
+
                 al_images.add(obj_model);
                 }
 
@@ -250,12 +276,12 @@ public class Category_Explore_Activity extends AppCompatActivity {
 
 
 
-        obj_adapter = new Adapter_PhotosFolder(getApplicationContext(),al_images);
+        obj_adapter = new Adapter_PhotosFolder(getApplicationContext(),al_images,position);
         gv_folder.setAdapter(obj_adapter);
         return al_images;
     }
 
-
+   //  not being used
     private ArrayList<Model_images>  FetchAudio()
     {
         al_images.clear();
@@ -338,7 +364,7 @@ public class Category_Explore_Activity extends AppCompatActivity {
 //        }
 //
 
-        obj_adapter = new Adapter_PhotosFolder(getApplicationContext(),al_images);
+        obj_adapter = new Adapter_PhotosFolder(getApplicationContext(),al_images,position);
         gv_folder.setAdapter(obj_adapter);
         return al_images;
 
@@ -359,9 +385,14 @@ public class Category_Explore_Activity extends AppCompatActivity {
 
     }
 
+  //function from asyncTask class
+    @Override
+    public void processFinish(ArrayList output) {
 
+          al_images=output;
+         obj_adapter = new Adapter_PhotosFolder(getApplicationContext(),al_images,position);
+         gv_folder.setAdapter(obj_adapter);
 
-
-
+    }
 }
 

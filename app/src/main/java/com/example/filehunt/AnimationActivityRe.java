@@ -1,5 +1,6 @@
 package com.example.filehunt;
 
+import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,12 +23,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.filehunt.Adapter.MultiSelectAdapter_Anim;
 import com.example.filehunt.Adapter.MultiSelectAdapter_Docs;
 import com.example.filehunt.Model.Model_Anim;
+import com.example.filehunt.Model.Model_Download;
 import com.example.filehunt.Utils.AlertDialogHelper;
+import com.example.filehunt.Utils.AsynctaskUtility;
 import com.example.filehunt.Utils.RecyclerItemClickListener;
 import com.example.filehunt.Utils.Utility;
 
@@ -35,7 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 
-public class AnimationActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener,MultiSelectAdapter_Anim.AnimListener{
+public class AnimationActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener,MultiSelectAdapter_Anim.AnimListener,AsynctaskUtility.AsyncResponse{
 
     ActionMode mActionMode;
     Menu context_menu;
@@ -53,32 +58,23 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
     ArrayList<Model_Anim> Intent_Docs_List;
     private SearchView searchView;
     Context mcontext;
-
+  int ANIMATION=6;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photos_activity_re);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mcontext=AnimationActivityRe.this;
+        Utility.setActivityTitle(mcontext,getResources().getString(R.string.animation));
+
+        new AsynctaskUtility<Model_Anim>(mcontext,this,ANIMATION).execute();
 
 //           int_position = getIntent().getIntExtra("value", 0);
-        fetchAnimationFiles();
 
           //data_load();
 
         alertDialogHelper =new AlertDialogHelper(this);
-        multiSelectAdapter = new MultiSelectAdapter_Anim(this,animList,multiselect_list,this);
 
-        // AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));  // did not work on high resolution phones
-
-
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
-        recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
-                DividerItemDecoration.VERTICAL));
-
-        // recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setAdapter(multiSelectAdapter);
 
 
 
@@ -193,6 +189,46 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
         multiSelectAdapter.AnimList=animList;
         multiSelectAdapter.notifyDataSetChanged();
     }
+    private void DispDetailsDialog( Model_Anim fileProperty )
+    {
+
+        if(fileProperty.getFilePath() !=null)
+        {
+            String[] splitPath = fileProperty.getFilePath().split("/");
+            String fName = splitPath[splitPath.length - 1];
+
+            Dialog dialog = new Dialog(AnimationActivityRe.this);
+            dialog.setContentView(R.layout.file_property_dialog);
+            // Set dialog title
+
+            TextView FileName = dialog.findViewById(R.id.FileName);
+            TextView FilePath = dialog.findViewById(R.id.FilePath);
+            TextView FileSize = dialog.findViewById(R.id.FileSize);
+            TextView FileDate = dialog.findViewById(R.id.FileDate);
+            TextView Resolution = dialog.findViewById(R.id.Resolution);
+            TextView resltxt=dialog.findViewById(R.id.resltxt);
+
+            TextView Oreintation = dialog.findViewById(R.id.ort);
+            TextView oreinttxt=dialog.findViewById(R.id.oreinttxt);
+
+            Oreintation.setVisibility(View.GONE);
+            oreinttxt.setVisibility(View.GONE);
+            resltxt.setVisibility(View.GONE);
+            Resolution.setVisibility(View.GONE);
+
+
+
+            FileName.setText(fName);
+            FilePath.setText(fileProperty.getFilePath());
+            FileSize.setText(fileProperty.getFileSize());
+            FileDate.setText(fileProperty.getFileMDate());
+
+
+
+            dialog.show();
+        }
+    }
+
 
     private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
 
@@ -220,8 +256,12 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
                     selectAll();
                     return  true;
                 case  R.id.action_Share:
-                    shareMultipleDocs();
+                    shareMultipleFilesWithNoughatAndAll();
                     return  true;
+                case R.id.action_details:
+                    if(multiselect_list.size()==1)//diplay details only for one selected image for now
+                        DispDetailsDialog(multiselect_list.get(0));
+                    return true;
                 default:
                     return false;
             }
@@ -284,6 +324,20 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
     public void onNeutralClick(int from) {
 
     }
+   // function from asyncTask
+    @Override
+    public void processFinish(ArrayList output) {
+        animList=output;
+        multiSelectAdapter = new MultiSelectAdapter_Anim(this,animList,multiselect_list,this);
+        // AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));  // did not work on high resolution phones
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+        recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
+        recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
+                DividerItemDecoration.VERTICAL));
+
+        recyclerView.setAdapter(multiSelectAdapter);
+    }
+
     private class DeleteFileTask extends AsyncTask<Void,Void,Integer>
     {
         ArrayList<Model_Anim> multiselect_list;
@@ -386,10 +440,53 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
          }
 
     }
+    private void shareMultipleFilesWithNoughatAndAll() {
+
+        if(multiselect_list.size()>0)
+        {
+            Intent sharingIntent = new Intent();
+            sharingIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
+            sharingIntent.setType("*/*");
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+            {
+                ArrayList<Uri> files = new ArrayList<Uri>();
+
+                for (int i = 0; i < multiselect_list.size(); i++) {
+                    File file = new File(multiselect_list.get(i).getFilePath());
+                    Uri uri = Uri.fromFile(file);
+                    files.add(uri);
+                }
+                sharingIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
+                startActivity(sharingIntent);
+            }
+            else
+            {
+                ArrayList<Uri> files = new ArrayList<Uri>();
+
+                for (int i = 0; i < multiselect_list.size(); i++)
+                {
+                    File file = new File(multiselect_list.get(i).getFilePath());
+                    Uri uri = FileProvider.getUriForFile(mcontext, getResources().getString(R.string.file_provider_authority), file);
+                    files.add(uri);
+                }
+                sharingIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
+                sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(sharingIntent);
+
+            }
+
+        }
+        else
+        {
+            Toast.makeText(mcontext, "No files to share", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
     private void fetchAnimationFiles() {
         ArrayList<String> animation = new ArrayList<>();
         
-        final String[] projection = {MediaStore.Files.FileColumns.DATA,MediaStore.Files.FileColumns.DISPLAY_NAME,MediaStore.Files.FileColumns.SIZE,MediaStore.Files.FileColumns.DATE_MODIFIED, MediaStore.Files.FileColumns.MEDIA_TYPE};
+        final String[] projection = {MediaStore.Files.FileColumns.DATA,MediaStore.Files.FileColumns.TITLE,MediaStore.Files.FileColumns.SIZE,MediaStore.Files.FileColumns.DATE_MODIFIED, MediaStore.Files.FileColumns.MEDIA_TYPE};
         Cursor cursor = mcontext.getContentResolver().query(MediaStore.Files.getContentUri("external"),
                 projection, null, null, null);
         
@@ -398,7 +495,7 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
         else if (cursor.getCount() > 0 && cursor.moveToFirst()) {
             do {
                 String path = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA));
-                String fileName=cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DISPLAY_NAME));
+                String fileName=cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.TITLE));
                 //long fileDateModified=cursor.getLong(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATE_MODIFIED));
                 String fileDateModified=cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATE_MODIFIED));
                 long fileSize=cursor.getLong(cursor.getColumnIndex(MediaStore.Files.FileColumns.SIZE));
@@ -505,24 +602,8 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
     @Override
     public void onAnimSelected(Model_Anim docs) {
 
-       //openanimationFile(docs.getFilePath());
-         Utility.OpenFile(mcontext,docs.getFilePath());
+        // Utility.OpenFile(mcontext,model_apk.getFilePath()); // open file below  Android N
+        Utility.OpenFileWithNoughtAndAll(docs.getFilePath(),mcontext,getResources().getString(R.string.file_provider_authority));   //new
     }
 
-    //function not being used can be deleted as  this code  is a part  of utility  now
-    public void openanimationFile(String name) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        File file = new File(name);
-        String extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
-        String mimetype = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-
-        if (extension.equalsIgnoreCase("") || mimetype == null) {
-            // if there is no extension or there is no definite mimetype, still try to open the file
-            intent.setDataAndType(Uri.fromFile(file), "text/*");
-        } else {
-            intent.setDataAndType(Uri.fromFile(file), mimetype);
-        }
-        // custom message for the intent
-        startActivity(Intent.createChooser(intent, "Choose an Application:"));
-    }
 }

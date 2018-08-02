@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">FileHunt</string>
 
-    <string name="internalstorage">Internal storage</string>
+    <string name="internalstorage">Internal Storage</string>
     <string name="avlbl">Available</string>
 
         <!--taken from filemangaer app-->
@@ -19,11 +19,7 @@
     <string name="searchview_description_voice">Voice search</string>
     <string name="capital_on">ON</string>
     <string name="capital_off">OFF</string>
-    <string name="picture">Images</string>
-    <string name="audio">Audio</string>
-    <string name="video">Video</string>
-    <string name="document">Documents</string>
-    <string name="apk">Apks</string>
+
     <string name="compression">Archives</string>
     <string name="class_count">%1$s items</string>
     <string name="mobile_storage">Phone storage</string>
@@ -77,7 +73,7 @@ Files with the same name already exist. Do you want to overwrite them?
     <string name="rename_recent_file_close">Close</string>
     <string name="input_name_dialog_message_invalid_name_length">Maximum number of characters reached</string>
 
-    <string name="recent_file">Recent files</string>
+
     <string name="no_file">Empty</string>
     <string name="search_toast">Please enter search keywords</string>
     <string name="today_string">Today</string>
@@ -128,7 +124,7 @@ Files with the same name already exist. Do you want to overwrite them?
     <string name="input_passwd">Input the password</string>
     <string name="camera_group">Camera</string>
     <string name="hotscreen_group">Screenshot</string>
-    <string name="download">Downloads</string>
+
     <string name="recent">Recent files</string>
     <string name="available_title">Available</string>
     <string name="item_count_string">%1$s items</string>
@@ -175,4 +171,17 @@ Operation completed. Files will be uploaded in the background
     <string name="action_search">Search</string>
     <string name="rar_extract_message">Extraction not supported for encrypted RAR files</string>
     <!--taken from filemangaer app-->
+
+    <string name="file_provider_authority" translatable="false">com.example.filehunt.provider</string>
+
+    <string name="animation">Animations</string>
+    <string name="picture">Images</string>
+    <string name="audio">Audios</string>
+    <string name="video">Videos</string>
+    <string name="document">Documents</string>
+    <string name="apk">Apks</string>
+    <string name="download">Downloads</string>
+    <string name="recent_file">Recent files</string>
+    <string name="loading_msg">Loading</string>
+
 </resources>

@@ -1,5 +1,6 @@
 package com.example.filehunt;
 
+import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -22,6 +24,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -37,6 +40,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import static com.example.filehunt.Class.Constants.PATH;
+import static com.example.filehunt.Utils.Utility.pathToBitmap;
 
 
 public class VideoActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener ,MultiSelectAdapter_Video.VdoListener {
@@ -56,6 +60,7 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
     int int_position;
     ArrayList<String> Intent_Video_List;
     ArrayList<String> thumbList;
+    ArrayList<String> durationList;
     Context mcontext;
     private SearchView searchView;
 
@@ -65,11 +70,13 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         setContentView(R.layout.photos_activity_re);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mcontext=VideoActivityRe.this;
-       
+        Utility.setActivityTitle(mcontext,getResources().getString(R.string.video));
         int_position = getIntent().getIntExtra("value", 0);
 
           Intent_Video_List = Category_Explore_Activity.al_images.get(int_position).getAl_imagepath();
           thumbList= Category_Explore_Activity.al_images.get(int_position).getAl_vdoThumb();// this list  will be part  of  Intent_Video_List using setter getter
+          durationList=Category_Explore_Activity.al_images.get(int_position).getAlVdoDuration();
+
           data_load();
 
 
@@ -192,8 +199,11 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         for (int i = 0; i < Intent_Video_List.size(); i++)
         {
             Grid_Model gridImg = new Grid_Model();
+            gridImg.setImgPath(Intent_Video_List.get(i));
             if(i<thumbList.size())
             gridImg.setImgBitmap(thumbList.get(i));
+            if(i<durationList.size())
+                gridImg.setVdoDuration(durationList.get(i));
             vidioList.add(gridImg);
         }
     }
@@ -224,6 +234,44 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         multiSelectAdapter.VdoList=vidioList;
         multiSelectAdapter.notifyDataSetChanged();
     }
+    private void DispDetailsDialog( Grid_Model fileProperty )
+    {
+
+        if(fileProperty.getImgPath() !=null)
+        {
+            File f = new File(fileProperty.getImgPath());
+            String[] splitPath = fileProperty.getImgPath().split("/");
+            String fName = splitPath[splitPath.length - 1];
+
+            Dialog dialog = new Dialog(VideoActivityRe.this);
+            dialog.setContentView(R.layout.file_property_dialog);
+            // Set dialog title
+
+            TextView FileName = dialog.findViewById(R.id.FileName);
+            TextView FilePath = dialog.findViewById(R.id.FilePath);
+            TextView FileSize = dialog.findViewById(R.id.FileSize);
+            TextView FileDate = dialog.findViewById(R.id.FileDate);
+            TextView Resolution = dialog.findViewById(R.id.Resolution);
+            TextView resltxt=dialog.findViewById(R.id.resltxt);
+            TextView Oreintation = dialog.findViewById(R.id.ort);
+            TextView oreinttxt=dialog.findViewById(R.id.oreinttxt);
+            Oreintation.setVisibility(View.GONE);
+            oreinttxt.setVisibility(View.GONE);
+            resltxt.setText("Duration");
+
+
+            FileName.setText(fName);
+            FilePath.setText(fileProperty.getImgPath());
+            FileSize.setText(Utility.formatSize(f.length()));
+            FileDate.setText(Utility.LongToDate((f.lastModified())));
+            Resolution.setText(fileProperty.getVdoDuration());
+
+             // Oreintation.setText("06:00");
+            // Oreintation.setText(String.valueOf(Utility.getOrintatin(f))+"");
+
+            dialog.show();
+        }
+    }
 
     private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
 
@@ -253,6 +301,11 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
                 case  R.id.action_Share:
                     shareMultipleVideo();
                     return  true;
+                case R.id.action_details:
+                    if(multiselect_list.size()==1)//diplay details only for one selected video for now
+                        DispDetailsDialog(multiselect_list.get(0));
+                    return  true;
+
                 default:
                     return false;
             }
@@ -400,22 +453,37 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
 
          if(multiselect_list.size()>0)
          {
-        Intent sharingIntent = new Intent();
-        sharingIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
-             // intent.putExtra(Intent.EXTRA_SUBJECT, "Here are some files.");
-             // //sharingIntent.setType("image/jpeg"); /* This example is sharing jpeg images. */
-        sharingIntent.setType("video/*"); /* images. */
+             Intent sharingIntent = new Intent();
+             sharingIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
+             sharingIntent.setType("video/*");
+             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+             {
+                 ArrayList<Uri> files = new ArrayList<Uri>();
 
-        ArrayList<Uri> files = new ArrayList<Uri>();
+                 for (int i = 0; i < multiselect_list.size(); i++) {
+                     File file = new File(multiselect_list.get(i).getImgPath());
+                     Uri uri = Uri.fromFile(file);
+                     files.add(uri);
+                 }
+                 sharingIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
+                 startActivity(sharingIntent);
+             }
+             else
+             {
+                 ArrayList<Uri> files = new ArrayList<Uri>();
 
-        for(int i=0;i<multiselect_list.size();i++)
-        {
-            File file = new File(multiselect_list.get(i).getImgPath());
-            Uri uri = Uri.fromFile(file);
-            files.add(uri);
-        }
-        sharingIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
-        startActivity(sharingIntent);
+                 for (int i = 0; i < multiselect_list.size(); i++)
+                 {
+                     File file = new File(multiselect_list.get(i).getImgPath());
+                     Uri uri = FileProvider.getUriForFile(mcontext, getResources().getString(R.string.file_provider_authority), file);
+                     files.add(uri);
+                 }
+                 sharingIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
+                 sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                 startActivity(sharingIntent);
+
+             }
+
              }
              else
          {
@@ -445,7 +513,9 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
 //                    intent.setDataAndType(Uri.parse(vdoModel.getImgBitmapStr()), "video/*");
 //                    startActivity(intent);
 
-             Utility.OpenFile(mcontext,vdoModel.getImgBitmapStr());
+
+        // Utility.OpenFile(mcontext,model_apk.getFilePath()); // open file below  Android N
+        Utility.OpenFileWithNoughtAndAll(vdoModel.getImgBitmapStr(),mcontext,getResources().getString(R.string.file_provider_authority));
 
     }
 }

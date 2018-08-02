@@ -25,4 +25,14 @@ public class Grid_Model {
     }
 
     private String imgBitmap;
+
+    public String getVdoDuration() {
+        return VdoDuration;
+    }
+
+    public void setVdoDuration(String vdoDuration) {
+        VdoDuration = vdoDuration;
+    }
+
+    private String VdoDuration;
 }

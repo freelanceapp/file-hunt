@@ -1,13 +1,16 @@
 package com.example.filehunt;
 
+import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -19,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -35,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.filehunt.Class.Constants.PATH;
+import static com.example.filehunt.Utils.Utility.pathToBitmap;
 
 
 public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener ,MultiSelectAdapter.ImgListener {
@@ -61,6 +66,7 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         setContentView(R.layout.photos_activity_re);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mcontext=PhotosActivityRe.this;
+        Utility.setActivityTitle(mcontext,getResources().getString(R.string.picture));
         int_position = getIntent().getIntExtra("value", 0);
 
         Intent_Images_List = Category_Explore_Activity.al_images.get(int_position).getAl_imagepath();
@@ -234,9 +240,16 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
                     return true;
                 case R.id.action_select:
                     selectAll();
+                    return true;
                 case  R.id.action_Share:
-                    shareMultipleImages();
+                    shareMultipleImagesWithNoughatAndAll();
+                    return true;
+                case R.id.action_details:
+                    if(multiselect_list.size()==1)//diplay details only for one selected image for now
+                    DispDetailsDialog(multiselect_list.get(0).getImgPath());
+                    return  true;
                 default:
+
                     return false;
             }
         }
@@ -250,8 +263,41 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         }
     };
 
+    private void DispDetailsDialog(String imgPath )
+    {
+
+        String morientation="";
+        File f =new File(imgPath);
+        Bitmap bitmap=pathToBitmap(imgPath);
+        int w=bitmap.getWidth();
+        int h=bitmap.getHeight();
+
+        System.out.println("ImageDetails path-> "+imgPath+"size \n "+ Utility.formatSize(f.length())+"\n resolution->"+w+"*"+h+"\n  orientation"+morientation);
+        String[] splitPath=imgPath.split("/");
+
+        String fName=splitPath[splitPath.length-1];
 
 
+        Dialog dialog = new Dialog(PhotosActivityRe.this);
+        dialog.setContentView(R.layout.file_property_dialog);
+        // Set dialog title
+
+        TextView FileName=dialog.findViewById(R.id.FileName);
+        TextView FilePath=dialog.findViewById(R.id.FilePath);
+        TextView FileSize=dialog.findViewById(R.id.FileSize);
+        TextView FileDate=dialog.findViewById(R.id.FileDate);
+        TextView Resolution=dialog.findViewById(R.id.Resolution);
+        TextView Oreintation=dialog.findViewById(R.id.ort);
+
+        FileName.setText(fName);
+        FilePath.setText(imgPath);
+        FileSize.setText(Utility.formatSize(f.length()));
+        FileDate.setText(Utility.LongToDate((f.lastModified())));
+        Resolution.setText(w+"*"+h);
+        Oreintation.setText(String.valueOf(Utility.getOrintatin(f))+"");
+
+        dialog.show();
+    }
 
 
     // AlertDialog Callback Functions
@@ -372,7 +418,7 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
     }
     private void sendBroadcast(File outputFile)
     {
-      //  https://stackoverflow.com/questions/4430888/android-file-delete-leaves-empty-placeholder-in-gallery
+         //  https://stackoverflow.com/questions/4430888/android-file-delete-leaves-empty-placeholder-in-gallery
         //this broadcast clear the deleted images from  android file system
         //it makes the MediaScanner service run again that keep  track of files in android
         // to  run it a permission  in manifest file has been given
@@ -397,7 +443,7 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         Intent sharingIntent = new Intent();
         sharingIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
              // intent.putExtra(Intent.EXTRA_SUBJECT, "Here are some files.");
-             // //sharingIntent.setType("image/jpeg"); /* This example is sharing jpeg images. */
+             // //sharingIntent.setType("image/jpeg");
         sharingIntent.setType("image/*"); /* images. */
 
         ArrayList<Uri> files = new ArrayList<Uri>();
@@ -418,11 +464,54 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
          }
 
     }
+    private void  shareMultipleImagesWithNoughatAndAll() {
+
+        if(multiselect_list.size()>0)
+        {
+            Intent sharingIntent = new Intent();
+            sharingIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
+            sharingIntent.setType("*/*");
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+            {
+                ArrayList<Uri> files = new ArrayList<Uri>();
+
+                for (int i = 0; i < multiselect_list.size(); i++) {
+                    File file = new File(multiselect_list.get(i).getImgPath());
+                    Uri uri = Uri.fromFile(file);
+                    files.add(uri);
+                }
+                sharingIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
+                startActivity(sharingIntent);
+            }
+            else
+            {
+                ArrayList<Uri> files = new ArrayList<Uri>();
+
+                for (int i = 0; i < multiselect_list.size(); i++)
+                {
+                    File file = new File(multiselect_list.get(i).getImgPath());
+                    Uri uri = FileProvider.getUriForFile(mcontext, getResources().getString(R.string.file_provider_authority), file);
+                    files.add(uri);
+                }
+                sharingIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
+                sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(sharingIntent);
+
+            }
+
+        }
+        else
+        {
+            Toast.makeText(mcontext, "No files to share", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
     private  int getScreenWidth() {
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int height = displayMetrics.heightPixels;
+       // int height = displayMetrics.heightPixels;
         int width = displayMetrics.widthPixels;
         System.out.println(width);
         return  width;
