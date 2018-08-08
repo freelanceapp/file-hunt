@@ -1,30 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/grey_ebebeb"
-    android:weightSum="100"
-    android:orientation="vertical">
+    android:background="@color/transparent"
+    >
 
 
     <android.support.v7.widget.RecyclerView
+        android:layout_above="@+id/storege_section"
+        android:layout_alignParentTop="true"
         android:id="@+id/category_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/dp2"
         android:layout_marginRight="@dimen/dp2"
-        android:layout_weight="75" />
+        />
 
     <RelativeLayout
-
-        android:padding="@dimen/dp20"
-        android:layout_weight="25"
+        android:padding="@dimen/dp10"
+       android:layout_alignParentBottom="true"
         android:id="@+id/storege_section"
         android:background="@color/white"
         android:layout_width="match_parent"
-        android:layout_height="0dp">
+        android:layout_height="wrap_content">
         <RelativeLayout
-            android:layout_centerInParent="true"
+
+            android:id="@+id/int_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
    <TextView
@@ -37,7 +38,6 @@
        android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/avlbTxt"
-            android:layout_marginTop="@dimen/dp30"
             android:layout_below="@+id/internalTxt"
             android:layout_alignParentLeft="true"
             android:textSize="@dimen/sp12"
@@ -49,7 +49,7 @@
 
         <TextView
             android:id="@+id/avlbMemory"
-            android:layout_marginTop="@dimen/dp20"
+            android:layout_marginTop="@dimen/dp30"
             android:layout_toRightOf="@+id/avlbTxt"
             android:layout_marginLeft="@dimen/dp10"
             android:textSize="@dimen/sp12"
@@ -71,7 +71,7 @@
             android:layout_height="wrap_content" />
 
         <ProgressBar
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="@dimen/dp15"
@@ -79,6 +79,67 @@
             android:layout_centerHorizontal="true"
             android:id="@+id/progressBar" />
         </RelativeLayout>
+       <!-- external storage layout-->
+        <RelativeLayout
+            android:visibility="gone"
+            android:layout_below="@+id/int_layout"
+            android:id="@+id/ext_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/externalTxt"
+                android:layout_alignParentLeft="true"
+                android:textSize="@dimen/sp18"
+                android:layout_alignParentTop="true"
+                android:text="@string/externalstorage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/avlbTxt_ext"
+                android:layout_marginTop="@dimen/dp30"
+                android:layout_below="@+id/externalTxt"
+                android:layout_alignParentLeft="true"
+                android:textSize="@dimen/sp12"
+                android:layout_alignParentTop="true"
+                android:text="@string/avlbl"
+                android:layout_alignBaseline="@+id/avlbMemory_ext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/avlbMemory_ext"
+                android:layout_marginTop="@dimen/dp30"
+                android:layout_toRightOf="@+id/avlbTxt_ext"
+                android:layout_marginLeft="@dimen/dp10"
+                android:textSize="@dimen/sp12"
+                android:layout_alignParentTop="true"
+                android:text=""
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/totalMemmory_ext"
+                android:layout_marginTop="@dimen/dp20"
+                android:layout_below="@+id/externalTxt"
+                android:layout_alignParentRight="true"
+                android:textSize="@dimen/sp12"
+                android:layout_alignParentTop="true"
+                android:text=""
+                android:layout_alignBaseline="@+id/avlbMemory_ext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <ProgressBar
+                android:layout_marginTop="5dp"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp15"
+                android:layout_below="@+id/totalMemmory_ext"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/progressBar_ext" />
+        </RelativeLayout>
+
+
     </RelativeLayout>
 
-</LinearLayout>
+</RelativeLayout>

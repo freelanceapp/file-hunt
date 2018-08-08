@@ -1,10 +1,12 @@
 package com.example.filehunt;
 
+import android.app.ActionBar;
 import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -13,21 +15,29 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.TypefaceSpan;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.filehunt.Adapter.MultiSelectAdapter_Anim;
 import com.example.filehunt.Adapter.MultiSelectAdapter_Docs;
+import com.example.filehunt.Model.Grid_Model;
 import com.example.filehunt.Model.Model_Anim;
 import com.example.filehunt.Model.Model_Download;
 import com.example.filehunt.Utils.AlertDialogHelper;
@@ -65,7 +75,8 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
         setContentView(R.layout.photos_activity_re);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mcontext=AnimationActivityRe.this;
-        Utility.setActivityTitle(mcontext,getResources().getString(R.string.animation));
+
+       Utility.setActivityTitle(mcontext,getResources().getString(R.string.animation));
 
         new AsynctaskUtility<Model_Anim>(mcontext,this,ANIMATION).execute();
 
@@ -259,8 +270,15 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
                     shareMultipleFilesWithNoughatAndAll();
                     return  true;
                 case R.id.action_details:
-                    if(multiselect_list.size()==1)//diplay details only for one selected image for now
+                    if(multiselect_list.size()==1) {
                         DispDetailsDialog(multiselect_list.get(0));
+                    }
+                    else {
+                        String size =calcSelectFileSize(multiselect_list);
+                        System.out.println("" + size);
+                        if(size!=null)
+                            Utility.multiFileDetailsDlg(mcontext,size,multiselect_list.size());
+                    }
                     return true;
                 default:
                     return false;
@@ -604,6 +622,19 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
 
         // Utility.OpenFile(mcontext,model_apk.getFilePath()); // open file below  Android N
         Utility.OpenFileWithNoughtAndAll(docs.getFilePath(),mcontext,getResources().getString(R.string.file_provider_authority));   //new
+    }
+    public  String calcSelectFileSize(ArrayList<Model_Anim> fileList)
+    {
+        long totalSize=0;
+
+        for(int i=0;i<fileList.size();i++)
+        {
+            Model_Anim m =  fileList.get(i);
+            File  f= new File(m.getFilePath());
+            totalSize+=f.length();
+        }
+
+        return  Utility.humanReadableByteCount(totalSize,true);
     }
 
 }

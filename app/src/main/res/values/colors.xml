@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#ebebeb</color>
-    <color name="colorPrimaryDark">#d6d5d5</color>
+    <color name="colorPrimary">#d6d5d5</color>
+    <color name="colorPrimaryDark">#808080</color>
     <color name="colorAccent">#f26522</color>
 
     <color name="white">#ffffff</color>
@@ -720,7 +720,17 @@
     <color name="main_storage_text">#b7000000</color>
     <color name="storage_detail_text">#89000000</color>
 
-    <color name="grey_ebebeb">#d6d5d5</color>
+    <color name="grey_ebebeb">#ebebeb</color>
     <color name="grey_eb">#FFEBEBEB</color>
+    <color name="color_img">#d772b3</color>
+    <color name="color_vdo">#fd5c2c</color>
+    <color name="color_audio">#d1313d</color>
+    <color name="color_docs">#fd586c</color>
+    <color name="color_download">#02aeb0</color>
+    <color name="color_anim">#ef930b</color>
+    <color name="color_recent">#339dc7</color>
+    <color name="color_apk">#bb2b83</color>
+    <color name="light_black">#323232</color>
+    <color name="progresscolor">#2a8d9d</color>
     <!--takem from filemanager app-->
 </resources>

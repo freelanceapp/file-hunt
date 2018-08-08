@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.util.Util;
 import com.example.filehunt.Adapter.MultiSelectAdapter;
 import com.example.filehunt.Model.Grid_Model;
 import com.example.filehunt.Utils.AlertDialogHelper;
@@ -66,11 +67,12 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         setContentView(R.layout.photos_activity_re);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mcontext=PhotosActivityRe.this;
-        Utility.setActivityTitle(mcontext,getResources().getString(R.string.picture));
+
         int_position = getIntent().getIntExtra("value", 0);
 
         Intent_Images_List = Category_Explore_Activity.al_images.get(int_position).getAl_imagepath();
-
+        String tittle=Category_Explore_Activity.al_images.get(int_position).getStr_folder();
+        Utility.setActivityTitle(mcontext,tittle);
         data_load();
 
         alertDialogHelper =new AlertDialogHelper(this);
@@ -163,6 +165,7 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
 
 
         return true;
+
     }
 
 
@@ -245,8 +248,17 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
                     shareMultipleImagesWithNoughatAndAll();
                     return true;
                 case R.id.action_details:
-                    if(multiselect_list.size()==1)//diplay details only for one selected image for now
-                    DispDetailsDialog(multiselect_list.get(0).getImgPath());
+                      if(multiselect_list.size()==1)
+                      {
+                          DispDetailsDialog(multiselect_list.get(0).getImgPath());
+                      }
+                     else {
+                          String size =calcSelectFileSize(multiselect_list);
+                          System.out.println("" + size);
+                          if(size!=null)
+                            Utility.multiFileDetailsDlg(mcontext,size,multiselect_list.size());
+                      }
+
                     return  true;
                 default:
 
@@ -294,10 +306,14 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         FileSize.setText(Utility.formatSize(f.length()));
         FileDate.setText(Utility.LongToDate((f.lastModified())));
         Resolution.setText(w+"*"+h);
-        Oreintation.setText(String.valueOf(Utility.getOrintatin(f))+"");
+        Oreintation.setText(Utility.getOrintatin(w,h));
 
         dialog.show();
     }
+
+
+
+
 
 
     // AlertDialog Callback Functions
@@ -404,8 +420,7 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
 
         }
 
-
-         // clear  existing cache of glide library
+        // clear  existing cache of glide library
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -525,4 +540,19 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         intent.putExtra(PATH, imgModel.getImgPath());
         startActivity(intent);
     }
+
+    public  String calcSelectFileSize(ArrayList<Grid_Model> fileList)
+    {
+        long totalSize=0;
+
+        for(int i=0;i<fileList.size();i++)
+        {
+            Grid_Model m =  fileList.get(i);
+            File  f= new File(m.getImgPath());
+            totalSize+=f.length();
+        }
+
+        return  Utility.humanReadableByteCount(totalSize,true);
+    }
+
 }

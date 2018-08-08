@@ -29,6 +29,7 @@ import android.widget.Toast;
 import com.example.filehunt.Adapter.MultiSelectAdapter_Audio;
 import com.example.filehunt.Adapter.MultiSelectAdapter_Video;
 import com.example.filehunt.Model.Grid_Model;
+import com.example.filehunt.Model.Model_Apk;
 import com.example.filehunt.Model.Model_Audio;
 import com.example.filehunt.Utils.AlertDialogHelper;
 import com.example.filehunt.Utils.AutoFitGridLayoutManager;
@@ -68,6 +69,9 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
         mcontext=AudioActivityRe.this;
         Utility.setActivityTitle(mcontext,getResources().getString(R.string.audio));
         int_position = getIntent().getIntExtra("value", 0);
+
+        String tittle=Category_Explore_Activity.al_images.get(int_position).getStr_folder();
+        Utility.setActivityTitle(mcontext,tittle);
 
          Intent_Audio_List = Category_Explore_Activity.al_images.get(int_position).getAl_imagepath();
          Intent_duration_List=Category_Explore_Activity.al_images.get(int_position).getAl_FileDuration();
@@ -185,7 +189,7 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
 
             FileName.setText(fName);
             FilePath.setText(fileProperty.getAudioPath());
-            FileSize.setText(Utility.formatSize(f.length()));
+            FileSize.setText(Utility.humanReadableByteCount(f.length(),true));
             FileDate.setText(Utility.LongToDate((f.lastModified())));
             Resolution.setText(fileProperty.getAudioFileDuration());
 
@@ -282,6 +286,12 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
                 case R.id.action_details:
                     if(multiselect_list.size()==1)//diplay details only for one selected image for now
                     DispDetailsDialog(multiselect_list.get(0));
+                    else {
+                        String size =calcSelectFileSize(multiselect_list);
+                        System.out.println("" + size);
+                        if(size!=null)
+                            Utility.multiFileDetailsDlg(mcontext,size,multiselect_list.size());
+                    }
                     return true;
                 default:
                     return false;
@@ -400,7 +410,7 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
             if(f.exists())
                 if(f.delete()) {
                     count++;
-                   // sendBroadcast(f);
+                    sendBroadcast(f);
                 }
 
         }
@@ -408,7 +418,7 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
     }
     private void sendBroadcast(File outputFile)
     {
-      //  https://stackoverflow.com/questions/4430888/android-file-delete-leaves-empty-placeholder-in-gallery
+        //  https://stackoverflow.com/questions/4430888/android-file-delete-leaves-empty-placeholder-in-gallery
         //this broadcast clear the deleted images from  android file system
         //it makes the MediaScanner service run again that keep  track of files in android
         // to  run it a permission  in manifest file has been given
@@ -504,5 +514,18 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
            Utility.OpenFileWithNoughtAndAll(audioModel.getAudioPath(),mcontext,getResources().getString(R.string.file_provider_authority));
 
 
+    }
+    public  String calcSelectFileSize(ArrayList<Model_Audio> fileList)
+    {
+        long totalSize=0;
+
+        for(int i=0;i<fileList.size();i++)
+        {
+            Model_Audio m =  fileList.get(i);
+            File  f= new File(m.getAudioPath());
+            totalSize+=f.length();
+        }
+
+        return  Utility.humanReadableByteCount(totalSize,true);
     }
 }

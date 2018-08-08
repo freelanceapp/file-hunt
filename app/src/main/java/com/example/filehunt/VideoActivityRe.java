@@ -39,6 +39,7 @@ import com.example.filehunt.Utils.Utility;
 import java.io.File;
 import java.util.ArrayList;
 
+
 import static com.example.filehunt.Class.Constants.PATH;
 import static com.example.filehunt.Utils.Utility.pathToBitmap;
 
@@ -70,12 +71,14 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         setContentView(R.layout.photos_activity_re);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mcontext=VideoActivityRe.this;
-        Utility.setActivityTitle(mcontext,getResources().getString(R.string.video));
-        int_position = getIntent().getIntExtra("value", 0);
 
+        int_position = getIntent().getIntExtra("value", 0);
+        String tittle=Category_Explore_Activity.al_images.get(int_position).getStr_folder();
+        Utility.setActivityTitle(mcontext,tittle);
           Intent_Video_List = Category_Explore_Activity.al_images.get(int_position).getAl_imagepath();
           thumbList= Category_Explore_Activity.al_images.get(int_position).getAl_vdoThumb();// this list  will be part  of  Intent_Video_List using setter getter
           durationList=Category_Explore_Activity.al_images.get(int_position).getAlVdoDuration();
+
 
           data_load();
 
@@ -302,8 +305,18 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
                     shareMultipleVideo();
                     return  true;
                 case R.id.action_details:
-                    if(multiselect_list.size()==1)//diplay details only for one selected video for now
+                    if(multiselect_list.size()==1)
+                    {
                         DispDetailsDialog(multiselect_list.get(0));
+                    }
+                    else {
+                            String size =calcSelectFileSize(multiselect_list);
+                            System.out.println("" + size);
+                            if(size!=null)
+                                Utility.multiFileDetailsDlg(mcontext,size,multiselect_list.size());
+                        }
+
+
                     return  true;
 
                 default:
@@ -427,6 +440,7 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
                 }
 
         }
+
         return count;
     }
     private void sendBroadcast(File outputFile)
@@ -518,4 +532,18 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         Utility.OpenFileWithNoughtAndAll(vdoModel.getImgBitmapStr(),mcontext,getResources().getString(R.string.file_provider_authority));
 
     }
+    public  String calcSelectFileSize(ArrayList<Grid_Model> fileList)
+    {
+        long totalSize=0;
+
+        for(int i=0;i<fileList.size();i++)
+        {
+            Grid_Model m =  fileList.get(i);
+            File  f= new File(m.getImgPath());
+            totalSize+=f.length();
+        }
+
+        return  Utility.humanReadableByteCount(totalSize,true);
+    }
+
 }

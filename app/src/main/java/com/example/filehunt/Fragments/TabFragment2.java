@@ -31,6 +31,7 @@ public class TabFragment2 extends Fragment  implements  Adapter_Storage.ItemList
 
     private   File path = new File(Environment.getExternalStorageDirectory() + "");
     private   File initial_path = new File(Environment.getExternalStorageDirectory() + "");
+    private   File previous_path = new File(Environment.getExternalStorageDirectory() + "");
     static ArrayList<String> str = new ArrayList<String>();
     static ArrayList<File> pathList=new ArrayList<>();
     private static final String TAG = "F_PATH";
@@ -59,11 +60,8 @@ public class TabFragment2 extends Fragment  implements  Adapter_Storage.ItemList
         recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
         recyclerView.addItemDecoration(new DividerItemDecoration(mcontext, DividerItemDecoration.VERTICAL));
         fileList1=new ArrayList<>();
-//        setCurrentDispPath();
-//        pathList.add(path);
+
         loadFileList();
-
-
         multiSelectAdapter=new Adapter_Storage(mcontext,fileList1,this);
         recyclerView.setAdapter(multiSelectAdapter);
     }
@@ -76,7 +74,19 @@ public class TabFragment2 extends Fragment  implements  Adapter_Storage.ItemList
            System.out.println("VISIBLE");
            setCurrentDispPath();
            pathList.clear();
-           pathList.add(path);
+
+           //loads the data only fisrt time when fragment is visible to user if this is not done then at the time of installation first time the
+           // storage details will not be visible so  call is once when fragment is visible to user
+
+           if(fileList1.size()==0) {
+               loadFileList();
+               multiSelectAdapter = new Adapter_Storage(mcontext, fileList1, this);
+               recyclerView.setAdapter(multiSelectAdapter);
+           }
+
+           //loads the data only fisrt time when fragment is visible to user if this is not done then at the time of installation first time the
+           // storage details will not be visible so  call is once when fragment is visible to user
+
        }
        else {
            pathList.clear();
@@ -101,7 +111,7 @@ public class TabFragment2 extends Fragment  implements  Adapter_Storage.ItemList
 
         int listSize=pathList.size();
 
-      if (pathList.size() ==1 )
+      if (pathList.size() ==0 )  // 1 to 0
         {
             path=initial_path;
            // pathList.clear();
@@ -115,8 +125,8 @@ public class TabFragment2 extends Fragment  implements  Adapter_Storage.ItemList
         else
         {
 
-                path=pathList.get(pathList.size()-2);
-                pathList.remove(pathList.size()-2);
+                path=pathList.get(pathList.size()-1);
+                pathList.remove(pathList.size()-1);
                 loadFileList();
                 multiSelectAdapter.notifyDataSetChanged();
         }
@@ -207,6 +217,7 @@ public class TabFragment2 extends Fragment  implements  Adapter_Storage.ItemList
 
         if (Item_model.getisDirecoty())
         {
+            previous_path=path;
             String chosenFile = Item_model.getFile();
             File sel = new File(path + "/" + chosenFile);
             //firstLvl = false;
@@ -215,8 +226,9 @@ public class TabFragment2 extends Fragment  implements  Adapter_Storage.ItemList
              fileList = null;
              fileList1.clear();
              path = new File(sel + "");
+            if(!previous_path.equals(path))
+             pathList.add(previous_path);
 
-             pathList.add(path);
             loadFileList();
             setCurrentDispPath();
 

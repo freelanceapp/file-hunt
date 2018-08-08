@@ -13,21 +13,25 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.filehunt.Adapter.MultiSelectAdapter_Apk;
 import com.example.filehunt.Adapter.MultiSelectAdapter_Docs;
+import com.example.filehunt.Class.Constants;
 import com.example.filehunt.Model.Model_Anim;
 import com.example.filehunt.Model.Model_Apk;
 import com.example.filehunt.Model.Model_Docs;
@@ -67,9 +71,11 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
         setContentView(R.layout.photos_activity_re);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mcontext=ApkActivityRe.this;
+        Constants.DELETED_APK_FILES=0;
 
         Utility.setActivityTitle(mcontext,getResources().getString(R.string.apk));
-//           int_position = getIntent().getIntExtra("value", 0);
+        //           int_position = getIntent().getIntExtra("value", 0);
+
         new AsynctaskUtility<Model_Recent>(mcontext,this,APK).execute();
         alertDialogHelper =new AlertDialogHelper(this);
 
@@ -234,10 +240,12 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
             return true;
         }
 
+
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
             return false; // Return false if nothing is done
         }
+
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
@@ -252,8 +260,14 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
                     shareApkMultipleFilesWithNoughatAndAll();
                     return  true;
                 case R.id.action_details:
-                    if(multiselect_list.size()==1)//diplay details only for one selected file for now
+                    if(multiselect_list.size()==1)
                         DispDetailsDialog(multiselect_list.get(0));
+                    else {
+                        String size =calcSelectFileSize(multiselect_list);
+                        System.out.println("" + size);
+                        if(size!=null)
+                            Utility.multiFileDetailsDlg(mcontext,size,multiselect_list.size());
+                    }
                     return true;
                 default:
                     return false;
@@ -376,8 +390,34 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
 
             refreshAdapter();
 
+
+
         }
         }
+    private void unSelectAll()
+    {
+        if (mActionMode != null)
+        {
+            multiselect_list.clear();
+
+//            for(int i=0;i<ApkList.size();i++)
+//            {
+//                if(!multiselect_list.contains(multiselect_list.contains(ApkList.get(i))))
+//                {
+//                    multiselect_list.add(ApkList.get(i));
+//                }
+//            }
+
+            if (multiselect_list.size() >= 0)
+                mActionMode.setTitle("" + multiselect_list.size());
+            else
+                mActionMode.setTitle("");
+
+            refreshAdapter();
+
+        }
+    }
+
     private int deleteFile(ArrayList<Model_Apk> delete_list)
     {
         int count=0;
@@ -392,6 +432,7 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
                 }
 
         }
+        Constants.DELETED_APK_FILES=count;
         return count;
     }
     private void sendBroadcast(File outputFile)
@@ -519,6 +560,21 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
         // Utility.OpenFile(mcontext,model_apk.getFilePath()); // open file below  Android N
         Utility.OpenFileWithNoughtAndAll(model_apk.getFilePath(),mcontext,getResources().getString(R.string.file_provider_authority));
     }
+    public  String calcSelectFileSize(ArrayList<Model_Apk> fileList)
+    {
+        long totalSize=0;
+
+        for(int i=0;i<fileList.size();i++)
+        {
+            Model_Apk m =  fileList.get(i);
+            File  f= new File(m.getFilePath());
+            totalSize+=f.length();
+        }
+
+        return  Utility.humanReadableByteCount(totalSize,true);
+    }
+
+
 
 
 }

@@ -2,6 +2,7 @@
     <string name="app_name">FileHunt</string>
 
     <string name="internalstorage">Internal Storage</string>
+    <string name="externalstorage">External Storage</string>
     <string name="avlbl">Available</string>
 
         <!--taken from filemangaer app-->

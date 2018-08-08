@@ -2,11 +2,13 @@ package com.example.filehunt.Utils;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -14,13 +16,25 @@ import android.os.StatFs;
 import android.support.media.ExifInterface;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatTextView;
+import android.support.v7.widget.Toolbar;
+import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.format.DateFormat;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.TypefaceSpan;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
+import android.widget.TextView;
 
 import com.example.filehunt.AnimationActivityRe;
+import com.example.filehunt.MainActivity;
+import com.example.filehunt.Model.Grid_Model;
+import com.example.filehunt.PhotosActivityRe;
 import com.example.filehunt.R;
 
 import java.io.BufferedReader;
@@ -117,6 +131,43 @@ public class Utility extends  Activity
 
         return availableBlocks * blockSize;
     }
+    public static   long getTotalExternalMemorySize() {
+        File path = Environment.getExternalStorageDirectory();
+        StatFs stat = new StatFs(path.getPath());
+        long blockSize = 0;
+        long availableBlocks=0;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            blockSize = stat.getBlockSizeLong();
+            availableBlocks = stat.getBlockCountLong();
+        }
+        else
+        {
+            blockSize = stat.getBlockSize();
+            availableBlocks = stat.getBlockCount();
+        }
+        return availableBlocks * blockSize;
+    }
+
+    public   static  long getAvailableExternalMemorySize()
+    {
+        File path = Environment.getExternalStorageDirectory();
+        StatFs stat = new StatFs(path.getPath());
+        long blockSize = 0;
+        long availableBlocks=0;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            blockSize = stat.getBlockSizeLong();
+            availableBlocks = stat.getAvailableBlocksLong();
+        }
+        else
+        {
+            blockSize = stat.getBlockSize();
+            availableBlocks = stat.getAvailableBlocks();
+        }
+
+        return availableBlocks * blockSize;
+    }
+
+
 
     public static String formatSize(long size) {
         String suffix = null;
@@ -146,10 +197,11 @@ public class Utility extends  Activity
         if (suffix != null) resultBuffer.append(suffix);
         return resultBuffer.toString();
     }
+    // https://stackoverflow.com/questions/3758606/how-to-convert-byte-size-into-human-readable-format-in-java
     public static String humanReadableByteCount(long bytes, boolean si) {
 
         // read this function
-       // https://stackoverflow.com/questions/3758606/how-to-convert-byte-size-into-human-readable-format-in-java
+
         int unit = si ? 1000 : 1024;
         if (bytes < unit) return bytes + " B";
         int exp = (int) (Math.log(bytes) / Math.log(unit));
@@ -402,6 +454,21 @@ public class Utility extends  Activity
 
 
     }
+    public static  String getOrintatin(int w,int h)
+    {
+        if(w>h)
+        {
+            return  "Landscape";
+        }
+        else if(h>w)
+        {
+            return  "Portrait";
+        }
+        else
+        {
+            return  "Portrait";
+        }
+    }
     public static int getOrintatin(File f)
     {
         try {
@@ -418,13 +485,74 @@ public class Utility extends  Activity
     }
     public static void setActivityTitle(Context ctx,String title)
     {
-        ((AppCompatActivity)ctx).getSupportActionBar().setTitle(title);
+        //((AppCompatActivity)ctx).getSupportActionBar().setTitle(title);
+        // ((AppCompatActivity)ctx).getSupportActionBar().setTitle(Html.fromHtml("<font color='#000000'>"+title+"</font>"));
+
+        SpannableString s = new SpannableString(title);
+        s.setSpan(new ForegroundColorSpan(ctx.getResources().getColor(R.color.black)), 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        s.setSpan(new TypefaceSpan( "adobe_caslonpro_Regular.ttf"), 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        // Update the action bar title with the TypefaceSpan instance
+        android.support.v7.app.ActionBar actionBar =((AppCompatActivity)ctx).getSupportActionBar();
+        actionBar.setTitle(s);
+
     }
   public static String putStrinBrckt(String str)
   {
 
       return "("+str+")";
   }
+
+
+  public static Typeface typeFace_adobe_caslonpro_Regular(Context ctx)
+    {
+        return Typeface.createFromAsset(ctx.getAssets(), "adobe_caslonpro_Regular.ttf");
+    }
+    public static Typeface typeface_caviar_dreams_Regular(Context ctx)
+    {
+        return Typeface.createFromAsset(ctx.getAssets(), "caviar_dreams_Regular.ttf");
+    }
+
+    public static  int dpToPx(int dp,Context ctx) {
+        DisplayMetrics displayMetrics = ctx.getResources().getDisplayMetrics();
+        int px= Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+        return px;
+    }
+    public int pxToDp(int px,Context ctx) {
+        DisplayMetrics displayMetrics = ctx.getResources().getDisplayMetrics();
+        return Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+    }
+   public static  int percentOfValue(int TotalValue,int percent)
+   {
+       return  TotalValue*percent/100;
+   }
+
+    public static void multiFileDetailsDlg(Context ctx ,String totalSize,int fileCount)
+    {
+
+        final Dialog dialog = new Dialog(ctx);
+        dialog.setContentView(R.layout.multifiledetais_dialog);
+        // Set dialog title
+
+        TextView FileNum=dialog.findViewById(R.id.FileNum);
+        TextView FileSize=dialog.findViewById(R.id.FileSizem);
+        TextView close=dialog.findViewById(R.id.close);
+        FileNum.setText(String.valueOf(fileCount));
+        FileSize.setText(totalSize);
+
+
+        close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+
+        dialog.show();
+    }
+
+
+
 
 
 

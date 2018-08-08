@@ -8,15 +8,23 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatTextView;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 
 import com.example.filehunt.Adapter.PagerAdapter;
+import com.example.filehunt.Adapter.pagerAdapter2;
+import com.example.filehunt.Fragments.TabFragment1;
 import com.example.filehunt.Fragments.TabFragment2;
+import com.example.filehunt.Utils.Utility;
 
 import java.util.ArrayList;
 
@@ -27,7 +35,10 @@ public class MainActivity extends AppCompatActivity {
 
     int check = 0;
     ViewPager viewPager;
-    PagerAdapter adapter;
+    //PagerAdapter adapter;
+    pagerAdapter2 adapter;
+    TabLayout tabLayout;
+    CardView cardLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,17 +46,25 @@ public class MainActivity extends AppCompatActivity {
         // Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         //setSupportActionBar(toolbar);
         centerTitle();
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
-        tabLayout.addTab(tabLayout.newTab().setText("CATEGORIES"));
-        tabLayout.addTab(tabLayout.newTab().setText("STORAGE"));
 
-        tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
+        tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+//        tabLayout.addTab(tabLayout.newTab().setText("CATEGORIES"));
+//        tabLayout.addTab(tabLayout.newTab().setText("STORAGE"));
+
+    //    tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
          viewPager = (ViewPager) findViewById(R.id.pager);
-         adapter = new PagerAdapter
-                (getSupportFragmentManager(), tabLayout.getTabCount());
-        viewPager.setAdapter(adapter);
+
+        cardLayout=(CardView)findViewById(R.id.cardLayout);
+        setupViewPager(viewPager);
+        tabLayout.setupWithViewPager(viewPager);
+        //tabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
+        setupTabLayout();
+      //  setSpace();
+        viewPager.setCurrentItem(0);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+
+
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -62,6 +81,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+
         viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
@@ -80,6 +101,70 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void setSpace() {
+        for(int i=0; i < tabLayout.getTabCount(); i++) {
+            View tab = ((ViewGroup) tabLayout.getChildAt(0)).getChildAt(i);
+            ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) tab.getLayoutParams();
+            p.setMargins(20, 0, 20, 0);
+            tab.requestLayout();
+        }
+    }
+
+    private void setupViewPager(ViewPager viewPager) {
+
+        adapter = new pagerAdapter2 (getSupportFragmentManager());
+        adapter.addFragment(new TabFragment1(), "Categories");
+        adapter.addFragment(new TabFragment2(), "Storage");
+        viewPager.setAdapter(adapter);
+    }
+
+    private void setupTabLayout() {
+
+        int ScreenWidth= (getScreenWidth()/2);
+        System.out.print(""+ScreenWidth);
+
+        TextView customTab1 = (TextView) LayoutInflater.from(MainActivity.this)
+                .inflate(R.layout.custom_tab_layout, null);
+
+
+
+        TextView customTab2 = (TextView) LayoutInflater.from(MainActivity.this)
+                .inflate(R.layout.custom_tab_layout, null);
+
+
+//        LinearLayout.LayoutParams params1=    new LinearLayout.LayoutParams(ScreenWidth, LinearLayout.LayoutParams.WRAP_CONTENT, 0);
+//
+//        params1.rightMargin=-40;
+//        LinearLayout.LayoutParams params2=    new LinearLayout.LayoutParams(ScreenWidth, LinearLayout.LayoutParams.WRAP_CONTENT, 0);
+//        params1.leftMargin=-40;
+
+       // customTab1.setLayoutParams(params1);
+     //   customTab2.setLayoutParams(params2);
+
+
+          customTab1.setLayoutParams(new LinearLayout.LayoutParams(ScreenWidth, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+         customTab2.setLayoutParams(new LinearLayout.LayoutParams(ScreenWidth, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+
+
+        customTab1.setText("Categories");
+        tabLayout.getTabAt(0).setCustomView(customTab1);
+        customTab2.setText("Storage");
+        tabLayout.getTabAt(1).setCustomView(customTab2);
+        customTab1.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(MainActivity.this));
+        customTab2.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(MainActivity.this));
+
+    }
+    private  int getScreenWidth() {
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        // int height = displayMetrics.heightPixels;
+        int width = displayMetrics.widthPixels;
+        System.out.println(width);
+        return  width;
+    }
+
 
     @Override
     public void onBackPressed() {
@@ -126,6 +211,7 @@ public class MainActivity extends AppCompatActivity {
                 appCompatTextView.setLayoutParams(params);
                 appCompatTextView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                 appCompatTextView.setTextColor(getResources().getColor(R.color.black));
+                appCompatTextView.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(MainActivity.this));
             }
         }
     }

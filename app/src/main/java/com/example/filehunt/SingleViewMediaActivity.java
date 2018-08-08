@@ -64,8 +64,12 @@ public class SingleViewMediaActivity extends AppCompatActivity {
         shareUri=Uri.fromFile(f);
 
            if(null!=imgPath) {
+               File f1 = new File(imgPath);
+               Utility.setActivityTitle(mcontext,f1.getName());
                singleImage.setImage(ImageSource.uri(imgPath));
+               singleImage.setRotation(Utility.getOrintatin(f));
            }
+
 
 
     }
@@ -132,7 +136,7 @@ public class SingleViewMediaActivity extends AppCompatActivity {
         FileSize.setText(Utility.formatSize(f.length()));
         FileDate.setText(Utility.LongToDate((f.lastModified())));
         Resolution.setText(w+"*"+h);
-        Oreintation.setText(String.valueOf(Utility.getOrintatin(f))+"");
+        Oreintation.setText(Utility.getOrintatin(w,h));
 
         dialog.show();
 

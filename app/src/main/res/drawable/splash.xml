@@ -3,7 +3,7 @@
     android:layout_width="100dp"
     android:layout_height="100dp">
     <item
-        android:drawable="@drawable/splashbackground"/>
+        android:drawable="@drawable/bckimg"/>
     <item >
         <bitmap
             android:gravity="center"

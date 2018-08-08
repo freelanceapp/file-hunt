@@ -12,8 +12,13 @@
         app:showAsAction="always"
         app:actionViewClass="android.support.v7.widget.SearchView" />
 
+
+
+<!--
+    commented as  without action mode  the  three dots menu(overflow menus is not needed)
     <item  android:id="@+id/item1"
         android:title="Copy"/>
+
     <item  android:id="@+id/item2"
         android:title="Cut"/>
 
@@ -28,5 +33,6 @@
 
     <item  android:id="@+id/item6"
         android:title="Details"/>
+        -->
 
 </menu>

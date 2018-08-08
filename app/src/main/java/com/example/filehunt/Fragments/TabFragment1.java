@@ -39,6 +39,7 @@ import com.example.filehunt.R;
 import com.example.filehunt.RecentActivityRe;
 import com.example.filehunt.Utils.EqualSpacingItemDecoration;
 import com.example.filehunt.Utils.Utility;
+import com.example.filehunt.Utils.UtilityStorage;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -54,8 +55,10 @@ public class TabFragment1 extends Fragment {
 
     private Context ctx;
     private RecyclerView category_recycler_view;
-    ProgressBar progressBar;
-    TextView avlbMemory,    totalMemmory;
+    ProgressBar progressBar,progressBar_Ext;
+    TextView avlbMemory,    totalMemmory,internalTxt,avlbTxt;
+    TextView avlbMemory_Ext,    totalMemmory_Ext,internalTxt_Ext,avlbTxt_Ext;
+    RelativeLayout ext_layout;
     private List<category_Model>cat_List=new ArrayList<category_Model>();
     private categoryAdapter adapter;
     private int j;
@@ -104,11 +107,22 @@ public class TabFragment1 extends Fragment {
         super.onViewCreated(view, savedInstanceState);
            ctx=getActivity();
         cat_List.clear();
+
+        ext_layout=(RelativeLayout)view.findViewById(R.id.ext_layout);
         category_recycler_view= (RecyclerView) view.findViewById(R.id.category_recycler_view);
         progressBar=(ProgressBar)view.findViewById(R.id.progressBar);
         avlbMemory=(TextView)view.findViewById(R.id.avlbMemory);
         totalMemmory=(TextView)view.findViewById(R.id.totalMemmory);
+        internalTxt=(TextView)view.findViewById(R.id.internalTxt);
+        avlbTxt=(TextView)view.findViewById(R.id.avlbTxt);
 
+        progressBar_Ext=(ProgressBar)view.findViewById(R.id.progressBar_ext);
+        avlbMemory_Ext=(TextView)view.findViewById(R.id.avlbMemory_ext);
+        totalMemmory_Ext=(TextView)view.findViewById(R.id.totalMemmory_ext);
+        internalTxt_Ext=(TextView)view.findViewById(R.id.externalTxt);
+        avlbTxt_Ext=(TextView)view.findViewById(R.id.avlbTxt_ext);
+
+        setTypeFace();
 
 
         if ((ContextCompat.checkSelfPermission(getActivity(),
@@ -147,6 +161,24 @@ public class TabFragment1 extends Fragment {
 
 
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        //Toast.makeText(getActivity(), "on resume", Toast.LENGTH_SHORT).show();
+        //System.out.print("visibel to user on resume");
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+
+        if(isVisibleToUser)
+        {
+            //System.out.print("visibiel to user");
+        }
+    }
+
     private void getCategories()
     {
 
@@ -171,13 +203,23 @@ public class TabFragment1 extends Fragment {
         cat_List.add(cat_Apk);
 
         adapter= new categoryAdapter(cat_List);
-       //int col_spacing=getScreenWidth()/50;
+         int per_col_spacing=Utility.percentOfValue(getScreenHeight(),2);
+
         category_recycler_view.setLayoutManager(new GridLayoutManager(getActivity(), 2));
-        category_recycler_view.addItemDecoration(new EqualSpacingItemDecoration(20, EqualSpacingItemDecoration.GRID));
+        category_recycler_view.addItemDecoration(new EqualSpacingItemDecoration(per_col_spacing, EqualSpacingItemDecoration.GRID));
 
         category_recycler_view.setAdapter(adapter);
         adapter.notifyDataSetChanged();
         fillProgressBar();
+        //
+        if(UtilityStorage.isExternalStorageReadableAndWritable())
+        {
+            ext_layout.setVisibility(View.GONE);
+            fillProgressBar_Ext();
+
+        }
+        //
+
 
 
         new LoadApkTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -214,11 +256,16 @@ public class TabFragment1 extends Fragment {
         public void onBindViewHolder(categoryViewHolder holder, final int position)
         {
             holder.catName.setText(catList.get(position).getCatName());
+
             holder.catIcon.setImageResource(catList.get(position).getCat_icon());
             holder.itemCount.setText(Utility.putStrinBrckt(catList.get(position).getIteCount()));
+           holder.catName.setTextColor(getTextColor(position));
+
+            holder.catName.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(getActivity()));
+            holder.itemCount.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(getActivity()));
 
              ViewGroup.LayoutParams params =  holder.container_Layout.getLayoutParams();
-             params.width=getScreenWidth()*50/100;
+             params.width=(getScreenWidth()-Utility.dpToPx(24,ctx))*45/100;
              holder.container_Layout.setLayoutParams(params);
 
             holder.container_Layout.setOnClickListener(new View.OnClickListener() {
@@ -292,6 +339,24 @@ public class TabFragment1 extends Fragment {
         }
 
     }
+
+    private int getTextColor(int position) {
+
+        switch (position) {
+            case  0: return   getActivity().getResources().getColor(R.color.color_img);
+            case  1: return   getActivity().getResources().getColor(R.color.color_vdo);
+            case  2: return   getActivity().getResources().getColor(R.color.color_audio);
+            case  3: return   getActivity().getResources().getColor(R.color.color_docs);
+            case  4: return   getActivity().getResources().getColor(R.color.color_download);
+            case  5: return   getActivity().getResources().getColor(R.color.color_anim);
+            case  6: return   getActivity().getResources().getColor(R.color.color_recent);
+            case  7: return   getActivity().getResources().getColor(R.color.color_apk);
+            default: return   getActivity().getResources().getColor(R.color.black);
+
+        }
+
+    }
+
     private List<String>getDownLoad(File dir)
     {
         List<String>downLoadListLocal=new ArrayList<>();
@@ -377,6 +442,8 @@ public class TabFragment1 extends Fragment {
     }
     private void fillProgressBar()
     {
+
+
            progressBar.setProgress(0);
            progressBar.setMax(100);
            long TotalInternalMemory=   Utility.getTotalInternalMemorySize();
@@ -393,7 +460,46 @@ public class TabFragment1 extends Fragment {
            progressBar.setProgress(progress);
 
 
+
     }
+    private void fillProgressBar_Ext()
+    {
+
+
+
+
+        progressBar_Ext.setProgress(0);
+        progressBar_Ext.setMax(100);
+        long TotalInternalMemory_Ext=   Utility.getTotalExternalMemorySize();
+        long AvailableInternalMemory_Ext=Utility.getAvailableExternalMemorySize();
+
+
+        long per= AvailableInternalMemory_Ext / (TotalInternalMemory_Ext/100);
+        System.out.print("Memory Stats--> Total "+TotalInternalMemory_Ext+" Avaailable"+AvailableInternalMemory_Ext+""+per);
+        // avlbMemory.setText(Utility.formatSize(Utility.getAvailableInternalMemorySize()));
+        avlbMemory_Ext.setText(Utility.humanReadableByteCount(Utility.getAvailableExternalMemorySize(),true)+"("+per+"%)");
+        // totalMemmory.setText("Total "+Utility.formatSize(Utility.getTotalInternalMemorySize()));
+        totalMemmory_Ext.setText("Total "+Utility.humanReadableByteCount(Utility.getTotalExternalMemorySize(),true));
+        int progress=100 -(int) per;
+        progressBar_Ext.setProgress(progress);
+
+
+
+    }
+    private void setTypeFace()
+    {
+        avlbMemory.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(getActivity()));
+        totalMemmory.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(getActivity()));
+        internalTxt.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(getActivity()));
+        avlbTxt.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(getActivity()));
+
+        avlbMemory_Ext.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(getActivity()));
+        totalMemmory_Ext.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(getActivity()));
+        internalTxt_Ext.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(getActivity()));
+        avlbTxt_Ext.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(getActivity()));
+
+    }
+
 
 
     private int listRecentFiles()
@@ -408,14 +514,42 @@ public class TabFragment1 extends Fragment {
                         .getContentUri("external"), projection,
                 null,
                 null, null);
+
+
         if (cursor == null)
             return recentFiles.size();
         if (cursor.getCount() > 0 && cursor.moveToFirst()) {
+
+
+            String[] types = new String[]{"pdf","png","jpeg","jpg","mpeg","mp4","mp3","gif","swf","ani",  "doc", "docx", "rtf", "txt", "wpd", "wps","xls","xlsx","json","dot","dotx","docm","dotm",
+                    "xlt",
+                    "xla",
+                    "xltx",
+                    "xlsm",
+                    "xltm",
+                    "xlam",
+                    "xlsb",
+                    "ppt",
+                    "pot",
+                    "pps",
+                    "ppa",
+
+                    "pptx",
+                    "potx",
+                    "ppsx",
+                    "ppam",
+                    "pptm",
+                    "potm",
+                    "ppsm"
+            };     // if any file type needed add extension here and task is done
+
+
+
             do {
-                String path = cursor.getString(cursor.getColumnIndex
-                        (MediaStore.Files.FileColumns.DATA));
+                String path = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA));
+                String FileType=Utility.getFileExtensionfromPath(path);
                 File f = new File(path);
-                if (d.compareTo(new Date(f.lastModified())) != 1 && !f.isDirectory()) {
+                if (d.compareTo(new Date(f.lastModified())) != 1 && !f.isDirectory() && Arrays.asList(types).contains(FileType)) {
 
                     recentFiles.add(f.getAbsolutePath());
 
@@ -825,6 +959,15 @@ public class TabFragment1 extends Fragment {
         int width = displayMetrics.widthPixels;
         System.out.println(width);
         return  width;
+    }
+    private  int getScreenHeight() {
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+         int height = displayMetrics.heightPixels;
+        //int width = displayMetrics.widthPixels;
+        System.out.println(height);
+        return  height;
     }
 
 }
