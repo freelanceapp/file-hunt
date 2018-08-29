@@ -14,7 +14,7 @@
         >
 
         <ImageView android:id="@+id/vdoThumbNail"
-            android:src="@drawable/logo"
+            android:src="@drawable/vdo_placeholder"
             android:layout_margin="@dimen/dp3"
             android:scaleType="centerCrop"
             android:layout_width="80dp"
@@ -34,7 +34,7 @@
             android:layout_marginTop="-30dp"
             android:visibility="gone"
             android:checked="true"
-            android:buttonTint="@color/green_900"
+            android:buttonTint="@color/checkbox_tint"
             android:layout_height="wrap_content"
             />
 

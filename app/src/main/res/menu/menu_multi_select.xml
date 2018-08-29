@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item android:id="@+id/action_select"
-        android:title="Select All"
+        android:title="@string/menu_selectAll"
         app:showAsAction="always"/>
 
     <item android:id="@+id/action_delete"
@@ -13,17 +13,20 @@
         app:showAsAction="always"/>
 
     <item  android:id="@+id/item1"
+        android:visible="false"
         android:title="Copy"/>
     <item  android:id="@+id/item2"
+        android:visible="false"
         android:title="Cut"/>
 
     <item  android:id="@+id/item3"
-        android:title="Add to favourtes"/>
+        android:visible="false"
+        android:title="Add to favourites"/>
 
     <item  android:id="@+id/action_Share"
         android:title="Share"/>
 
-    <item  android:id="@+id/item5"
+    <item  android:id="@+id/action_rename"
         android:title="Rename"/>
 
     <item  android:id="@+id/action_details"

@@ -92,7 +92,7 @@ Files with the same name already exist. Do you want to overwrite them?
     <string name="sort_size">Sort by size</string>
     <string name="sort_type">Sort by type</string>
     <string name="sort_name">Sort by name</string>
-    <string name="rename_failed">Rename failed，the same name existed</string>
+
     <string name="unzip_file">Unzip the file</string>
     <string name="unzip_to_current_directory">Unzip to the current path</string>
     <string name="unzip_to_other_directory">Unzip to a different path</string>
@@ -184,5 +184,28 @@ Operation completed. Files will be uploaded in the background
     <string name="download">Downloads</string>
     <string name="recent_file">Recent files</string>
     <string name="loading_msg">Loading</string>
+
+
+    <string name="menu_selectAll">SELECT ALL</string>
+    <string name="menu_unselectAll">UNSELECT ALL</string>
+
+    <string name="cat_Images">Image</string>
+    <string name="cat_Videos">Video</string>
+    <string name="cat_Audio">Audio</string>
+    <string name="cat_Documents">Document</string>
+    <string name="cat_Download">Download</string>
+    <string name="cat_Animation">Animation</string>
+    <string name="cat_Recent">Recent</string>
+    <string name="cat_Apk">Apk</string>
+
+    <string name="save">SAVE</string>
+    <string name="cancel">CANCEL</string>
+   <string name="versiontxt">V 1.7</string>
+
+
+    <string name="rename_success">File renamed successfully</string>
+    <string name="rename_failed">Rename failed</string>
+
+    <string name="emty_error">can not be empty</string>
 
 </resources>

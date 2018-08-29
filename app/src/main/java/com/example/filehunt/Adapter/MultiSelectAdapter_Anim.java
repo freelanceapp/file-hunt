@@ -13,9 +13,12 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.filehunt.Model.Model_Anim;
 import com.example.filehunt.Model.Model_Docs;
 import com.example.filehunt.R;
+import com.example.filehunt.Utils.Utility;
 
 import java.util.ArrayList;
 
@@ -41,15 +44,22 @@ public class MultiSelectAdapter_Anim extends RecyclerView.Adapter<MultiSelectAda
              fileSize=(TextView)view.findViewById(R.id.FileSize);
              fileMdate=(TextView)view.findViewById(R.id.FileMdate);
              fileDuration=(TextView)view.findViewById(R.id.FileDuration);
-              chbx=(CheckBox) view.findViewById(R.id.chbx);
+             chbx=(CheckBox) view.findViewById(R.id.chbx);
              rellayout=(RelativeLayout)view.findViewById(R.id.rellayout);
              FileIcon=(ImageView)view.findViewById(R.id.FileIcon);
+
+              fileName.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
+              fileSize.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
+              fileMdate.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
+
 
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     // send selected docs in callback
+                    int pos=getAdapterPosition();
+                    if(pos!=RecyclerView.NO_POSITION)
                     listener.onAnimSelected(AnimListfiltered.get(getAdapterPosition()));
                 }
             });
@@ -84,19 +94,29 @@ public class MultiSelectAdapter_Anim extends RecyclerView.Adapter<MultiSelectAda
                  holder.fileMdate.setText(model.getFileMDate());
                  holder.fileSize.setText(model.getFileSize());
 
+                 if(model.getFilePath().endsWith("gif"))
+                 {
 
-                 iconDrawable=mContext.getResources().getDrawable(R.drawable.ic_gif);
-                holder.FileIcon.setImageDrawable(iconDrawable);
+                     Glide.with(mContext).load("file://" + model.getFilePath())
+                             .diskCacheStrategy(DiskCacheStrategy.ALL)
+                             .skipMemoryCache(false).placeholder(R.drawable.ic_gif).error(R.drawable.ic_gif)
+                             .into(holder.FileIcon);
+                     }
+                     else {
+
+                     iconDrawable = mContext.getResources().getDrawable(R.drawable.ic_gif);
+                     holder.FileIcon.setImageDrawable(iconDrawable);
+                 }
 
 
 
         if(selected_AnimList.contains(AnimList.get(position))) {
             holder.chbx.setVisibility(View.VISIBLE);  // for time being checkbox not shown   layout backgroud being changed
-            holder.rellayout.setBackgroundColor(mContext.getResources().getColor(R.color.gradation_04_light));
+           // holder.rellayout.setBackgroundColor(mContext.getResources().getColor(R.color.gradation_04_light));
         }
         else {
             holder.chbx.setVisibility(View.INVISIBLE); // for time being checkbox not shown   layout backgroud being changed
-            holder.rellayout.setBackgroundColor(mContext.getResources().getColor(R.color.white));
+          //  holder.rellayout.setBackgroundColor(mContext.getResources().getColor(R.color.white));
         }
 
 

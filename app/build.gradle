@@ -4,7 +4,7 @@ android {
     compileSdkVersion 27
     defaultConfig {
         applicationId "com.example.filehunt"
-        minSdkVersion 15
+        minSdkVersion 16
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
@@ -31,9 +31,11 @@ dependencies {
     implementation 'com.android.support:recyclerview-v7:27.1.1'
     implementation'com.android.support:cardview-v7:27.1.1'
     implementation    'com.github.bumptech.glide:glide:3.7.0'
-   //zoom image library
-  //https://android-arsenal.com/details/1/1509     library url
+     //zoom image library
+    //https://android-arsenal.com/details/1/1509     library url
     implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.10.0'
+
+
 
 
 }

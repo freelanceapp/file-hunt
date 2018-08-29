@@ -41,9 +41,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.filehunt.AnimationActivityRe;
+import com.example.filehunt.ApkActivityRe;
+import com.example.filehunt.AudioActivityRe;
+import com.example.filehunt.Class.Constants;
 import com.example.filehunt.Class.CustomTypefaceSpan;
 import com.example.filehunt.Class.Icons;
+import com.example.filehunt.DocsActivityRe;
+import com.example.filehunt.DownloadActivityRe;
+import com.example.filehunt.PhotosActivityRe;
 import com.example.filehunt.R;
+import com.example.filehunt.RecentActivityRe;
+import com.example.filehunt.VideoActivityRe;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -76,6 +85,7 @@ public class Utility extends  Activity
     private static final String EXTERNAL_STORAGE = System.getenv("EXTERNAL_STORAGE");
 
    static boolean  fileStatus=false;
+
     public static long getAvailMemory(Context context) {
 
         ActivityManager activityManager = (ActivityManager) context
@@ -813,9 +823,9 @@ public static boolean IsNotEmpty(EditText view)
         return false;
 }
 
-    public static boolean fileRenameDialog(final Context ctx , final String fPath)
+    public static boolean fileRenameDialog(final Context ctx , final String fPath, final int MediaType)
     {
-
+       //https://github.com/sang89vh/easyfilemanager/blob/master/AmazeFileManagerSang89vhAdmob/src/main/java/com/mybox/filemanager/services/httpservice/FileUtil.java
         File f =  new File(fPath);
         final Dialog dialog = new Dialog(ctx);
         dialog.setContentView(R.layout.filerenamedialog);
@@ -831,8 +841,15 @@ public static boolean IsNotEmpty(EditText view)
         Edit_Rename.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
         View_cancel.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
         View_save.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
-        if(f!=null)
+        if(f!=null) {
+            String extension=Utility.getFileExtensionfromPath(fPath.toLowerCase());
             Edit_Rename.setText(f.getName());
+            if(extension!=null)
+                // set cusror position ahead of file  extension ;
+              Edit_Rename.setSelection(f.getName().length()-(extension.length()+1));
+            else
+                Edit_Rename.setSelection(f.getName().length());
+        }
 
 
 
@@ -846,11 +863,17 @@ public static boolean IsNotEmpty(EditText view)
             @Override
             public void onClick(View v) {
                 if(Utility.IsNotEmpty(Edit_Rename)) {
-                       fileStatus= renameFile(ctx,fPath, Edit_Rename.getText().toString());
+                       fileStatus= renameFile(ctx,fPath, Edit_Rename.getText().toString(),MediaType);
                       dialog.dismiss();
+                    if(fileStatus) {
+                        Toast.makeText(ctx, ctx.getResources().getString(R.string.rename_success), Toast.LENGTH_SHORT).show();
+
+                        }
+                    else
+                        Toast.makeText(ctx, ctx.getResources().getString(R.string.rename_failed), Toast.LENGTH_SHORT).show();
 
                 }else {
-                      Edit_Rename.setError("can't be empty");
+                      Edit_Rename.setError(ctx.getResources().getString(R.string.emty_error));
                 }
 
             }
@@ -858,9 +881,12 @@ public static boolean IsNotEmpty(EditText view)
 
 
         dialog.show();
+
+
+
         return  fileStatus;
     }
-    private static  boolean renameFile(Context pctx,String path,String newName)
+    private static  boolean renameFile(Context pctx,String path,String newName,int MediaType)
     {
 
         File oldFile = new File(path);
@@ -877,8 +903,47 @@ public static boolean IsNotEmpty(EditText view)
         if (success)
         {
 
-             Utility.RunMediaScan(pctx,latestname);
-             Utility.RunMediaScan(pctx,oldFile);
+            switch (MediaType)
+            {
+
+                case 0: //images
+                    PhotosActivityRe imgs = PhotosActivityRe.getInstance();
+                    imgs.refreshAdapterAfterRename(pathstr + "/" + newName, newName);
+                    break;
+                case 1: //videos
+                    VideoActivityRe vdo = VideoActivityRe.getInstance();
+                    vdo.refreshAdapterAfterRename(pathstr + "/" + newName, newName);
+                    break;
+                case 2:  //audio
+                    AudioActivityRe audio = AudioActivityRe.getInstance();
+                    audio.refreshAdapterAfterRename(pathstr + "/" + newName, newName);
+                    break;
+                case 3:   // document
+                    DocsActivityRe docs = DocsActivityRe.getInstance();
+                    docs.refreshAdapterAfterRename(pathstr + "/" + newName, newName);
+                    break;
+                case 4:  // download
+                    DownloadActivityRe download = DownloadActivityRe.getInstance();
+                    download.refreshAdapterAfterRename(pathstr + "/" + newName, newName);
+                    break;
+                case 5:  //animation
+                    AnimationActivityRe anim = AnimationActivityRe.getInstance();
+                    anim.refreshAdapterAfterRename(pathstr + "/" + newName, newName);
+                    break;
+                case 6: //recent
+                    RecentActivityRe recent = RecentActivityRe.getInstance();
+                    recent.refreshAdapterAfterRename(pathstr + "/" + newName, newName);
+                    break;
+
+                case 7: //apk
+                    ApkActivityRe apk = ApkActivityRe.getInstance();
+                    apk.refreshAdapterAfterRename(pathstr + "/" + newName, newName);
+                    break;
+                    }
+
+                   //
+                   Utility.RunMediaScan(pctx,latestname);
+                   Utility.RunMediaScan(pctx,oldFile);
 
         }
 

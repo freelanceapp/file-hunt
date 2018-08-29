@@ -5,11 +5,14 @@ import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
+import android.provider.SyncStateContract;
 import android.speech.tts.UtteranceProgressListener;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
@@ -23,11 +26,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.filehunt.Adapter.MultiSelectAdapter_Audio;
 import com.example.filehunt.Adapter.MultiSelectAdapter_Video;
+import com.example.filehunt.Class.Constants;
 import com.example.filehunt.Model.Grid_Model;
 import com.example.filehunt.Model.Model_Apk;
 import com.example.filehunt.Model.Model_Audio;
@@ -58,16 +64,22 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
     ArrayList<String> Intent_Audio_List;
     ArrayList<String> Intent_duration_List;
     private SearchView searchView;
+    ImageView blankIndicator;
 
     Context mcontext;
+    Model_Audio fileTorename;
+    int renamePosition;
+    static  AudioActivityRe instance;
+    private boolean isUnseleAllEnabled=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photos_activity_re);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        blankIndicator=(ImageView) findViewById(R.id.blankIndicator);
         mcontext=AudioActivityRe.this;
-        Utility.setActivityTitle(mcontext,getResources().getString(R.string.audio));
+        Utility.setActivityTitle(mcontext,getResources().getString(R.string.cat_Audio));
         int_position = getIntent().getIntExtra("value", 0);
 
         String tittle=Category_Explore_Activity.al_images.get(int_position).getStr_folder();
@@ -76,31 +88,36 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
          Intent_Audio_List = Category_Explore_Activity.al_images.get(int_position).getAl_imagepath();
          Intent_duration_List=Category_Explore_Activity.al_images.get(int_position).getAl_FileDuration();
          data_load();
-
+         instance=this;
         alertDialogHelper =new AlertDialogHelper(this);
-        multiSelectAdapter = new MultiSelectAdapter_Audio(this,audioList,multiselect_list,this);
 
 
+        if(audioList.size()!=0) {
+            multiSelectAdapter = new MultiSelectAdapter_Audio(this, audioList, multiselect_list, this);
+            //  AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));
 
-      //  AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));
-
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
-        recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
-                DividerItemDecoration.VERTICAL));
-
-       // recyclerView.setItemAnimator(new DefaultItemAnimator());
-
-
-        recyclerView.setAdapter(multiSelectAdapter);
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+            recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
+            recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
+                    DividerItemDecoration.VERTICAL));
+            // recyclerView.setItemAnimator(new DefaultItemAnimator());
+            recyclerView.setAdapter(multiSelectAdapter);
+        }
+        else
+        {
+            blankIndicator.setVisibility(View.VISIBLE);
+        }
 
 
 
         recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if (isMultiSelect)
+                if (isMultiSelect) {
+                    int pos = position;
+                     if(pos!=RecyclerView.NO_POSITION)
                     multi_select(position);
+                }
 
                 else {
 
@@ -126,6 +143,18 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
 
 
     }
+    public static AudioActivityRe getInstance() {
+        return instance;
+    }
+    public void refreshAdapterAfterRename(String newPath,String newName)
+    {
+        fileTorename.setAudioPath(newPath);
+        fileTorename.setAudiFileName(newName);
+        audioList.set(renamePosition,fileTorename);
+        refreshAdapter();
+
+    }
+
 
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -139,11 +168,13 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
                 .getSearchableInfo(getComponentName()));
         searchView.setMaxWidth(Integer.MAX_VALUE);
 
+        Utility.setCustomizeSeachBar(mcontext,searchView);
         // listening to search query text change
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 // filter recycler view when query submitted
+                if(multiSelectAdapter!=null)
                 multiSelectAdapter.getFilter().filter(query);
                 return false;
             }
@@ -151,6 +182,7 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
             @Override
             public boolean onQueryTextChange(String query) {
                 // filter recycler view when text is changed
+                if(multiSelectAdapter!=null)
                 multiSelectAdapter.getFilter().filter(query);
                 return false;
             }
@@ -234,8 +266,17 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
         if (mActionMode != null) {
             if (multiselect_list.contains(audioList.get(position)))
                 multiselect_list.remove(audioList.get(position));
-            else
+            else {
                 multiselect_list.add(audioList.get(position));
+
+                // to  rename file contain old file;
+                if(multiselect_list.size()==1) {
+                     fileTorename = audioList.get(position);
+                     renamePosition=position;
+                }
+                // to  rename file contain old file;
+
+            }
 
             if (multiselect_list.size() > 0)
                 mActionMode.setTitle("" + multiselect_list.size());
@@ -253,6 +294,15 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
         multiSelectAdapter.selected_AudioList=multiselect_list;
         multiSelectAdapter.AudioList=audioList;
         multiSelectAdapter.notifyDataSetChanged();
+        selectMenuChnage();
+
+       //finish action mode when user deselect files one by one ;
+        if(multiselect_list.size()==0) {
+            if (mActionMode != null) {
+                mActionMode.finish();
+            }
+        }
+
     }
 
     private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
@@ -274,11 +324,22 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
+
+                case R.id.action_rename:
+                    if(multiselect_list.size()==1) {
+
+                        Utility.fileRenameDialog(mcontext,multiselect_list.get(0).getAudioPath(),Constants.AUDIO);
+
+                        }
+                    return true;
                 case R.id.action_delete:
                     alertDialogHelper.showAlertDialog("","Delete Audio","DELETE","CANCEL",1,false);
                     return true;
                 case R.id.action_select:
-                    selectAll();
+                    if(audioList.size()==multiselect_list.size() || isUnseleAllEnabled==true)
+                        unSelectAll();
+                    else
+                        selectAll();
                     return  true;
                 case  R.id.action_Share:
                     shareMultipleAudioWithNoughatAndAll();
@@ -306,7 +367,6 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
             refreshAdapter();
         }
     };
-
 
 
 
@@ -398,8 +458,76 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
 
             refreshAdapter();
 
+            //to change  the unselectAll  menu  to  selectAll
+            selectMenuChnage();
+            //to change  the unselectAll  menu  to  selectAll
+
         }
         }
+    private void unSelectAll()
+    {
+        if (mActionMode != null)
+        {
+            multiselect_list.clear();
+
+            if (multiselect_list.size() >= 0)
+                mActionMode.setTitle("" + multiselect_list.size());
+            else
+                mActionMode.setTitle("");
+
+            //to change  the unselectAll  menu  to  selectAll
+            selectMenuChnage();
+            //to change  the unselectAll  menu  to  selectAll
+
+            if (mActionMode != null) {
+                mActionMode.finish();
+            }
+
+
+            refreshAdapter();
+
+        }
+    }
+
+    private void selectMenuChnage()
+    {
+        if(context_menu!=null)
+        {
+            if(audioList.size()==multiselect_list.size()) {
+                for (int i = 0; i < context_menu.size(); i++) {
+                    MenuItem item = context_menu.getItem(i);
+                    if (item.getTitle().toString().equalsIgnoreCase(getResources().getString(R.string.menu_selectAll))) {
+                        item.setTitle(getResources().getString(R.string.menu_unselectAll));
+                        isUnseleAllEnabled=true;
+                    }
+                }
+            }
+            else {
+
+                for (int i = 0; i < context_menu.size(); i++) {
+                    MenuItem item = context_menu.getItem(i);
+                    if (item.getTitle().toString().equalsIgnoreCase(getResources().getString(R.string.menu_unselectAll))) {
+                        item.setTitle(getResources().getString(R.string.menu_selectAll));
+                        isUnseleAllEnabled=false;
+                    }
+                }
+
+            }
+
+            // rename  options will be visible if only i file is selected
+
+            MenuItem item= context_menu.findItem(R.id.action_rename);
+            if (multiselect_list.size()==1)
+                item.setVisible(true);
+            else
+                item.setVisible(false);
+
+            // rename  options will be visible if only i file is selected
+
+        }
+        invalidateOptionsMenu();
+    }
+
     private int deleteFile(ArrayList<Model_Audio> delete_list)
     {
         int count=0;
@@ -414,8 +542,10 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
                 }
 
         }
+        Constants.DELETED_AUDIO_FILES=count;
         return count;
     }
+
     private void sendBroadcast(File outputFile)
     {
         //  https://stackoverflow.com/questions/4430888/android-file-delete-leaves-empty-placeholder-in-gallery
@@ -510,8 +640,16 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
     @Override
     public void onAudioSelected(Model_Audio audioModel) {
 
-        // Utility.OpenFile(mcontext,model_apk.getFilePath()); // open file below  Android N
-           Utility.OpenFileWithNoughtAndAll(audioModel.getAudioPath(),mcontext,getResources().getString(R.string.file_provider_authority));
+           // Utility.OpenFile(mcontext,model_apk.getFilePath()); // open file below  Android N
+
+         if(mActionMode==null)   // only open file when action mode  is not enabled;
+        {
+            Utility.OpenFileWithNoughtAndAll(audioModel.getAudioPath(),mcontext,getResources().getString(R.string.file_provider_authority));
+        }
+
+
+
+
 
 
     }
@@ -528,4 +666,7 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
 
         return  Utility.humanReadableByteCount(totalSize,true);
     }
+
+
+
 }

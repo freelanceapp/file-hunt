@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.example.filehunt.Model.Model_Apk;
 import com.example.filehunt.R;
+import com.example.filehunt.Utils.Utility;
 
 import java.util.ArrayList;
 
@@ -39,16 +40,25 @@ public class MultiSelectAdapter_Apk extends RecyclerView.Adapter<MultiSelectAdap
              fileName=(TextView) view.findViewById(R.id.AudioFileName);
              fileSize=(TextView)view.findViewById(R.id.FileSize);
              fileMdate=(TextView)view.findViewById(R.id.FileMdate);
-             fileDuration=(TextView)view.findViewById(R.id.FileDuration);
+
               chbx=(CheckBox) view.findViewById(R.id.chbx);
              rellayout=(RelativeLayout)view.findViewById(R.id.rellayout);
              FileIcon=(ImageView)view.findViewById(R.id.FileIcon);
+
+             fileName.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
+             fileSize.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
+             fileMdate.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
+
+
+
 
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     // send selected apk in callback
+                    int pos=getAdapterPosition();
+                    if(pos!=RecyclerView.NO_POSITION)
                     listener.onApkSelected(ApkListfiltered.get(getAdapterPosition()));
                 }
             });
@@ -91,11 +101,11 @@ public class MultiSelectAdapter_Apk extends RecyclerView.Adapter<MultiSelectAdap
 
         if(selected_ApkList.contains(ApkList.get(position))) {
             holder.chbx.setVisibility(View.VISIBLE);  // for time being checkbox not shown   layout backgroud being changed
-            holder.rellayout.setBackgroundColor(mContext.getResources().getColor(R.color.gradation_04_light));
+           // holder.rellayout.setBackgroundColor(mContext.getResources().getColor(R.color.gradation_04_light));
         }
         else {
             holder.chbx.setVisibility(View.INVISIBLE); // for time being checkbox not shown   layout backgroud being changed
-            holder.rellayout.setBackgroundColor(mContext.getResources().getColor(R.color.white));
+           // holder.rellayout.setBackgroundColor(mContext.getResources().getColor(R.color.white));
         }
 
 

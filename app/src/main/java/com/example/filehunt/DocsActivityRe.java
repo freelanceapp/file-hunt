@@ -25,11 +25,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.filehunt.Adapter.MultiSelectAdapter_Docs;
 import com.example.filehunt.Adapter.MultiSelectAdapter_Video;
+import com.example.filehunt.Class.Constants;
 import com.example.filehunt.Model.Grid_Model;
 import com.example.filehunt.Model.Model_Audio;
 import com.example.filehunt.Model.Model_Docs;
@@ -61,18 +63,26 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
     int int_position;
     ArrayList<Model_Docs> Intent_Docs_List;
     private SearchView searchView;
+    ImageView blankIndicator;
     Context mcontext;
        int DOCUMENTS=4;
+    private boolean isUnseleAllEnabled=false;
+    private Model_Docs fileTorename;
+    private  int renamePosition;
+    public  static  DocsActivityRe instance;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photos_activity_re);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        blankIndicator=(ImageView) findViewById(R.id.blankIndicator);
         mcontext=DocsActivityRe.this;
-        Utility.setActivityTitle(mcontext,getResources().getString(R.string.document));
+        instance=this;
+        Utility.setActivityTitle(mcontext,getResources().getString(R.string.cat_Documents));
        
 //           int_position = getIntent().getIntExtra("value", 0);
-             new AsynctaskUtility<Model_Docs>(mcontext,this,DOCUMENTS).execute();
+             new AsynctaskUtility<Model_Docs>(mcontext,this,DOCUMENTS).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         
 
 
@@ -84,7 +94,7 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
         recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if (isMultiSelect)
+                if (isMultiSelect && position!=RecyclerView.NO_POSITION )
                     multi_select(position);
 
                 else {
@@ -114,6 +124,17 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
 
 
     }
+    public static DocsActivityRe getInstance() {
+        return instance;
+    }
+    public void refreshAdapterAfterRename(String newPath,String newName)
+    {
+        fileTorename.setFilePath(newPath);
+        fileTorename.setFileName(newName);
+        docsList.set(renamePosition,fileTorename);
+        refreshAdapter();
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -128,11 +149,14 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
                 .getSearchableInfo(getComponentName()));
         searchView.setMaxWidth(Integer.MAX_VALUE);
 
+        Utility.setCustomizeSeachBar(mcontext,searchView);
+
         // listening to search query text change
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 // filter recycler view when query submitted
+                if(multiSelectAdapter!=null)
                 multiSelectAdapter.getFilter().filter(query);
                 return false;
             }
@@ -140,6 +164,7 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
             @Override
             public boolean onQueryTextChange(String query) {
                 // filter recycler view when text is changed
+                if(multiSelectAdapter!=null)
                 multiSelectAdapter.getFilter().filter(query);
                 return false;
             }
@@ -184,8 +209,16 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
         if (mActionMode != null) {
             if (multiselect_list.contains(docsList.get(position)))
                 multiselect_list.remove(docsList.get(position));
-            else
+            else {
                 multiselect_list.add(docsList.get(position));
+                // to  rename file contain old file;
+
+                if(multiselect_list.size()==1) {
+                    fileTorename = docsList.get(position);
+                    renamePosition=position;
+                }
+                // to  rename file contain old file;
+            }
 
             if (multiselect_list.size() > 0)
                 mActionMode.setTitle("" + multiselect_list.size());
@@ -203,6 +236,13 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
         multiSelectAdapter.selected_DocsList=multiselect_list;
         multiSelectAdapter.DocsList=docsList;
         multiSelectAdapter.notifyDataSetChanged();
+        selectMenuChnage();
+        //finish action mode when user deselect files one by one ;
+        if(multiselect_list.size()==0) {
+            if (mActionMode != null) {
+                mActionMode.finish();
+            }
+        }
     }
     private void DispDetailsDialog( Model_Docs fileProperty )
     {
@@ -265,11 +305,19 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
+
+                case R.id.action_rename:
+                    if(multiselect_list.size()==1)
+                        Utility.fileRenameDialog(mcontext,multiselect_list.get(0).getFilePath(),Constants.DOCUMENT);
+                    return  true;
                 case R.id.action_delete:
-                    alertDialogHelper.showAlertDialog("","Delete Video","DELETE","CANCEL",1,false);
+                    alertDialogHelper.showAlertDialog("","Delete file","DELETE","CANCEL",1,false);
                     return true;
                 case R.id.action_select:
-                    selectAll();
+                    if(docsList.size()==multiselect_list.size() || isUnseleAllEnabled==true)
+                        unSelectAll();
+                    else
+                        selectAll();
                     return  true;
                 case  R.id.action_Share:
                     shareMultipleDocsWithNoughatAndAll();
@@ -353,17 +401,21 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
     public void processFinish(ArrayList output) {
 
                    docsList=output;
+            multiSelectAdapter = new MultiSelectAdapter_Docs(this, docsList, multiselect_list, this);
+          if(docsList.size()!=0)
+          {
+              // AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));  // did not work on high resolution phones
+              LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+              recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
+              recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
+                      DividerItemDecoration.VERTICAL));
+              recyclerView.setAdapter(multiSelectAdapter);
+          }else
+          {
+              blankIndicator.setVisibility(View.VISIBLE);
+          }
 
-        multiSelectAdapter = new MultiSelectAdapter_Docs(this,docsList,multiselect_list,this);
-        // AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));  // did not work on high resolution phones
 
-
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
-        recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
-                DividerItemDecoration.VERTICAL));
-
-        recyclerView.setAdapter(multiSelectAdapter);
     }
 
     private class DeleteFileTask extends AsyncTask<Void,Void,Integer>
@@ -409,8 +461,77 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
 
             refreshAdapter();
 
+            //to change  the unselectAll  menu  to  selectAll
+            selectMenuChnage();
+            //to change  the unselectAll  menu  to  selectAll
+
         }
         }
+    private void unSelectAll()
+    {
+        if (mActionMode != null)
+        {
+            multiselect_list.clear();
+
+            if (multiselect_list.size() >= 0)
+                mActionMode.setTitle("" + multiselect_list.size());
+            else
+                mActionMode.setTitle("");
+
+            //to change  the unselectAll  menu  to  selectAll
+            selectMenuChnage();
+            //to change  the unselectAll  menu  to  selectAll
+
+            if (mActionMode != null) {
+                mActionMode.finish();
+            }
+
+            refreshAdapter();
+
+
+
+
+        }
+    }
+
+    private void selectMenuChnage()
+    {
+        if(context_menu!=null)
+        {
+            if(docsList.size()==multiselect_list.size()) {
+                for (int i = 0; i < context_menu.size(); i++) {
+                    MenuItem item = context_menu.getItem(i);
+                    if (item.getTitle().toString().equalsIgnoreCase(getResources().getString(R.string.menu_selectAll))) {
+                        item.setTitle(getResources().getString(R.string.menu_unselectAll));
+                        isUnseleAllEnabled=true;
+                    }
+                }
+            }
+            else {
+
+                for (int i = 0; i < context_menu.size(); i++) {
+                    MenuItem item = context_menu.getItem(i);
+                    if (item.getTitle().toString().equalsIgnoreCase(getResources().getString(R.string.menu_unselectAll))) {
+                        item.setTitle(getResources().getString(R.string.menu_selectAll));
+                        isUnseleAllEnabled=false;
+                    }
+                }
+
+            }
+
+            // rename  options will be visible if only i file is selected
+
+            MenuItem item= context_menu.findItem(R.id.action_rename);
+            if (multiselect_list.size()==1)
+                item.setVisible(true);
+            else
+                item.setVisible(false);
+
+            // rename  options will be visible if only i file is selected
+        }
+        invalidateOptionsMenu();
+    }
+
     private int deleteFile(ArrayList<Model_Docs> delete_list)
     {
         int count=0;
@@ -425,6 +546,7 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
                 }
 
         }
+        Constants.DELETED_DOCUMENT_FILES=count;
         return count;
     }
     private void sendBroadcast(File outputFile)
@@ -598,6 +720,7 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
 
 
         // Utility.OpenFile(mcontext,model_apk.getFilePath()); // open file below  Android N
+        if(mActionMode==null)
         Utility.OpenFileWithNoughtAndAll(docs.getFilePath() ,mcontext,getResources().getString(R.string.file_provider_authority));
 
     }

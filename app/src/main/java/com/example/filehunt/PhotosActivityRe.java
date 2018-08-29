@@ -2,6 +2,7 @@ package com.example.filehunt;
 
 import android.app.Dialog;
 import android.app.SearchManager;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -10,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -22,12 +24,15 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.util.Util;
 import com.example.filehunt.Adapter.MultiSelectAdapter;
+import com.example.filehunt.Class.Constants;
 import com.example.filehunt.Model.Grid_Model;
 import com.example.filehunt.Utils.AlertDialogHelper;
 import com.example.filehunt.Utils.AutoFitGridLayoutManager;
@@ -36,9 +41,11 @@ import com.example.filehunt.Utils.RecyclerItemClickListener;
 import com.example.filehunt.Utils.Utility;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.filehunt.Class.Constants.DELETED_IMG_FILES;
 import static com.example.filehunt.Class.Constants.PATH;
 import static com.example.filehunt.Utils.Utility.pathToBitmap;
 
@@ -55,36 +62,49 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
 
     ArrayList<Grid_Model> img_ImgList = new ArrayList<>();
     ArrayList<Grid_Model> multiselect_list = new ArrayList<>();
-    private SearchView searchView;
+    SearchView searchView;
     AlertDialogHelper alertDialogHelper;
     int int_position;
     ArrayList<String> Intent_Images_List;
     Context mcontext;
+    ImageView blankIndicator;
+    private boolean isUnseleAllEnabled=false;
+    public static PhotosActivityRe instance;
+    private Grid_Model fileTorename;
+    private int renamePosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photos_activity_re);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        blankIndicator=(ImageView) findViewById(R.id.blankIndicator);
         mcontext=PhotosActivityRe.this;
+        instance=this;
 
         int_position = getIntent().getIntExtra("value", 0);
 
         Intent_Images_List = Category_Explore_Activity.al_images.get(int_position).getAl_imagepath();
         String tittle=Category_Explore_Activity.al_images.get(int_position).getStr_folder();
         Utility.setActivityTitle(mcontext,tittle);
+
         data_load();
 
+
+
         alertDialogHelper =new AlertDialogHelper(this);
-        multiSelectAdapter = new MultiSelectAdapter(this,img_ImgList,multiselect_list,this);
-        //  AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));   // did not work on high resolution phones
 
 
-        //set the width of column 20 %  of width of screen
-            int columnWidthPercent=(getScreenWidth()*20)/100;
-            AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this,columnWidthPercent);
+        if(Intent_Images_List.size()!=0) {
+            multiSelectAdapter = new MultiSelectAdapter(this, img_ImgList, multiselect_list, this);
+            //  AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));   // did not work on high resolution phones
+
+
+            //set the width of column 20 %  of width of screen
+            int columnWidthPercent = (getScreenWidth() * 20) / 100;
+            AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, columnWidthPercent);
             recyclerView.setLayoutManager(layoutManager);
-        //set the width of column 20 %  of width of screen
+            //set the width of column 20 %  of width of screen
 
 
 //        //set the number of columns as  per  width of screen
@@ -93,19 +113,21 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
 //        recyclerView.setLayoutManager(new GridLayoutManager(this, columnCount));
 //        //set the number of columns as  per  width of screen
 
+            recyclerView.setItemAnimator(new DefaultItemAnimator());
+            recyclerView.getItemAnimator().setChangeDuration(0);
+            recyclerView.setAdapter(multiSelectAdapter);
+        }else {
+            blankIndicator.setVisibility(View.VISIBLE);
+        }
 
 
-
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.getItemAnimator().setChangeDuration(0);
-        recyclerView.setAdapter(multiSelectAdapter);
 
 
 
         recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if (isMultiSelect)
+                if (isMultiSelect && position!=RecyclerView.NO_POSITION)
                     multi_select(position);
 
                 else {
@@ -134,6 +156,17 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
 
     }
 
+    public static PhotosActivityRe getInstance() {
+        return instance;
+    }
+    public void refreshAdapterAfterRename(String newPath,String newName)
+    {
+        fileTorename.setImgPath(newPath);
+        img_ImgList.set(renamePosition,fileTorename);
+        refreshAdapter();
+
+    }
+
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_common_activity, menu);
@@ -146,11 +179,27 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
                 .getSearchableInfo(getComponentName()));
         searchView.setMaxWidth(Integer.MAX_VALUE);
 
+        Utility.setCustomizeSeachBar(mcontext,searchView);
+
+//        ImageView searchIcon = searchView.findViewById(android.support.v7.appcompat.R.id.search_button);
+//        ImageView crossIcon = searchView.findViewById(android.support.v7.appcompat.R.id.search_close_btn);
+//
+//        searchIcon.setImageDrawable(ContextCompat.getDrawable(mcontext,R.mipmap.ic_search_black_24dp));
+//        crossIcon.setImageDrawable(ContextCompat.getDrawable(mcontext,android.R.drawable.ic_delete));
+//
+//        EditText searchEditText = (EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
+//        searchEditText.setTextColor(getResources().getColor(R.color.black));
+//        searchEditText.setHintTextColor(getResources().getColor(R.color.black));
+//        searchEditText.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mcontext));
+//        Utility.setCursorColor(searchEditText,getResources().getColor(R.color.black));
+
+
         // listening to search query text change
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 // filter recycler view when query submitted
+                if(multiSelectAdapter!=null)
                 multiSelectAdapter.getFilter().filter(query);
                 return false;
             }
@@ -158,6 +207,7 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
             @Override
             public boolean onQueryTextChange(String query) {
                 // filter recycler view when text is changed
+                if(multiSelectAdapter!=null)
                 multiSelectAdapter.getFilter().filter(query);
                 return false;
             }
@@ -198,8 +248,16 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         if (mActionMode != null) {
             if (multiselect_list.contains(img_ImgList.get(position)))
                 multiselect_list.remove(img_ImgList.get(position));
-            else
+            else {
                 multiselect_list.add(img_ImgList.get(position));
+
+                // to  rename file contain old file;
+                if(multiselect_list.size()==1) {
+                    fileTorename = img_ImgList.get(position);
+                     renamePosition=position;
+                }
+                // to  rename file contain old file;
+            }
 
             if (multiselect_list.size() > 0)
                 mActionMode.setTitle("" + multiselect_list.size());
@@ -217,6 +275,14 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         multiSelectAdapter.selected_ImgList=multiselect_list;
         multiSelectAdapter.ImgList=img_ImgList;
         multiSelectAdapter.notifyDataSetChanged();
+        selectMenuChnage();
+
+        //finish action mode when user deselect files one by one ;
+        if(multiselect_list.size()==0) {
+            if (mActionMode != null) {
+                mActionMode.finish();
+            }
+        }
     }
 
     private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
@@ -238,11 +304,20 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
+
+                case R.id.action_rename:
+                    if(multiselect_list.size()==1)
+                        Utility.fileRenameDialog(mcontext,multiselect_list.get(0).getImgPath(), Constants.IMAGES);
+
+                    return  true;
                 case R.id.action_delete:
                     alertDialogHelper.showAlertDialog("","Delete Image","DELETE","CANCEL",1,false);
                     return true;
                 case R.id.action_select:
-                    selectAll();
+                    if(img_ImgList.size()==multiselect_list.size() || isUnseleAllEnabled==true)
+                        unSelectAll();
+                    else
+                        selectAll();
                     return true;
                 case  R.id.action_Share:
                     shareMultipleImagesWithNoughatAndAll();
@@ -303,7 +378,7 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
 
         FileName.setText(fName);
         FilePath.setText(imgPath);
-        FileSize.setText(Utility.formatSize(f.length()));
+        FileSize.setText(Utility.humanReadableByteCount(f.length(),true));
         FileDate.setText(Utility.LongToDate((f.lastModified())));
         Resolution.setText(w+"*"+h);
         Oreintation.setText(Utility.getOrintatin(w,h));
@@ -402,9 +477,76 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
                 mActionMode.setTitle("");
 
             refreshAdapter();
+            //to change  the unselectAll  menu  to  selectAll
+            selectMenuChnage();
+            //to change  the unselectAll  menu  to  selectAll
 
         }
         }
+    private void unSelectAll()
+    {
+        if (mActionMode != null)
+        {
+            multiselect_list.clear();
+
+            if (multiselect_list.size() >= 0)
+                mActionMode.setTitle("" + multiselect_list.size());
+            else
+                mActionMode.setTitle("");
+
+            //to change  the unselectAll  menu  to  selectAll
+            selectMenuChnage();
+            //to change  the unselectAll  menu  to  selectAll
+
+
+            if (mActionMode != null) {
+                mActionMode.finish();
+            }
+
+            refreshAdapter();
+
+        }
+    }
+
+    private void selectMenuChnage()
+    {
+        if(context_menu!=null)
+        {
+            if(img_ImgList.size()==multiselect_list.size()) {
+                for (int i = 0; i < context_menu.size(); i++) {
+                    MenuItem item = context_menu.getItem(i);
+                    if (item.getTitle().toString().equalsIgnoreCase(getResources().getString(R.string.menu_selectAll))) {
+                        item.setTitle(getResources().getString(R.string.menu_unselectAll));
+                        isUnseleAllEnabled=true;
+                    }
+                }
+            }
+            else {
+
+                for (int i = 0; i < context_menu.size(); i++) {
+                    MenuItem item = context_menu.getItem(i);
+                    if (item.getTitle().toString().equalsIgnoreCase(getResources().getString(R.string.menu_unselectAll))) {
+                        item.setTitle(getResources().getString(R.string.menu_selectAll));
+                        isUnseleAllEnabled=false;
+                    }
+                }
+
+            }
+
+            // rename  options will be visible if only i file is selected
+
+            MenuItem item= context_menu.findItem(R.id.action_rename);
+            if (multiselect_list.size()==1)
+                item.setVisible(true);
+            else
+                item.setVisible(false);
+
+            // rename  options will be visible if only i file is selected
+
+        }
+        invalidateOptionsMenu();
+    }
+
     private int deleteFile( ArrayList<Grid_Model> delete_list)
     {
         int count=0;
@@ -428,7 +570,7 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
                // Glide.getPhotoCacheDir(mcontext).delete();
             }
         }).start();
-
+          DELETED_IMG_FILES=count;
         return count;
     }
     private void sendBroadcast(File outputFile)
@@ -483,35 +625,41 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
 
         if(multiselect_list.size()>0)
         {
-            Intent sharingIntent = new Intent();
-            sharingIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
-            sharingIntent.setType("*/*");
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
-            {
-                ArrayList<Uri> files = new ArrayList<Uri>();
+            try {
+                Intent sharingIntent = new Intent();
+                sharingIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
+                sharingIntent.setType("*/*");
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                    ArrayList<Uri> files = new ArrayList<Uri>();
 
-                for (int i = 0; i < multiselect_list.size(); i++) {
-                    File file = new File(multiselect_list.get(i).getImgPath());
-                    Uri uri = Uri.fromFile(file);
-                    files.add(uri);
+                    for (int i = 0; i < multiselect_list.size(); i++) {
+                        File file = new File(multiselect_list.get(i).getImgPath());
+                        Uri uri = Uri.fromFile(file);
+                        files.add(uri);
+                    }
+                    sharingIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
+                    startActivity(sharingIntent);
+                } else {
+                    ArrayList<Uri> files = new ArrayList<Uri>();
+
+                    for (int i = 0; i < multiselect_list.size(); i++) {
+                        File file = new File(multiselect_list.get(i).getImgPath());
+                        Uri uri = FileProvider.getUriForFile(mcontext, getResources().getString(R.string.file_provider_authority), file);
+                        files.add(uri);
+                    }
+                    sharingIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
+                    sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    startActivity(sharingIntent);
+
                 }
-                sharingIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
-                startActivity(sharingIntent);
+            }catch (ActivityNotFoundException e)
+            {
+                Toast.makeText(mcontext, "Application not found", Toast.LENGTH_SHORT).show();
             }
-            else
+            catch (Exception e)
             {
-                ArrayList<Uri> files = new ArrayList<Uri>();
-
-                for (int i = 0; i < multiselect_list.size(); i++)
-                {
-                    File file = new File(multiselect_list.get(i).getImgPath());
-                    Uri uri = FileProvider.getUriForFile(mcontext, getResources().getString(R.string.file_provider_authority), file);
-                    files.add(uri);
-                }
-                sharingIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
-                sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                startActivity(sharingIntent);
-
+                String str = e.getMessage();
+                System.out.println(""+str);
             }
 
         }
@@ -535,10 +683,13 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
     @Override
     public void onImageSelected(Grid_Model imgModel) {
 
-        Intent intent = new Intent(getApplicationContext(), SingleViewMediaActivity.class);
-       // intent.putExtra(PATH, Category_Explore_Activity.al_images.get(int_position).getAl_imagepath().get(position));
-        intent.putExtra(PATH, imgModel.getImgPath());
-        startActivity(intent);
+//        Intent intent = new Intent(getApplicationContext(), SingleViewMediaActivity.class);
+//       // intent.putExtra(PATH, Category_Explore_Activity.al_images.get(int_position).getAl_imagepath().get(position));
+//        intent.putExtra(PATH, imgModel.getImgPath());
+//        startActivity(intent);
+          if(mActionMode==null)
+        Utility.OpenFileWithNoughtAndAll(imgModel.getImgPath(),mcontext,getResources().getString(R.string.file_provider_authority));
+
     }
 
     public  String calcSelectFileSize(ArrayList<Grid_Model> fileList)

@@ -1,9 +1,14 @@
 package com.example.filehunt.Fragments;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -11,11 +16,13 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
@@ -34,9 +41,11 @@ import com.example.filehunt.ApkActivityRe;
 import com.example.filehunt.Category_Explore_Activity;
 import com.example.filehunt.DocsActivityRe;
 import com.example.filehunt.DownloadActivityRe;
+import com.example.filehunt.Model.Model_Recent;
 import com.example.filehunt.Model.category_Model;
 import com.example.filehunt.R;
 import com.example.filehunt.RecentActivityRe;
+import com.example.filehunt.Utils.AsynctaskUtility;
 import com.example.filehunt.Utils.EqualSpacingItemDecoration;
 import com.example.filehunt.Utils.Utility;
 import com.example.filehunt.Utils.UtilityStorage;
@@ -48,6 +57,15 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import static android.content.Context.MODE_PRIVATE;
+import static com.example.filehunt.Class.Constants.DELETED_ANIMATION_FILES;
+import static com.example.filehunt.Class.Constants.DELETED_APK_FILES;
+import static com.example.filehunt.Class.Constants.DELETED_AUDIO_FILES;
+import static com.example.filehunt.Class.Constants.DELETED_DOCUMENT_FILES;
+import static com.example.filehunt.Class.Constants.DELETED_DOWNLOAD_FILES;
+import static com.example.filehunt.Class.Constants.DELETED_IMG_FILES;
+import static com.example.filehunt.Class.Constants.DELETED_RECENT_FILES;
+import static com.example.filehunt.Class.Constants.DELETED_VDO_FILES;
 import static com.example.filehunt.Class.Constants.POSITION;
 
 public class TabFragment1 extends Fragment {
@@ -93,7 +111,12 @@ public class TabFragment1 extends Fragment {
     category_Model cat_Document;
     category_Model cat_Recent;
 
-    private static final int REQUEST_PERMISSIONS = 100;
+    String[] permissionsRequired = new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE};
+    private static final int PERMISSION_CALLBACK_CONSTANT = 100;
+    private static final int REQUEST_PERMISSION_SETTING = 101;
+    private SharedPreferences permissionStatus;
+    private boolean sentToSettings = false;
+
 
     @Nullable
     @Override
@@ -107,7 +130,7 @@ public class TabFragment1 extends Fragment {
         super.onViewCreated(view, savedInstanceState);
            ctx=getActivity();
         cat_List.clear();
-
+        permissionStatus = getActivity().getSharedPreferences("permissionStatus", MODE_PRIVATE);
         ext_layout=(RelativeLayout)view.findViewById(R.id.ext_layout);
         category_recycler_view= (RecyclerView) view.findViewById(R.id.category_recycler_view);
         progressBar=(ProgressBar)view.findViewById(R.id.progressBar);
@@ -125,27 +148,73 @@ public class TabFragment1 extends Fragment {
         setTypeFace();
 
 
-        if ((ContextCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)) {
-            if ((ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) && (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
-                    Manifest.permission.READ_EXTERNAL_STORAGE))) {
 
+        if (ActivityCompat.checkSelfPermission(getActivity(), permissionsRequired[0]) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(getActivity(), permissionsRequired[1]) != PackageManager.PERMISSION_GRANTED)
+        {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), permissionsRequired[0]) || ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), permissionsRequired[1]))
+            {
+                //Show Information about why you need the permission
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+                builder.setTitle("Need Permissions");
+                builder.setMessage(getActivity().getString(R.string.app_name)+" needs to access your storage.");
+
+                builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                      //  ActivityCompat.requestPermissions((Activity) ctx, permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
+                       requestPermissions(permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                builder.show();
+
+            } else if (permissionStatus.getBoolean(permissionsRequired[0], false)) {
+                //Previously Permission Request was cancelled with 'Dont Ask Again',
+                // Redirect to Settings after showing Information about why you need the permission
+                AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+                builder.setTitle("Need Permissions");
+                builder.setMessage(getActivity().getString(R.string.app_name)+" app need stoarge permission.");
+                builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                        sentToSettings = true;
+                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                        Uri uri = Uri.fromParts("package", getActivity().getPackageName(), null);
+                        intent.setData(uri);
+                        startActivityForResult(intent, REQUEST_PERMISSION_SETTING);
+                        Toast.makeText(getActivity(), "Go to Permissions to Grant storage access", Toast.LENGTH_LONG).show();
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                builder.show();
             } else {
-                // for  on fragmnet
-                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
-                        REQUEST_PERMISSIONS);
+                //just request the permission
+               requestPermissions(permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
 
-                        //  for acitivty
-//                ActivityCompat.requestPermissions(MainActivity.this,
-//                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
-//                        REQUEST_PERMISSIONS);
             }
-        }else {
-            Log.e("Else","Else");
+
+            SharedPreferences.Editor editor = permissionStatus.edit();
+            editor.putBoolean(permissionsRequired[0], false);
+            editor.commit();
+        }
+        else {
+            //You already have the permission, just go ahead.
             getCategories();
         }
+        //new  permission
 
 
 
@@ -165,8 +234,144 @@ public class TabFragment1 extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        //Toast.makeText(getActivity(), "on resume", Toast.LENGTH_SHORT).show();
-        //System.out.print("visibel to user on resume");
+
+
+        // detetct  which activity  was in stack  then  apply a swich case  for better  result;
+        if(DELETED_APK_FILES>0) {
+            if (cat_Apk != null) {
+                try {
+
+                    int newtcount = Integer.parseInt(cat_Apk.getIteCount()) - DELETED_APK_FILES;
+                    cat_Apk = new category_Model(getResources().getString(R.string.cat_Apk), String.valueOf(newtcount), R.mipmap.cat_ic_apk);
+                    cat_List.set(7, cat_Apk);
+                    adapter.notifyDataSetChanged();
+                    DELETED_APK_FILES = 0;
+                } catch (Exception e) {
+                    String msg = e.getMessage();
+                    System.out.print("" + msg);
+                }
+            }
+        }
+
+        if(DELETED_ANIMATION_FILES>0) {
+            if (cat_Animation != null) {
+                try {
+
+                    int newtcount = Integer.parseInt(cat_Animation.getIteCount()) - DELETED_ANIMATION_FILES;
+                    cat_Animation = new category_Model(getResources().getString(R.string.cat_Animation), String.valueOf(newtcount), R.mipmap.cat_ic_animation);
+                    cat_List.set(5, cat_Animation);
+                    adapter.notifyDataSetChanged();
+                    DELETED_ANIMATION_FILES = 0;
+                } catch (Exception e) {
+                    String msg = e.getMessage();
+                    System.out.print("" + msg);
+                }
+            }
+        }
+
+        if(DELETED_IMG_FILES>0) {
+            if (cat_Img != null) {
+                try {
+
+                    int newtcount = Integer.parseInt(cat_Img.getIteCount()) - DELETED_IMG_FILES;
+                    cat_Img = new category_Model(getResources().getString(R.string.cat_Images), String.valueOf(newtcount), R.mipmap.cat_ic_image);
+                    cat_List.set(0, cat_Img);
+                    adapter.notifyDataSetChanged();
+                    DELETED_IMG_FILES = 0;
+                } catch (Exception e) {
+                    String msg = e.getMessage();
+                    System.out.print("" + msg);
+                }
+            }
+        }
+
+        if(DELETED_VDO_FILES>0) {
+            if (cat_Video != null) {
+                try {
+
+                    int newtcount = Integer.parseInt(cat_Video.getIteCount()) - DELETED_VDO_FILES;
+                    cat_Video = new category_Model(getResources().getString(R.string.cat_Videos), String.valueOf(newtcount), R.mipmap.cat_ic_vdo);
+                    cat_List.set(1, cat_Video);
+                    adapter.notifyDataSetChanged();
+                    DELETED_VDO_FILES = 0;
+                } catch (Exception e) {
+                    String msg = e.getMessage();
+                    System.out.print("" + msg);
+                }
+            }
+        }
+
+        if(DELETED_AUDIO_FILES>0) {
+            if (cat_Audio != null) {
+                try {
+
+                    int newtcount = Integer.parseInt(cat_Audio.getIteCount()) - DELETED_AUDIO_FILES;
+                    cat_Audio = new category_Model(getResources().getString(R.string.cat_Audio), String.valueOf(newtcount), R.mipmap.cat_ic_music);
+                    cat_List.set(2, cat_Audio);
+                    adapter.notifyDataSetChanged();
+                    DELETED_AUDIO_FILES = 0;
+                } catch (Exception e) {
+                    String msg = e.getMessage();
+                    System.out.print("" + msg);
+                }
+            }
+        }
+
+        if(DELETED_DOCUMENT_FILES>0) {
+            if (cat_Document != null) {
+                try {
+
+                    int newtcount = Integer.parseInt(cat_Document.getIteCount()) - DELETED_DOCUMENT_FILES;
+                    cat_Document = new category_Model(getResources().getString(R.string.cat_Documents), String.valueOf(newtcount), R.mipmap.cat_ic_docs);
+                    cat_List.set(3, cat_Document);
+                    adapter.notifyDataSetChanged();
+                    DELETED_DOCUMENT_FILES = 0;
+                } catch (Exception e) {
+                    String msg = e.getMessage();
+                    System.out.print("" + msg);
+                }
+            }
+        }
+
+        if(DELETED_DOWNLOAD_FILES>0) {
+            if (cat_Download != null) {
+                try {
+
+                    int newtcount = Integer.parseInt(cat_Download.getIteCount()) - DELETED_DOWNLOAD_FILES;
+                    cat_Download = new category_Model(getResources().getString(R.string.cat_Download), String.valueOf(newtcount), R.mipmap.cat_ic_download);
+                    cat_List.set(4, cat_Download);
+                    adapter.notifyDataSetChanged();
+                    DELETED_DOWNLOAD_FILES = 0;
+                } catch (Exception e) {
+                    String msg = e.getMessage();
+                    System.out.print("" + msg);
+                }
+            }
+        }
+
+        if(DELETED_RECENT_FILES>0) {
+            if (cat_Recent != null) {
+                try {
+
+                    int newtcount = Integer.parseInt(cat_Recent.getIteCount()) - DELETED_RECENT_FILES;
+                    cat_Recent = new category_Model(getResources().getString(R.string.cat_Recent), String.valueOf(newtcount), R.mipmap.cat_ic_recent);
+                    cat_List.set(6, cat_Recent);
+                    adapter.notifyDataSetChanged();
+                    DELETED_RECENT_FILES = 0;
+                } catch (Exception e) {
+                    String msg = e.getMessage();
+                    System.out.print("" + msg);
+                }
+            }
+        }
+
+
+
+
+
+
+
+
     }
 
     @Override
@@ -175,7 +380,11 @@ public class TabFragment1 extends Fragment {
 
         if(isVisibleToUser)
         {
-            //System.out.print("visibiel to user");
+
+
+
+
+
         }
     }
 
@@ -184,14 +393,14 @@ public class TabFragment1 extends Fragment {
 
          cat_List.clear();
 
-         cat_Img=new category_Model("Images",pngList.size()+jpgList.size()+flashlList.size()+" items",R.mipmap.cat_ic_image);
-         cat_Apk=new category_Model("Apk",apkList.size()+" items",R.mipmap.cat_ic_apk);
-         cat_Animation=new category_Model("Animation",giflList.size()+" items",R.mipmap.cat_ic_animation);
-         cat_Audio=new category_Model("Audio",mp3List.size()+" items",R.mipmap.cat_ic_music);
-         cat_Video=new category_Model("Video",mp4List.size()+" items",R.mipmap.cat_ic_vdo);
-         cat_Download=new category_Model("Download",downLoadList.size()+" items",R.mipmap.cat_ic_download);
-         cat_Document=new category_Model("Document",pptlList.size()+wordList.size()+pdfList.size()+txtList.size()+" items",R.mipmap.cat_ic_docs);
-         cat_Recent=new category_Model("Recent",recentFiles.size()+" items",R.mipmap.cat_ic_recent);
+         cat_Img=new category_Model(getResources().getString(R.string.cat_Images),String.valueOf(pngList.size()+jpgList.size()+flashlList.size()),R.mipmap.cat_ic_image);
+         cat_Apk=new category_Model(getResources().getString(R.string.cat_Apk),String.valueOf(apkList.size()),R.mipmap.cat_ic_apk);
+         cat_Animation=new category_Model(getResources().getString(R.string.cat_Animation),String.valueOf(giflList.size()),R.mipmap.cat_ic_animation);
+         cat_Audio=new category_Model(getResources().getString(R.string.cat_Audio),String.valueOf(mp3List.size()),R.mipmap.cat_ic_music);
+         cat_Video=new category_Model(getResources().getString(R.string.cat_Videos),String.valueOf(mp4List.size()),R.mipmap.cat_ic_vdo);
+         cat_Download=new category_Model(getResources().getString(R.string.cat_Download),String.valueOf(downLoadList.size()),R.mipmap.cat_ic_download);
+         cat_Document=new category_Model(getResources().getString(R.string.cat_Documents),String.valueOf(pptlList.size()+wordList.size()+pdfList.size()+txtList.size()),R.mipmap.cat_ic_docs);
+         cat_Recent=new category_Model(getResources().getString(R.string.cat_Recent),String.valueOf(recentFiles.size()),R.mipmap.cat_ic_recent);
 
         cat_List.add(cat_Img);
         cat_List.add(cat_Video);
@@ -202,7 +411,7 @@ public class TabFragment1 extends Fragment {
         cat_List.add(cat_Recent);
         cat_List.add(cat_Apk);
 
-        adapter= new categoryAdapter(cat_List);
+         adapter= new categoryAdapter(cat_List);
          int per_col_spacing=Utility.percentOfValue(getScreenHeight(),2);
 
         category_recycler_view.setLayoutManager(new GridLayoutManager(getActivity(), 2));
@@ -212,12 +421,23 @@ public class TabFragment1 extends Fragment {
         adapter.notifyDataSetChanged();
         fillProgressBar();
         //
-        if(UtilityStorage.isExternalStorageReadableAndWritable())
-        {
-            ext_layout.setVisibility(View.GONE);
-            fillProgressBar_Ext();
 
-        }
+
+
+     try {
+         String sdCardPath = UtilityStorage.getExternalStoragePath(ctx, true);
+         // if sdcard is ejected the returned path will not exist;
+         if (sdCardPath != null && Utility.isPathExist(sdCardPath,getActivity())) {
+             ext_layout.setVisibility(View.VISIBLE);
+             fillProgressBar_Ext();
+
+         }
+     }catch (Exception e)
+     {
+
+     }
+
+
         //
 
 
@@ -233,7 +453,6 @@ public class TabFragment1 extends Fragment {
         new LoadIamgesTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         new LoadAudioTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         new LoadDocumentTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
 
 
 
@@ -258,7 +477,7 @@ public class TabFragment1 extends Fragment {
             holder.catName.setText(catList.get(position).getCatName());
 
             holder.catIcon.setImageResource(catList.get(position).getCat_icon());
-            holder.itemCount.setText(Utility.putStrinBrckt(catList.get(position).getIteCount()));
+            holder.itemCount.setText(Utility.putStrinBrckt(catList.get(position).getIteCount()+" items"));
            holder.catName.setTextColor(getTextColor(position));
 
             holder.catName.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(getActivity()));
@@ -450,10 +669,10 @@ public class TabFragment1 extends Fragment {
            long AvailableInternalMemory=Utility.getAvailableInternalMemorySize();
 
 
-           long per= AvailableInternalMemory / (TotalInternalMemory/100);
-           System.out.print("Memory Stats--> Total "+TotalInternalMemory+" Avaailable"+AvailableInternalMemory+""+per);
+           float per= (float)AvailableInternalMemory / (float) (TotalInternalMemory/100);
+           System.out.print("Memory Stats--> Total "+TotalInternalMemory+" Avaailable"+AvailableInternalMemory+""+Utility.setdecimalPoints(String.valueOf(per),2));
           // avlbMemory.setText(Utility.formatSize(Utility.getAvailableInternalMemorySize()));
-           avlbMemory.setText(Utility.humanReadableByteCount(Utility.getAvailableInternalMemorySize(),true)+"("+per+"%)");
+           avlbMemory.setText(Utility.humanReadableByteCount(Utility.getAvailableInternalMemorySize(),true)+"("+Utility.setdecimalPoints(String.valueOf(per),2)+"%)");
            // totalMemmory.setText("Total "+Utility.formatSize(Utility.getTotalInternalMemorySize()));
             totalMemmory.setText("Total "+Utility.humanReadableByteCount(Utility.getTotalInternalMemorySize(),true));
            int progress=100 -(int) per;
@@ -470,16 +689,16 @@ public class TabFragment1 extends Fragment {
 
         progressBar_Ext.setProgress(0);
         progressBar_Ext.setMax(100);
-        long TotalInternalMemory_Ext=   Utility.getTotalExternalMemorySize();
-        long AvailableInternalMemory_Ext=Utility.getAvailableExternalMemorySize();
+        long TotalMemory_Ext=   Utility.getTotalExternalMemorySize(UtilityStorage.getExternalStoragePath(ctx,true));
+        long AvailableMemory_Ext=Utility.getAvailableExternalMemorySize(UtilityStorage.getExternalStoragePath(ctx,true));
 
 
-        long per= AvailableInternalMemory_Ext / (TotalInternalMemory_Ext/100);
-        System.out.print("Memory Stats--> Total "+TotalInternalMemory_Ext+" Avaailable"+AvailableInternalMemory_Ext+""+per);
-        // avlbMemory.setText(Utility.formatSize(Utility.getAvailableInternalMemorySize()));
-        avlbMemory_Ext.setText(Utility.humanReadableByteCount(Utility.getAvailableExternalMemorySize(),true)+"("+per+"%)");
-        // totalMemmory.setText("Total "+Utility.formatSize(Utility.getTotalInternalMemorySize()));
-        totalMemmory_Ext.setText("Total "+Utility.humanReadableByteCount(Utility.getTotalExternalMemorySize(),true));
+        long per= AvailableMemory_Ext / (TotalMemory_Ext/100);
+        System.out.print("Memory Stats--> Total "+TotalMemory_Ext+" Avaailable"+AvailableMemory_Ext+""+per);
+
+        avlbMemory_Ext.setText(Utility.humanReadableByteCount(AvailableMemory_Ext,true)+"("+per+"%)");
+
+        totalMemmory_Ext.setText("Total "+Utility.humanReadableByteCount(TotalMemory_Ext,true));
         int progress=100 -(int) per;
         progressBar_Ext.setProgress(progress);
 
@@ -505,9 +724,9 @@ public class TabFragment1 extends Fragment {
     private int listRecentFiles()
     {
 
-        final String[] projection = {MediaStore.Files.FileColumns.DATA, MediaStore.Files.FileColumns.DATE_MODIFIED};
+        final String[] projection = {MediaStore.Files.FileColumns.DATA};
         Calendar c = Calendar.getInstance();
-        c.set(Calendar.DAY_OF_YEAR, c.get(Calendar.DAY_OF_YEAR) - 2);
+        c.set(Calendar.DAY_OF_YEAR, c.get(Calendar.DAY_OF_YEAR) - 7);
         Date d = c.getTime();
 
         Cursor cursor = ctx.getContentResolver().query(MediaStore.Files
@@ -520,30 +739,10 @@ public class TabFragment1 extends Fragment {
             return recentFiles.size();
         if (cursor.getCount() > 0 && cursor.moveToFirst()) {
 
-
-            String[] types = new String[]{"pdf","png","jpeg","jpg","mpeg","mp4","mp3","gif","swf","ani",  "doc", "docx", "rtf", "txt", "wpd", "wps","xls","xlsx","json","dot","dotx","docm","dotm",
-                    "xlt",
-                    "xla",
-                    "xltx",
-                    "xlsm",
-                    "xltm",
-                    "xlam",
-                    "xlsb",
-                    "ppt",
-                    "pot",
-                    "pps",
-                    "ppa",
-
-                    "pptx",
-                    "potx",
-                    "ppsx",
-                    "ppam",
-                    "pptm",
-                    "potm",
-                    "ppsm"
-            };     // if any file type needed add extension here and task is done
-
-
+            String[] types = new String[]{"pdf","png","jpeg","jpg","mp4","mp3","aac","amr","gif","doc", "docx", "txt", "wpd", "wps","xls","xlsx",
+                    "pptx"
+            };
+            // if any file type needed add extension here and task is done
 
             do {
                 String path = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA));
@@ -557,32 +756,86 @@ public class TabFragment1 extends Fragment {
             } while (cursor.moveToNext());
         }
         cursor.close();
+
+
         //Collections.sort(recentFiles, (lhs, rhs) -> -1 * Long.valueOf(lhs.date).compareTo(rhs.date));
 
-        if (recentFiles.size() > 20)
-            for (int i = recentFiles.size() - 1; i > 20; i--) {
-                recentFiles.remove(i);
-            }
+//        if (recentFiles.size() > 20)
+//            for (int i = recentFiles.size() - 1; i > 20; i--) {
+//                recentFiles.remove(i);
+//            }
+
+
         return recentFiles.size();
 
 
     }
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        switch (requestCode) {
-            case REQUEST_PERMISSIONS: {
-                for (int i = 0; i < grantResults.length; i++) {
-                    if (grantResults.length > 0 && grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                         getCategories();
-                    } else {
-                        Toast.makeText(getActivity(), "The app was not allowed to read or write to your storage. Hence, it cannot function properly. Please consider granting it this permission", Toast.LENGTH_LONG).show();
-                    }
+
+
+    //new
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_CALLBACK_CONSTANT) {
+            //check if all permissions are granted
+            boolean allgranted = false;
+            for (int i = 0; i < grantResults.length; i++) {
+                if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                    allgranted = true;
+                } else {
+                    allgranted = false;
+                    break;
                 }
+            }
+
+            if (allgranted)
+            {
+              getCategories();
+
+            }
+            else if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), permissionsRequired[0]) || ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), permissionsRequired[1])) {
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+                builder.setTitle("Need Permissions");
+                builder.setMessage(getActivity().getString(R.string.app_name)+" app needs storage permission.");
+                builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                       requestPermissions(permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                builder.show();
+            } else
+            {
+                Toast.makeText(getActivity(), "Unable to get Permission", Toast.LENGTH_LONG).show();
+            }
+        }
+
+
+    }
+    //new
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_PERMISSION_SETTING) {
+            if (ActivityCompat.checkSelfPermission(getActivity(), permissionsRequired[0]) == PackageManager.PERMISSION_GRANTED) {
+                //Got Permission
+               getCategories();
             }
         }
     }
+
     private class LoadIamgesTask extends AsyncTask<Void,Void,Integer>
     {
 
@@ -596,7 +849,7 @@ public class TabFragment1 extends Fragment {
         protected void onPostExecute(Integer count) {
             super.onPostExecute(count);
 
-                  cat_Img=new category_Model("Images",count+" items",R.mipmap.cat_ic_image);
+                  cat_Img=new category_Model(getResources().getString(R.string.cat_Images),String.valueOf(count),R.mipmap.cat_ic_image);
                   cat_List.set(0,cat_Img);
                   adapter.notifyDataSetChanged();
 
@@ -639,7 +892,7 @@ public class TabFragment1 extends Fragment {
         protected void onPostExecute(Integer count) {
             super.onPostExecute(count);
 
-            cat_Video=new category_Model("Video",count+" items",R.mipmap.cat_ic_vdo);
+            cat_Video=new category_Model(getResources().getString(R.string.cat_Videos),String.valueOf(count),R.mipmap.cat_ic_vdo);
             cat_List.set(1,cat_Video);
             adapter.notifyDataSetChanged();
 
@@ -681,7 +934,7 @@ public class TabFragment1 extends Fragment {
         protected void onPostExecute(Integer count) {
             super.onPostExecute(count);
 
-            cat_Document=new category_Model("Document",count+" items",R.mipmap.cat_ic_docs);
+            cat_Document=new category_Model(getResources().getString(R.string.cat_Documents),String.valueOf(count),R.mipmap.cat_ic_docs);
             cat_List.set(3,cat_Document);
             adapter.notifyDataSetChanged();
 
@@ -697,29 +950,9 @@ public class TabFragment1 extends Fragment {
         final String[] projection = {MediaStore.Files.FileColumns.DATA};
         Cursor cursor = getContext().getContentResolver().query(MediaStore.Files.getContentUri("external"),
                 projection, null, null, null);
-        String[] types = new String[]{"pdf",  "doc", "docx", "rtf", "txt", "wpd", "wps","xls","xlsx","json","dot","dotx","docm","dotm",
-                "xlt",
-                "xla",
-
-                "xltx",
-                "xlsm",
-                "xltm",
-                "xlam",
-                "xlsb",
-
-                "ppt",
-                "pot",
-                "pps",
-                "ppa",
-
-                "pptx",
-                "potx",
-                "ppsx",
-                "ppam",
-                "pptm",
-                "potm",
-                "ppsm",
-                "mdb "   };     // if any file type needed add extension here and task is done
+        String[] types = new String[]{"pdf","doc", "docx", "txt", "wpd", "wps","xls","xlsx","ppt",
+                "pptx"
+        };     // if any file type needed add extension here and task is done
 
         if (cursor == null) {
             System.out.println("docs data count" + 0);
@@ -760,7 +993,7 @@ public class TabFragment1 extends Fragment {
         @Override
         protected void onPostExecute(Integer count) {
             super.onPostExecute(count);
-            cat_Audio = new category_Model("Audio", count + " items", R.mipmap.cat_ic_music);
+            cat_Audio = new category_Model(getResources().getString(R.string.cat_Audio), String.valueOf(count), R.mipmap.cat_ic_music);
             cat_List.set(2, cat_Audio);
             adapter.notifyDataSetChanged();
 
@@ -814,12 +1047,11 @@ public class TabFragment1 extends Fragment {
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
 
-                cat_Download = new category_Model("Download", downLoadList.size() + " items", R.mipmap.cat_ic_download);
+                cat_Download = new category_Model(getResources().getString(R.string.cat_Download), String.valueOf(downLoadList.size()), R.mipmap.cat_ic_download);
                 cat_List.set(4, cat_Download);
                 adapter.notifyDataSetChanged();
 
-
-            }
+                }
         }
 
     private class LoadAnimationTask extends AsyncTask<Void,Void,Integer> {
@@ -835,7 +1067,7 @@ public class TabFragment1 extends Fragment {
         @Override
         protected void onPostExecute(Integer count) {
             super.onPostExecute(count);
-            cat_Animation=new category_Model("Animation",count+" items",R.mipmap.cat_ic_animation);
+            cat_Animation=new category_Model(getResources().getString(R.string.cat_Animation),String.valueOf(count),R.mipmap.cat_ic_animation);
             cat_List.set(5, cat_Animation);
             adapter.notifyDataSetChanged();
 
@@ -877,7 +1109,7 @@ public class TabFragment1 extends Fragment {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
 
-            cat_Recent=new category_Model("Recent",recentFiles.size()+" items",R.mipmap.cat_ic_recent);
+            cat_Recent=new category_Model(getResources().getString(R.string.cat_Recent),String.valueOf(recentFiles.size()),R.mipmap.cat_ic_recent);
             cat_List.set(6, cat_Recent);
             adapter.notifyDataSetChanged();
 
@@ -898,7 +1130,7 @@ public class TabFragment1 extends Fragment {
         protected void onPostExecute(Integer count) {
             super.onPostExecute(count);
 
-            cat_Apk=new category_Model("Apk",count+" items",R.mipmap.cat_ic_apk);
+            cat_Apk=new category_Model(getResources().getString(R.string.cat_Apk),String.valueOf(count),R.mipmap.cat_ic_apk);
             cat_List.set(7, cat_Apk);
             adapter.notifyDataSetChanged();
 

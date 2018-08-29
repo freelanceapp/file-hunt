@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.example.filehunt.Model.Model_Docs;
 import com.example.filehunt.R;
+import com.example.filehunt.Utils.Utility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,11 +49,18 @@ public class MultiSelectAdapter_Docs extends RecyclerView.Adapter<MultiSelectAda
              rellayout=(RelativeLayout)view.findViewById(R.id.rellayout);
              FileIcon=(ImageView)view.findViewById(R.id.FileIcon);
 
+            fileName.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
+            fileSize.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
+            fileMdate.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
+            fileDuration.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
+
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     // send selected docs in callback
+                    int pos=getAdapterPosition();
+                    if(pos!=RecyclerView.NO_POSITION)
                     listener.onDocsSelected(DocsListfiltered.get(getAdapterPosition()));
                 }
             });
@@ -109,11 +117,11 @@ public class MultiSelectAdapter_Docs extends RecyclerView.Adapter<MultiSelectAda
 
         if(selected_DocsList.contains(DocsList.get(position))) {
             holder.chbx.setVisibility(View.VISIBLE);  // for time being checkbox not shown   layout backgroud being changed
-            holder.rellayout.setBackgroundColor(mContext.getResources().getColor(R.color.gradation_04_light));
+           // holder.rellayout.setBackgroundColor(mContext.getResources().getColor(R.color.gradation_04_light));
         }
         else {
             holder.chbx.setVisibility(View.INVISIBLE); // for time being checkbox not shown   layout backgroud being changed
-            holder.rellayout.setBackgroundColor(mContext.getResources().getColor(R.color.white));
+          //  holder.rellayout.setBackgroundColor(mContext.getResources().getColor(R.color.white));
         }
 
 

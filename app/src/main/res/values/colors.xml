@@ -4,6 +4,8 @@
     <color name="colorPrimaryDark">#808080</color>
     <color name="colorAccent">#f26522</color>
 
+
+
     <color name="white">#ffffff</color>
 
     <color name="e5e5e5">#e5e5e5</color>
@@ -732,5 +734,10 @@
     <color name="color_apk">#bb2b83</color>
     <color name="light_black">#323232</color>
     <color name="progresscolor">#2a8d9d</color>
+    <color name="checkbox_tint">#f26522</color>
+
+
+    <color name="appthemecolor">#1e689e</color>
+
     <!--takem from filemanager app-->
 </resources>

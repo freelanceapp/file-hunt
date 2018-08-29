@@ -49,6 +49,8 @@ public class MultiSelectAdapter extends RecyclerView.Adapter<MultiSelectAdapter.
                 @Override
                 public void onClick(View view) {
                     // send selected docs in callback
+                    int pos=getAdapterPosition();
+                    if(pos!=RecyclerView.NO_POSITION)
                     listener.onImageSelected(ImgListfiltered.get(getAdapterPosition()));
                 }
             });
@@ -80,7 +82,7 @@ public class MultiSelectAdapter extends RecyclerView.Adapter<MultiSelectAdapter.
 
                  Glide.with(mContext).load("file://" +Img.getImgPath())
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .skipMemoryCache(false)
+                .skipMemoryCache(false).placeholder(R.drawable.img_placeholder).error(R.drawable.img_placeholder)
                 .into(holder.iv_image);
 
 

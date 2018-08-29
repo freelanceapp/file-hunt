@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.filehunt.Model.Model_images;
 import com.example.filehunt.R;
+import com.example.filehunt.Utils.Utility;
 
 import java.util.ArrayList;
 
@@ -30,9 +31,7 @@ public class Adapter_PhotosFolder extends ArrayAdapter<Model_images> {
         this.al_menu = al_menu;
         this.context = context;
         this.media_position=media_position;
-
-
-    }
+        }
 
     @Override
     public int getCount() {
@@ -80,19 +79,25 @@ public class Adapter_PhotosFolder extends ArrayAdapter<Model_images> {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-           viewHolder.tv_date_modified.setText(al_menu.get(position).getDate_modified());
-            viewHolder.tv_foldern.setText(al_menu.get(position).getStr_folder());
-            viewHolder.tv_foldersize.setText(al_menu.get(position).getAl_imagepath().size()+"");
+             viewHolder.tv_date_modified.setText(al_menu.get(position).getDate_modified());
+             viewHolder.tv_foldern.setText(al_menu.get(position).getStr_folder());
+             viewHolder.tv_foldersize.setText(al_menu.get(position).getAl_imagepath().size()+"");
+
+             viewHolder.tv_date_modified.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(context));
+             viewHolder.tv_foldern.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(context));
+             viewHolder.tv_foldersize.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(context));
 
 
    if (media_position==2)
    {
        viewHolder.iv_image.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_music));
    }
+
+
    else {
         Glide.with(context).load("file://" + al_menu.get(position).getAl_imagepath().get(0))
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .skipMemoryCache(true)
+                .skipMemoryCache(false)
                 .into(viewHolder.iv_image);
    }
 

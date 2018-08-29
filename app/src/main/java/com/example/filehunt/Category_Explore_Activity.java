@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
@@ -14,9 +15,11 @@ import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.filehunt.Adapter.Adapter_PhotosFolder;
+import com.example.filehunt.Class.Constants;
 import com.example.filehunt.Model.Model_Docs;
 import com.example.filehunt.Model.Model_images;
 import com.example.filehunt.Utils.AsynctaskUtility;
@@ -31,6 +34,7 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import static com.example.filehunt.Class.Constants.AUDIO;
+import static com.example.filehunt.Class.Constants.DELETED_VDO_FILES;
 import static com.example.filehunt.Class.Constants.IMAGES;
 import static com.example.filehunt.Class.Constants.POSITION;
 import static com.example.filehunt.Class.Constants.VIDEO;
@@ -41,6 +45,7 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
     Context ctx;
     boolean boolean_folder;
     GridView gv_folder;
+    ImageView blank_indicator;
     Adapter_PhotosFolder obj_adapter;
     int AUDIO=3;
     int VIDEO=2;
@@ -54,6 +59,8 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
         ctx=Category_Explore_Activity.this;
 
         setContentView(R.layout.category_explore_activity);
+
+        blank_indicator=(ImageView)findViewById(R.id.blank_indicatorm);
         gv_folder = (GridView)findViewById(R.id.gv_folder);
 
         if(getIntent().getExtras() !=null)
@@ -64,17 +71,17 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
         switch (position)
         {
             case 0:
-                Utility.setActivityTitle(ctx,getResources().getString(R.string.picture));
-                new AsynctaskUtility<Model_images>(ctx,this,IMAGES).execute();
+                Utility.setActivityTitle(ctx,getResources().getString(R.string.cat_Images));
+                new AsynctaskUtility<Model_images>(ctx,this,IMAGES).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
                 break;
             case 1:
-                Utility.setActivityTitle(ctx,getResources().getString(R.string.video));
-                new AsynctaskUtility<Model_images>(ctx,this,VIDEO).execute();
+                Utility.setActivityTitle(ctx,getResources().getString(R.string.cat_Videos));
+                new AsynctaskUtility<Model_images>(ctx,this,VIDEO).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     break;
             case 2:
-                Utility.setActivityTitle(ctx,getResources().getString(R.string.audio));
-                new AsynctaskUtility<Model_images>(ctx,this,AUDIO).execute();
+                Utility.setActivityTitle(ctx,getResources().getString(R.string.cat_Audio));
+                new AsynctaskUtility<Model_images>(ctx,this,AUDIO).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 break;
             case 3:
 
@@ -113,6 +120,31 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
 
 
         }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+
+        if(Constants.DELETED_VDO_FILES>0 && position==1)
+        {
+            new AsynctaskUtility<Model_images>(ctx,this,VIDEO).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+        if(Constants.DELETED_AUDIO_FILES>0 && position==2 )
+        {
+            new AsynctaskUtility<Model_images>(ctx,this,AUDIO).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+        if(Constants.DELETED_IMG_FILES>0 && position==0)
+        {
+
+            new AsynctaskUtility<Model_images>(ctx,this,IMAGES).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        }
+
+
+    }
+
     // not being used;
       public ArrayList<Model_images>  Load_Media(int  MediaType)
     {
@@ -390,8 +422,17 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
     public void processFinish(ArrayList output) {
 
           al_images=output;
-         obj_adapter = new Adapter_PhotosFolder(getApplicationContext(),al_images,position);
-         gv_folder.setAdapter(obj_adapter);
+          if(al_images.size()!=0) {
+              blank_indicator.setVisibility(View.GONE);
+              obj_adapter = new Adapter_PhotosFolder(getApplicationContext(), al_images, position);
+              gv_folder.setAdapter(obj_adapter);
+          }
+          else
+          {
+              obj_adapter = new Adapter_PhotosFolder(getApplicationContext(), al_images, position);
+              gv_folder.setAdapter(obj_adapter);
+              blank_indicator.setVisibility(View.VISIBLE);
+          }
 
     }
 }

@@ -32,11 +32,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.filehunt.Adapter.MultiSelectAdapter_Anim;
 import com.example.filehunt.Adapter.MultiSelectAdapter_Docs;
+import com.example.filehunt.Class.Constants;
 import com.example.filehunt.Model.Grid_Model;
 import com.example.filehunt.Model.Model_Anim;
 import com.example.filehunt.Model.Model_Download;
@@ -68,17 +70,24 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
     ArrayList<Model_Anim> Intent_Docs_List;
     private SearchView searchView;
     Context mcontext;
-  int ANIMATION=6;
+    ImageView blankIndicator;
+    int ANIMATION=6;
+    private boolean isUnseleAllEnabled=false;
+    private Model_Anim fileTorename;
+    private  int renamePosition;
+    static AnimationActivityRe instance;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photos_activity_re);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        blankIndicator=(ImageView) findViewById(R.id.blankIndicator);
         mcontext=AnimationActivityRe.this;
+       instance=this;
+       Utility.setActivityTitle(mcontext,getResources().getString(R.string.cat_Animation));
 
-       Utility.setActivityTitle(mcontext,getResources().getString(R.string.animation));
-
-        new AsynctaskUtility<Model_Anim>(mcontext,this,ANIMATION).execute();
+        new AsynctaskUtility<Model_Anim>(mcontext,this,ANIMATION).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 //           int_position = getIntent().getIntExtra("value", 0);
 
@@ -92,8 +101,11 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
         recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if (isMultiSelect)
-                    multi_select(position);
+                if (isMultiSelect) {
+                    int pos = position;
+                    if (pos!=RecyclerView.NO_POSITION)
+                        multi_select(position);
+                }
 
                 else {
 
@@ -122,6 +134,17 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
 
 
     }
+    public static AnimationActivityRe getInstance() {
+        return instance;
+    }
+    public void refreshAdapterAfterRename(String newPath,String newName)
+    {
+        fileTorename.setFilePath(newPath);
+        fileTorename.setFileName(newName);
+        animList.set(renamePosition,fileTorename);
+        refreshAdapter();
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -136,11 +159,14 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
                 .getSearchableInfo(getComponentName()));
         searchView.setMaxWidth(Integer.MAX_VALUE);
 
+        Utility.setCustomizeSeachBar(mcontext,searchView);
+
         // listening to search query text change
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 // filter recycler view when query submitted
+                if(multiSelectAdapter!=null)
                 multiSelectAdapter.getFilter().filter(query);
                 return false;
             }
@@ -148,6 +174,7 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
             @Override
             public boolean onQueryTextChange(String query) {
                 // filter recycler view when text is changed
+                if(multiSelectAdapter!=null)
                 multiSelectAdapter.getFilter().filter(query);
                 return false;
             }
@@ -180,8 +207,17 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
         if (mActionMode != null) {
             if (multiselect_list.contains(animList.get(position)))
                 multiselect_list.remove(animList.get(position));
-            else
+            else {
                 multiselect_list.add(animList.get(position));
+
+                // to  rename file contain old file;
+                if (multiselect_list.size() == 1) {
+
+                    fileTorename = animList.get(position);
+                    renamePosition = position;
+                }
+                // to  rename file contain old file;
+            }
 
             if (multiselect_list.size() > 0)
                 mActionMode.setTitle("" + multiselect_list.size());
@@ -199,6 +235,15 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
         multiSelectAdapter.selected_AnimList=multiselect_list;
         multiSelectAdapter.AnimList=animList;
         multiSelectAdapter.notifyDataSetChanged();
+        selectMenuChnage();
+
+        //finish action mode when user deselect files one by one ;
+   if(multiselect_list.size()==0) {
+       if (mActionMode != null) {
+           mActionMode.finish();
+       }
+   }
+
     }
     private void DispDetailsDialog( Model_Anim fileProperty )
     {
@@ -260,11 +305,20 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
+
+                case R.id.action_rename:
+                    if(multiselect_list.size()==1)
+                    Utility.fileRenameDialog(mcontext,multiselect_list.get(0).getFilePath(),Constants.ANIMATION);
+
+                    return  true;
                 case R.id.action_delete:
-                    alertDialogHelper.showAlertDialog("","Delete Video","DELETE","CANCEL",1,false);
+                    alertDialogHelper.showAlertDialog("","Delete file","DELETE","CANCEL",1,false);
                     return true;
                 case R.id.action_select:
-                    selectAll();
+                    if(animList.size()==multiselect_list.size() || isUnseleAllEnabled==true)
+                        unSelectAll();
+                    else
+                        selectAll();
                     return  true;
                 case  R.id.action_Share:
                     shareMultipleFilesWithNoughatAndAll();
@@ -346,14 +400,21 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
     @Override
     public void processFinish(ArrayList output) {
         animList=output;
-        multiSelectAdapter = new MultiSelectAdapter_Anim(this,animList,multiselect_list,this);
-        // AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));  // did not work on high resolution phones
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
-        recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
-                DividerItemDecoration.VERTICAL));
+        multiSelectAdapter = new MultiSelectAdapter_Anim(this, animList, multiselect_list, this);
+        if(animList.size()==0)
+        {
+            blankIndicator.setVisibility(View.VISIBLE);
+        }
+        else {
 
-        recyclerView.setAdapter(multiSelectAdapter);
+            // AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));  // did not work on high resolution phones
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+            recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
+            recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
+                    DividerItemDecoration.VERTICAL));
+
+            recyclerView.setAdapter(multiSelectAdapter);
+        }
     }
 
     private class DeleteFileTask extends AsyncTask<Void,Void,Integer>
@@ -397,10 +458,76 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
             else
                 mActionMode.setTitle("");
 
+            //to change  the unselectAll  menu  to  selectAll
+            selectMenuChnage();
+            //to change  the unselectAll  menu  to  selectAll
             refreshAdapter();
 
         }
         }
+    private void unSelectAll()
+    {
+        if (mActionMode != null)
+        {
+            multiselect_list.clear();
+
+            if (multiselect_list.size() >= 0)
+                mActionMode.setTitle("" + multiselect_list.size());
+            else
+                mActionMode.setTitle("");
+
+            //to change  the unselectAll  menu  to  selectAll
+            selectMenuChnage();
+            //to change  the unselectAll  menu  to  selectAll
+
+            if (mActionMode != null) {
+                mActionMode.finish();
+            }
+
+
+            refreshAdapter();
+
+        }
+    }
+
+    private void selectMenuChnage()
+    {
+        if(context_menu!=null)
+        {
+            if(animList.size()==multiselect_list.size()) {
+                for (int i = 0; i < context_menu.size(); i++) {
+                    MenuItem item = context_menu.getItem(i);
+                    if (item.getTitle().toString().equalsIgnoreCase(getResources().getString(R.string.menu_selectAll))) {
+                        item.setTitle(getResources().getString(R.string.menu_unselectAll));
+                        isUnseleAllEnabled=true;
+                    }
+                }
+            }
+            else {
+
+                for (int i = 0; i < context_menu.size(); i++) {
+                    MenuItem item = context_menu.getItem(i);
+                    if (item.getTitle().toString().equalsIgnoreCase(getResources().getString(R.string.menu_unselectAll))) {
+                        item.setTitle(getResources().getString(R.string.menu_selectAll));
+                        isUnseleAllEnabled=false;
+                    }
+                }
+
+            }
+            // rename  options will be visible if only i file is selected
+
+            MenuItem item= context_menu.findItem(R.id.action_rename);
+            if (multiselect_list.size()==1)
+                item.setVisible(true);
+            else
+                item.setVisible(false);
+
+            // rename  options will be visible if only i file is selected
+
+        }
+        invalidateOptionsMenu();
+    }
+
     private int deleteFile(ArrayList<Model_Anim> delete_list)
     {
         int count=0;
@@ -411,10 +538,11 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
             if(f.exists())
                 if(f.delete()) {
                     count++;
-                   // sendBroadcast(f);
+                   sendBroadcast(f);
                 }
 
         }
+        Constants.DELETED_ANIMATION_FILES=count;
         return count;
     }
     private void sendBroadcast(File outputFile)
@@ -621,7 +749,9 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
     public void onAnimSelected(Model_Anim docs) {
 
         // Utility.OpenFile(mcontext,model_apk.getFilePath()); // open file below  Android N
-        Utility.OpenFileWithNoughtAndAll(docs.getFilePath(),mcontext,getResources().getString(R.string.file_provider_authority));   //new
+        if(mActionMode==null) {
+            Utility.OpenFileWithNoughtAndAll(docs.getFilePath(), mcontext, getResources().getString(R.string.file_provider_authority));   //new
+        }
     }
     public  String calcSelectFileSize(ArrayList<Model_Anim> fileList)
     {

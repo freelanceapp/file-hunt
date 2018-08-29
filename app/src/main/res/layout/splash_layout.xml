@@ -40,14 +40,28 @@
     </RelativeLayout>
 
 <TextView
-
+   android:id="@+id/cp_txt"
     android:textColor="@color/progresscolor"
-    android:layout_alignParentBottom="true"
+  android:layout_above="@+id/versiontxt"
     android:layout_centerInParent="true"
-    android:layout_marginBottom="@dimen/dp20"
+
     android:textSize="@dimen/sp10"
     android:gravity="center"
     android:text="Copyright © 2018 jack morris media.All rights reserved."
     android:layout_width="wrap_content"
     android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/versiontxt"
+        android:text="@string/versiontxt"
+        android:textSize="@dimen/sp10"
+        android:gravity="center"
+        android:layout_marginBottom="@dimen/dp20"
+        android:layout_alignParentBottom="true"
+        android:layout_centerInParent="true"
+        android:textColor="@color/progresscolor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+
 </RelativeLayout>

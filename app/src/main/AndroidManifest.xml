@@ -40,6 +40,7 @@
         <activity android:name=".RecentActivityRe" android:screenOrientation="portrait"></activity>
 
         <provider
+
             android:name="android.support.v4.content.FileProvider"
             android:authorities="@string/file_provider_authority"
             android:exported="false"

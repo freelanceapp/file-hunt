@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatTextView;
@@ -26,6 +27,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,6 +44,7 @@ import com.example.filehunt.Utils.AlertDialogHelper;
 import com.example.filehunt.Utils.AsynctaskUtility;
 import com.example.filehunt.Utils.RecyclerItemClickListener;
 import com.example.filehunt.Utils.Utility;
+
 
 import java.io.File;
 import java.util.ArrayList;
@@ -63,27 +68,38 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
     int int_position;
     ArrayList<Model_Apk> Intent_Docs_List;
     private SearchView searchView;
+
+    ImageView blankIndicator;
     Context mcontext;
-  int APK=8;
+     int APK=8;
+     boolean isUnseleAllEnabled=false;
+     static  ApkActivityRe instance;
+     private  int renamePosition;
+    private Model_Apk fileTorename;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photos_activity_re);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        blankIndicator=(ImageView) findViewById(R.id.blankIndicator);
+        instance=this;
         mcontext=ApkActivityRe.this;
         Constants.DELETED_APK_FILES=0;
 
-        Utility.setActivityTitle(mcontext,getResources().getString(R.string.apk));
+        Utility.setActivityTitle(mcontext,getResources().getString(R.string.cat_Apk));
         //           int_position = getIntent().getIntExtra("value", 0);
 
-        new AsynctaskUtility<Model_Recent>(mcontext,this,APK).execute();
+        new AsynctaskUtility<Model_Recent>(mcontext,this,APK).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         alertDialogHelper =new AlertDialogHelper(this);
 
         recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if (isMultiSelect)
+                if (isMultiSelect) {
+                    if(position!=RecyclerView.NO_POSITION)
                     multi_select(position);
+                }
 
                 else {
 
@@ -112,6 +128,30 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
 
 
     }
+    public static ApkActivityRe getInstance() {
+        return instance;
+    }
+    public void refreshAdapterAfterRename(String newPath,String newName)
+    {
+        fileTorename.setFilePath(newPath);
+        fileTorename.setFileName(newName);
+        ApkList.set(renamePosition,fileTorename);
+        refreshAdapter();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
+    @Override
+    protected void onPause() {
+
+        super.onPause();
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -126,11 +166,14 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
                 .getSearchableInfo(getComponentName()));
         searchView.setMaxWidth(Integer.MAX_VALUE);
 
+        Utility.setCustomizeSeachBar(mcontext,searchView);
+
         // listening to search query text change
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 // filter recycler view when query submitted
+                if(multiSelectAdapter!=null)
                 multiSelectAdapter.getFilter().filter(query);
                 return false;
             }
@@ -138,6 +181,7 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
             @Override
             public boolean onQueryTextChange(String query) {
                 // filter recycler view when text is changed
+                if(multiSelectAdapter!=null)
                 multiSelectAdapter.getFilter().filter(query);
                 return false;
             }
@@ -169,8 +213,13 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
         if (mActionMode != null) {
             if (multiselect_list.contains(ApkList.get(position)))
                 multiselect_list.remove(ApkList.get(position));
-            else
+            else {
                 multiselect_list.add(ApkList.get(position));
+                if(multiselect_list.size()==1) {
+                    fileTorename = ApkList.get(position);
+                    renamePosition = position;
+                }
+            }
 
             if (multiselect_list.size() > 0)
                 mActionMode.setTitle("" + multiselect_list.size());
@@ -188,6 +237,17 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
         multiSelectAdapter.selected_ApkList=multiselect_list;
         multiSelectAdapter.ApkList=ApkList;
         multiSelectAdapter.notifyDataSetChanged();
+
+        selectMenuChnage();
+
+        //finish action mode when user deselect files one by one ;
+        if(multiselect_list.size()==0) {
+            if (mActionMode != null) {
+                mActionMode.finish();
+            }
+        }
+
+
     }
     private void DispDetailsDialog( Model_Apk fileProperty )
     {
@@ -237,12 +297,14 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
             MenuInflater inflater = mode.getMenuInflater();
             inflater.inflate(R.menu.menu_multi_select, menu);
             context_menu = menu;
+
             return true;
         }
 
 
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+
             return false; // Return false if nothing is done
         }
 
@@ -250,11 +312,20 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
+
+                case R.id.action_rename:
+                    if(multiselect_list.size()==1)
+                    Utility.fileRenameDialog(mcontext,multiselect_list.get(0).getFilePath(),Constants.APK);
+                    return  true;
                 case R.id.action_delete:
-                    alertDialogHelper.showAlertDialog("","Delete Video","DELETE","CANCEL",1,false);
+                    alertDialogHelper.showAlertDialog("","Delete Apk","DELETE","CANCEL",1,false);
                     return true;
                 case R.id.action_select:
-                    selectAll();
+                    if(ApkList.size()==multiselect_list.size() || isUnseleAllEnabled==true)
+                     unSelectAll();
+                     else
+                     selectAll();
+
                     return  true;
                 case  R.id.action_Share:
                     shareApkMultipleFilesWithNoughatAndAll();
@@ -337,13 +408,21 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
 
 
         ApkList=output;
-        multiSelectAdapter = new MultiSelectAdapter_Apk(this,ApkList,multiselect_list,this);
-        // AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));  // did not work on high resolution phones
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
-        recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
-                DividerItemDecoration.VERTICAL));
-        recyclerView.setAdapter(multiSelectAdapter);
+        multiSelectAdapter = new MultiSelectAdapter_Apk(this, ApkList, multiselect_list, this);
+        if(ApkList.size()==0)
+        {
+            blankIndicator.setVisibility(View.VISIBLE);
+        }
+        else {
+
+            // AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));  // did not work on high resolution phones
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+            recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
+            recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
+                    DividerItemDecoration.VERTICAL));
+            recyclerView.setAdapter(multiSelectAdapter);
+
+        };
 
     }
 
@@ -388,6 +467,11 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
             else
                 mActionMode.setTitle("");
 
+            //to change  the selectAll  menu  to  unselectAll
+            selectMenuChnage();
+            //to change  the selectAll  menu  to  unselectAll
+
+
             refreshAdapter();
 
 
@@ -400,22 +484,64 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
         {
             multiselect_list.clear();
 
-//            for(int i=0;i<ApkList.size();i++)
-//            {
-//                if(!multiselect_list.contains(multiselect_list.contains(ApkList.get(i))))
-//                {
-//                    multiselect_list.add(ApkList.get(i));
-//                }
-//            }
-
             if (multiselect_list.size() >= 0)
                 mActionMode.setTitle("" + multiselect_list.size());
             else
                 mActionMode.setTitle("");
 
+            //to change  the unselectAll  menu  to  selectAll
+            selectMenuChnage();
+            //to change  the unselectAll  menu  to  selectAll
+
+            if (mActionMode != null) {
+                mActionMode.finish();
+            }
+
             refreshAdapter();
 
         }
+    }
+
+
+    private void selectMenuChnage()
+    {
+        if(context_menu!=null)
+        {
+            if(ApkList.size()==multiselect_list.size()) {
+                for (int i = 0; i < context_menu.size(); i++) {
+                    MenuItem item = context_menu.getItem(i);
+                    if (item.getTitle().toString().equalsIgnoreCase(getResources().getString(R.string.menu_selectAll))) {
+                        item.setTitle(getResources().getString(R.string.menu_unselectAll));
+
+                        isUnseleAllEnabled=true;
+                    }
+                }
+            }
+            else {
+
+                for (int i = 0; i < context_menu.size(); i++) {
+                    MenuItem item = context_menu.getItem(i);
+                    if (item.getTitle().toString().equalsIgnoreCase(getResources().getString(R.string.menu_unselectAll))) {
+                        item.setTitle(getResources().getString(R.string.menu_selectAll));
+                        isUnseleAllEnabled=false;
+                    }
+                }
+
+            }
+
+            // rename  options will be visible if only i file is selected
+
+                MenuItem item= context_menu.findItem(R.id.action_rename);
+                if (multiselect_list.size()==1)
+                    item.setVisible(true);
+                else
+                    item.setVisible(false);
+
+            // rename  options will be visible if only i file is selected
+        }
+
+
+        invalidateOptionsMenu();
     }
 
     private int deleteFile(ArrayList<Model_Apk> delete_list)
@@ -558,6 +684,7 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
     public void onApkSelected (Model_Apk model_apk) {
 
         // Utility.OpenFile(mcontext,model_apk.getFilePath()); // open file below  Android N
+        if(mActionMode==null)
         Utility.OpenFileWithNoughtAndAll(model_apk.getFilePath(),mcontext,getResources().getString(R.string.file_provider_authority));
     }
     public  String calcSelectFileSize(ArrayList<Model_Apk> fileList)

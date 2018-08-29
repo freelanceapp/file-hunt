@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+       <RelativeLayout
+           android:padding="@dimen/dp10"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content">
+           <RelativeLayout
+               android:id="@+id/header"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content">
+               <TextView
+                   android:paddingBottom="@dimen/dp10"
+                   android:text="Details"
+                   android:textSize="@dimen/sp20"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content" />
+           </RelativeLayout>
+           <ScrollView
+               android:id="@+id/scrlview"
+               android:layout_below="@+id/header"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content">
+               <LinearLayout
+                   android:orientation="vertical"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content">
+
+                   <!--name layout-->
+                   <LinearLayout
+                       android:orientation="vertical"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content">
+                       <TextView
+
+                           android:text="Number of files"
+                           android:textSize="@dimen/sp16"
+                           android:textColor="@color/black"
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content" />
+
+                       <TextView
+                           android:id="@+id/FileNum"
+                           android:text="10"
+                           android:textSize="@dimen/sp14"
+                           android:textColor="@color/button_disable_color_light"
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content" />
+
+                   </LinearLayout>
+                   <!--name layout-->
+
+                   <!--path layout-->
+               <LinearLayout
+                   android:orientation="vertical"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content">
+                   <TextView
+                       android:text="Total size"
+                       android:textSize="@dimen/sp16"
+                       android:textColor="@color/black"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content" />
+
+                   <TextView
+                       android:id="@+id/FileSizem"
+                       android:text="2 mb "
+                       android:textSize="@dimen/sp14"
+                       android:textColor="@color/button_disable_color_light"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content" />
+
+               </LinearLayout>
+                   <!--path layout-->
+
+               </LinearLayout>
+
+
+           </ScrollView>
+           <TextView
+               android:layout_below="@+id/scrlview"
+               android:id="@+id/close"
+               android:text="CLOSE"
+               android:textSize="@dimen/sp16"
+               android:padding="@dimen/dp10"
+               android:textColor="@color/green_01"
+               android:layout_alignParentRight="true"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content" />
+
+
+       </RelativeLayout>
+
+</RelativeLayout>

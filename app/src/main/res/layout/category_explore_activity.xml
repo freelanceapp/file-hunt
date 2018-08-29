@@ -3,14 +3,19 @@
     android:background="@drawable/bckimg"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-
+    <ImageView
+       android:id="@+id/blank_indicatorm"
+        android:visibility="gone"
+        android:src="@drawable/nofilefound"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <GridView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/gv_folder"
         android:numColumns="2"
-        android:scrollbars="none"
+
         android:layout_margin="@dimen/dp5"
        ></GridView>
 

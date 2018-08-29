@@ -44,6 +44,8 @@ public class MultiSelectAdapter_Video extends RecyclerView.Adapter<MultiSelectAd
                 @Override
                 public void onClick(View view) {
                     // send selected docs in callback
+                    int pos=getAdapterPosition();
+                    if(pos!=RecyclerView.NO_POSITION)
                     listener.onVdoSelected(VdoListfiltered.get(getAdapterPosition()));
                 }
             });
@@ -76,7 +78,7 @@ public class MultiSelectAdapter_Video extends RecyclerView.Adapter<MultiSelectAd
                     if(Img.getImgBitmapStr()!=null)
                     {
                              Glide.with(mContext).load("file://" + Img.getImgBitmapStr())
-                                .skipMemoryCache(false)
+                                .skipMemoryCache(false).placeholder(R.drawable.vdo_placeholder).error(R.drawable.vdo_placeholder)
                                 .into(holder.iv_image);
                     }
 

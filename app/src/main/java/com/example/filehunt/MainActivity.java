@@ -2,7 +2,11 @@ package com.example.filehunt;
 
 
 import android.app.FragmentManager;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v4.app.Fragment;
@@ -11,6 +15,7 @@ import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,14 +29,20 @@ import com.example.filehunt.Adapter.PagerAdapter;
 import com.example.filehunt.Adapter.pagerAdapter2;
 import com.example.filehunt.Fragments.TabFragment1;
 import com.example.filehunt.Fragments.TabFragment2;
+import com.example.filehunt.Model.Model_Recent;
+import com.example.filehunt.Utils.AsynctaskUtility;
 import com.example.filehunt.Utils.Utility;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
 
 import static com.example.filehunt.Class.Constants.TAB_FRAGMENT_TAG;
 
 
 public class MainActivity extends AppCompatActivity {
+
 
     int check = 0;
     ViewPager viewPager;
@@ -83,6 +94,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+        //
+
+        //
+
         viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
@@ -100,6 +115,8 @@ public class MainActivity extends AppCompatActivity {
                 // TODO Auto-generated method stub
             }
         });
+
+
     }
 
     private void setSpace() {
@@ -215,4 +232,80 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        clearApplicationData(MainActivity.this);
+    }
+    public void clearApplicationData(Context context) {
+        File cache = context.getCacheDir();
+
+        File appDir = new File(cache.getParent());
+
+       long bytes=dirSize(appDir);
+
+        System.out.println(""+bytes);
+        String str=Utility.humanReadableByteCount(bytes,true);
+        System.out.println(""+str);
+        if(bytes>26214400)    //1024*1024 *25  25 mb;
+        if (appDir.exists()) {
+            String[] children = appDir.list();
+            for (String s : children) {
+                if (!s.equals("lib")) {
+                    deleteDir(new File(appDir, s));
+                    Log.i("TAG", "**************** File /data/data/APP_PACKAGE/" + s + " DELETED *******************");
+                }
+            }
+        }
+    }
+
+
+
+    public static boolean deleteDir(File dir) {
+        long bytes=dir.length();
+        System.out.println(""+bytes);
+
+        if (dir != null && dir.isDirectory()) {
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++)
+            {
+                boolean success = deleteDir(new File(dir, children[i]));
+                if (!success) {
+                    return false;
+                }
+            }
+            return dir.delete();
+        }
+        else if(dir!= null && dir.isFile())
+        {
+            return dir.delete();
+        } else {
+            return false;
+        }
+    }
+
+
+    private static long dirSize(File dir) {
+
+        if (dir.exists()) {
+            long result = 0;
+            File[] fileList = dir.listFiles();
+            for(int i = 0; i < fileList.length; i++) {
+                // Recursive call if it's a directory
+                if(fileList[i].isDirectory()) {
+                    result += dirSize(fileList [i]);
+                } else {
+                    // Sum the file size in bytes
+                    result += fileList[i].length();
+                }
+            }
+            return result; // return the file size
+        }
+        return 0;
+    }
+
+
+
 }
