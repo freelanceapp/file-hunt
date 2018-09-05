@@ -35,6 +35,7 @@ import android.text.style.ForegroundColorSpan;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -640,6 +641,7 @@ public static  boolean isPathExist(String pathStr,Context ctx)
          s.setSpan (new CustomTypefaceSpan("", tf), 0, s.length(),Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
         // Update the action bar title with the TypefaceSpan instance
         android.support.v7.app.ActionBar actionBar =((AppCompatActivity)ctx).getSupportActionBar();
+
         actionBar.setTitle(s);
 
 
@@ -844,6 +846,7 @@ public static boolean IsNotEmpty(EditText view)
         if(f!=null) {
             String extension=Utility.getFileExtensionfromPath(fPath.toLowerCase());
             Edit_Rename.setText(f.getName());
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
             if(extension!=null)
                 // set cusror position ahead of file  extension ;
               Edit_Rename.setSelection(f.getName().length()-(extension.length()+1));
@@ -863,16 +866,11 @@ public static boolean IsNotEmpty(EditText view)
             @Override
             public void onClick(View v) {
                 if(Utility.IsNotEmpty(Edit_Rename)) {
+                    // will  be used on activityresult  function of every activity in case of filerename first time when write permission is granted
+                    Constants.Global_File_Rename_NewName=Edit_Rename.getText().toString();
                        fileStatus= renameFile(ctx,fPath, Edit_Rename.getText().toString(),MediaType);
                       dialog.dismiss();
-                    if(fileStatus) {
-                        Toast.makeText(ctx, ctx.getResources().getString(R.string.rename_success), Toast.LENGTH_SHORT).show();
-
-                        }
-                    else
-                        Toast.makeText(ctx, ctx.getResources().getString(R.string.rename_failed), Toast.LENGTH_SHORT).show();
-
-                }else {
+                      }else {
                       Edit_Rename.setError(ctx.getResources().getString(R.string.emty_error));
                 }
 
@@ -886,22 +884,37 @@ public static boolean IsNotEmpty(EditText view)
 
         return  fileStatus;
     }
-    private static  boolean renameFile(Context pctx,String path,String newName,int MediaType)
+    public static  boolean renameFile(Context pctx,String oldfpath,String newName,int MediaType)
     {
 
-        File oldFile = new File(path);
-        int i = path.lastIndexOf(File.separator);
-        String pathstr = (i > -1) ? path.substring(0, i) : path;
+        File oldFile = new File(oldfpath);
+        int i = oldfpath.lastIndexOf(File.separator);
+        String pathstr = (i > -1) ? oldfpath.substring(0, i) : oldfpath;
 
         // String extension = Utility.getFileExtensionfromPath(path);
         //File latestname = new File(pathstr + "/" + newName + "." + extension);
-
+        String nPath=pathstr + "/" + newName;
         File latestname = new File(pathstr + "/" + newName);
-        boolean st=oldFile.getParentFile().canWrite();
+
+
         boolean success = oldFile.renameTo(latestname);
+
+        // if normal  way  could  not rename file than use AccessFramework
+        if(!success)
+        {
+                  if(UtilityStorage.isWritableNormalOrSaf(oldFile,pctx))
+                    success=UtilityStorage.reNameWithAccesFramework(pctx,oldFile,latestname);
+                   else {
+                      UtilityStorage.guideDialogForLEXA(pctx, oldFile.getParent(), Constants.FILE_RENAME_REQUEST_CODE);
+                      return false ; // do  not  procced to  generate Toast of file rename faild in case of asking for permission;
+                  }
+
+        }
 
         if (success)
         {
+
+            Toast.makeText(pctx, pctx.getResources().getString(R.string.rename_success), Toast.LENGTH_SHORT).show();
 
             switch (MediaType)
             {
@@ -945,6 +958,9 @@ public static boolean IsNotEmpty(EditText view)
                    Utility.RunMediaScan(pctx,latestname);
                    Utility.RunMediaScan(pctx,oldFile);
 
+        }
+        else {
+            Toast.makeText(pctx, pctx.getResources().getString(R.string.rename_failed), Toast.LENGTH_SHORT).show();
         }
 
         return  success;

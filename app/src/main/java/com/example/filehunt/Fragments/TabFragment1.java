@@ -125,11 +125,14 @@ public class TabFragment1 extends Fragment {
 
         }
 
+
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
            ctx=getActivity();
         cat_List.clear();
+
         permissionStatus = getActivity().getSharedPreferences("permissionStatus", MODE_PRIVATE);
         ext_layout=(RelativeLayout)view.findViewById(R.id.ext_layout);
         category_recycler_view= (RecyclerView) view.findViewById(R.id.category_recycler_view);

@@ -35,8 +35,10 @@ import com.example.filehunt.Class.Constants;
 import com.example.filehunt.Model.Grid_Model;
 import com.example.filehunt.Utils.AlertDialogHelper;
 import com.example.filehunt.Utils.AutoFitGridLayoutManager;
+import com.example.filehunt.Utils.CustomProgressDialog;
 import com.example.filehunt.Utils.RecyclerItemClickListener;
 import com.example.filehunt.Utils.Utility;
+import com.example.filehunt.Utils.UtilityStorage;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -80,6 +82,7 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         blankIndicator=(ImageView) findViewById(R.id.blankIndicator);
         mcontext=VideoActivityRe.this;
         instance=this;
+        UtilityStorage.InitilaizePrefs(mcontext);
 
         int_position = getIntent().getIntExtra("value", 0);
         String tittle=Category_Explore_Activity.al_images.get(int_position).getStr_folder();
@@ -156,6 +159,33 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
 
 
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode==Constants.FILE_DELETE_REQUEST_CODE) {
+            boolean isPersistUriSet = UtilityStorage.setUriForStorage(requestCode, resultCode, data);
+            if (isPersistUriSet && multiselect_list.size() > 0)
+                new DeleteFileTask(multiselect_list).execute();
+        }
+        if(requestCode==Constants.FILE_RENAME_REQUEST_CODE)
+        {
+            boolean isPersistUriSet = UtilityStorage.setUriForStorage(requestCode, resultCode, data);
+            if (isPersistUriSet && multiselect_list.size() ==1)
+            {
+                       // call rename function  here in the case of premission granted first  time;
+
+                Utility.renameFile(mcontext,multiselect_list.get(0).getImgPath(),Constants.Global_File_Rename_NewName,1);
+
+            }
+
+        }
+
+
+
+    }
+
     public static VideoActivityRe getInstance() {
         return instance;
     }
@@ -393,15 +423,31 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         {
             if(multiselect_list.size()>0)
             {
-                new  DeleteFileTask(multiselect_list).execute();
-                for(int i=0;i<multiselect_list.size();i++)
-                    vidioList.remove(multiselect_list.get(i));
 
-                multiSelectAdapter.notifyDataSetChanged();
+                //
+                File f =new File(multiselect_list.get(0).getImgPath());
 
-                if (mActionMode != null) {
-                    mActionMode.finish();
+                if(UtilityStorage.isWritableNormalOrSaf(f,mcontext)) {
+                    new DeleteFileTask(multiselect_list).execute();
                 }
+                else
+                {
+                    UtilityStorage.guideDialogForLEXA(mcontext,f.getParent(),Constants.FILE_DELETE_REQUEST_CODE);
+                }
+
+                //
+
+                // now this task  is being done  on post execute of delete task
+
+
+//                for(int i=0;i<multiselect_list.size();i++)
+//                    vidioList.remove(multiselect_list.get(i));
+//
+//                multiSelectAdapter.notifyDataSetChanged();
+//
+//                if (mActionMode != null) {
+//                    mActionMode.finish();
+//                }
 
             }
         }
@@ -431,6 +477,12 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
     }
     private class DeleteFileTask extends AsyncTask<Void,Void,Integer>
     {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            CustomProgressDialog.show(mcontext,getResources().getString(R.string.deleting_file));
+        }
+
         ArrayList<Grid_Model> multiselect_list;
         DeleteFileTask( ArrayList<Grid_Model> multiselect_list)
         {
@@ -447,7 +499,20 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         protected void onPostExecute(Integer FileCount) {
             super.onPostExecute(FileCount);
 
+            if(FileCount>0)
+            {
+                for (int i = 0; i < multiselect_list.size(); i++)
+                    vidioList.remove(multiselect_list.get(i));
+
+                multiSelectAdapter.notifyDataSetChanged();
+
+                if (mActionMode != null) {
+                    mActionMode.finish();
+                }
+            }
             Toast.makeText(mcontext, FileCount+" file deleted", Toast.LENGTH_SHORT).show();
+
+            CustomProgressDialog.dismiss();
 
 
         }
@@ -549,12 +614,33 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
 
         for(int i=0;i<delete_list.size();i++)
         {
-            File f=new File(String.valueOf(delete_list.get(i).getImgPath().toLowerCase()));
-            if(f.exists())
-                if(f.delete()) {
+           // File f=new File(String.valueOf(delete_list.get(i).getImgPath().toLowerCase()));
+            File f=new File(String.valueOf(delete_list.get(i).getImgPath()));
+            if(f.exists()) {
+                if (f.delete()) {
                     count++;
                     sendBroadcast(f);
                 }
+                // if normal methos fails to  delete data
+                //new
+                else {
+                    boolean st = UtilityStorage.isWritableNormalOrSaf(f, mcontext);
+                    System.out.println("" + st);
+                    if (st) {
+                        boolean status = UtilityStorage.deleteWithAccesFramework(mcontext, f);
+                        if (status) {
+                            count++;
+                            Utility.RunMediaScan(mcontext, f);
+                        }
+                    } else {
+                       // UtilityStorage.triggerStorageAccessFramework(mcontext);
+                    }
+
+
+                }
+            }
+            //new
+            // if normal methos fails to  delete data
 
         }
         Constants.DELETED_VDO_FILES=count;

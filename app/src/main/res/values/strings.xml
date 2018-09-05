@@ -200,12 +200,19 @@ Operation completed. Files will be uploaded in the background
 
     <string name="save">SAVE</string>
     <string name="cancel">CANCEL</string>
-   <string name="versiontxt">V 1.7</string>
+   <string name="versiontxt">V 1.8</string>
 
 
     <string name="rename_success">File renamed successfully</string>
     <string name="rename_failed">Rename failed</string>
 
     <string name="emty_error">can not be empty</string>
+    <string name="error">Error</string>
+
+    <string name="needsaccesssummary">Please choose the root directory of \t</string>
+    <string name="needsaccesssummary1">\tto grant write access to operate </string>
+    <string name="permission_txt">Read/Write permission is required</string>
+    <string name="open">OPEN</string>
+    <string name="deleting_file">Deleting files </string>
 
 </resources>

@@ -250,10 +250,11 @@ public class MainActivity extends AppCompatActivity {
         String str=Utility.humanReadableByteCount(bytes,true);
         System.out.println(""+str);
         if(bytes>26214400)    //1024*1024 *25  25 mb;
+
         if (appDir.exists()) {
             String[] children = appDir.list();
             for (String s : children) {
-                if (!s.equals("lib")) {
+                if (!s.equals("lib") || !s.equalsIgnoreCase("shared_prefs")) {
                     deleteDir(new File(appDir, s));
                     Log.i("TAG", "**************** File /data/data/APP_PACKAGE/" + s + " DELETED *******************");
                 }
@@ -261,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
+//shared_prefs
 
     public static boolean deleteDir(File dir) {
         long bytes=dir.length();

@@ -24,6 +24,15 @@ public class Constants {
     public static int RECENT=6;
     public static int APK=7;
 
+
+
+    //  on ActivityresultConstants
+
+         public static final int FILE_DELETE_REQUEST_CODE=3;
+         public static final int FILE_RENAME_REQUEST_CODE=4;
+    //
+
+    public static String Global_File_Rename_NewName;
     public  static  String WordMimeType="application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
     public static String TAB_FRAGMENT_TAG="FragMent2";
@@ -31,4 +40,9 @@ public class Constants {
     public static String  FileProtocol="file://";
 
     public static String fileToBeRenamed;
+
+
+    public static final String PREFERENCE_URI = "URI";
+
+
 }

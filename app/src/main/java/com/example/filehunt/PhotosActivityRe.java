@@ -36,9 +36,11 @@ import com.example.filehunt.Class.Constants;
 import com.example.filehunt.Model.Grid_Model;
 import com.example.filehunt.Utils.AlertDialogHelper;
 import com.example.filehunt.Utils.AutoFitGridLayoutManager;
+import com.example.filehunt.Utils.CustomProgressDialog;
 import com.example.filehunt.Utils.GridSpacingItemDecoration;
 import com.example.filehunt.Utils.RecyclerItemClickListener;
 import com.example.filehunt.Utils.Utility;
+import com.example.filehunt.Utils.UtilityStorage;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -81,7 +83,7 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         blankIndicator=(ImageView) findViewById(R.id.blankIndicator);
         mcontext=PhotosActivityRe.this;
         instance=this;
-
+        UtilityStorage.InitilaizePrefs(mcontext);
         int_position = getIntent().getIntExtra("value", 0);
 
         Intent_Images_List = Category_Explore_Activity.al_images.get(int_position).getAl_imagepath();
@@ -152,6 +154,30 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
 
             }
         }));
+
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode==Constants.FILE_DELETE_REQUEST_CODE) {
+            boolean isPersistUriSet = UtilityStorage.setUriForStorage(requestCode, resultCode, data);
+            if (isPersistUriSet && multiselect_list.size() > 0)
+                new DeleteFileTask(multiselect_list).execute();
+        }
+        if(requestCode==Constants.FILE_RENAME_REQUEST_CODE)
+        {
+            boolean isPersistUriSet = UtilityStorage.setUriForStorage(requestCode, resultCode, data);
+            if (isPersistUriSet && multiselect_list.size() > 0)
+            {
+                // call rename function  here in the case of premission granted first  time;
+
+                Utility.renameFile(mcontext,multiselect_list.get(0).getImgPath(),Constants.Global_File_Rename_NewName,0);
+            }
+
+        }
 
 
     }
@@ -352,12 +378,14 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
 
     private void DispDetailsDialog(String imgPath )
     {
-
+        int w=0,h=0;
         String morientation="";
         File f =new File(imgPath);
         Bitmap bitmap=pathToBitmap(imgPath);
-        int w=bitmap.getWidth();
-        int h=bitmap.getHeight();
+        if(bitmap!=null) {
+             w = bitmap.getWidth();
+             h = bitmap.getHeight();
+        }
 
         System.out.println("ImageDetails path-> "+imgPath+"size \n "+ Utility.formatSize(f.length())+"\n resolution->"+w+"*"+h+"\n  orientation"+morientation);
         String[] splitPath=imgPath.split("/");
@@ -399,15 +427,27 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         {
             if(multiselect_list.size()>0)
             {
-                new  DeleteFileTask(multiselect_list).execute();
-                for(int i=0;i<multiselect_list.size();i++)
-                    img_ImgList.remove(multiselect_list.get(i));
+                 File f =new File(multiselect_list.get(0).getImgPath());
 
-                multiSelectAdapter.notifyDataSetChanged();
-
-                if (mActionMode != null) {
-                    mActionMode.finish();
+                 if(UtilityStorage.isWritableNormalOrSaf(f,mcontext)) {
+                    new DeleteFileTask(multiselect_list).execute();
                 }
+                else
+                {
+                    UtilityStorage.guideDialogForLEXA(mcontext,f.getParent(),Constants.FILE_DELETE_REQUEST_CODE);
+                }
+
+                // now this task  is being done  on post execute of delete task
+//                for(int i=0;i<multiselect_list.size();i++)
+//                    img_ImgList.remove(multiselect_list.get(i));
+//
+//                multiSelectAdapter.notifyDataSetChanged();
+//
+//                if (mActionMode != null) {
+//                    mActionMode.finish();
+//                }
+
+
 
             }
         }
@@ -437,6 +477,12 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
     }
     private class DeleteFileTask extends AsyncTask<Void,Void,Integer>
     {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            CustomProgressDialog.show(mcontext,getResources().getString(R.string.deleting_file));
+        }
+
         ArrayList<Grid_Model> multiselect_list;
         DeleteFileTask( ArrayList<Grid_Model> multiselect_list)
         {
@@ -453,7 +499,24 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         protected void onPostExecute(Integer FileCount) {
             super.onPostExecute(FileCount);
 
+
+            // remove  the  file from  img list  if deleted;
+            if(FileCount>0)
+            {
+                for (int i = 0; i < multiselect_list.size(); i++)
+                    img_ImgList.remove(multiselect_list.get(i));
+
+                multiSelectAdapter.notifyDataSetChanged();
+
+                if (mActionMode != null) {
+                    mActionMode.finish();
+                }
+            }
+
+
             Toast.makeText(mcontext, FileCount+" file deleted", Toast.LENGTH_SHORT).show();
+
+            CustomProgressDialog.dismiss();
 
 
         }
@@ -554,11 +617,29 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         for(int i=0;i<delete_list.size();i++)
         {
             File f=new File(String.valueOf(delete_list.get(i).getImgPath()));
-            if(f.exists())
-                if(f.delete()) {
+            if(f.exists()) {
+                if (f.delete()) {
                     count++;
                     sendBroadcast(f);
                 }
+                //new
+                else {
+                    boolean st = UtilityStorage.isWritableNormalOrSaf(f, mcontext);
+                    System.out.println("" + st);
+                    if (st) {
+                        boolean status = UtilityStorage.deleteWithAccesFramework(mcontext, f);
+                        if (status) {
+                            count++;
+                            Utility.RunMediaScan(mcontext, f);
+                        }
+                    } else {
+                        //UtilityStorage.triggerStorageAccessFramework(mcontext);
+                    }
+
+
+                }
+            }
+                //new
 
         }
 

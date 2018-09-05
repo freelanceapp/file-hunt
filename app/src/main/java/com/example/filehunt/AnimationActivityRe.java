@@ -44,8 +44,10 @@ import com.example.filehunt.Model.Model_Anim;
 import com.example.filehunt.Model.Model_Download;
 import com.example.filehunt.Utils.AlertDialogHelper;
 import com.example.filehunt.Utils.AsynctaskUtility;
+import com.example.filehunt.Utils.CustomProgressDialog;
 import com.example.filehunt.Utils.RecyclerItemClickListener;
 import com.example.filehunt.Utils.Utility;
+import com.example.filehunt.Utils.UtilityStorage;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -85,6 +87,7 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
         blankIndicator=(ImageView) findViewById(R.id.blankIndicator);
         mcontext=AnimationActivityRe.this;
        instance=this;
+        UtilityStorage.InitilaizePrefs(mcontext);
        Utility.setActivityTitle(mcontext,getResources().getString(R.string.cat_Animation));
 
         new AsynctaskUtility<Model_Anim>(mcontext,this,ANIMATION).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -134,6 +137,33 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
 
 
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode==Constants.FILE_DELETE_REQUEST_CODE) {
+            boolean isPersistUriSet = UtilityStorage.setUriForStorage(requestCode, resultCode, data);
+            if (isPersistUriSet && multiselect_list.size() > 0)
+                new DeleteFileTask(multiselect_list).execute();
+        }
+        if(requestCode==Constants.FILE_RENAME_REQUEST_CODE)
+        {
+            boolean isPersistUriSet = UtilityStorage.setUriForStorage(requestCode, resultCode, data);
+            if (isPersistUriSet && multiselect_list.size() > 0)
+            {
+
+                // call rename function  here in the case of premission granted first  time;
+
+                Utility.renameFile(mcontext,multiselect_list.get(0).getFilePath(),Constants.Global_File_Rename_NewName,5);
+            }
+
+        }
+
+
+
+    }
+
     public static AnimationActivityRe getInstance() {
         return instance;
     }
@@ -360,15 +390,29 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
         {
             if(multiselect_list.size()>0)
             {
-                new  DeleteFileTask(multiselect_list).execute();
-                for(int i=0;i<multiselect_list.size();i++)
-                    animList.remove(multiselect_list.get(i));
+                File f =new File(multiselect_list.get(0).getFilePath());
 
-                multiSelectAdapter.notifyDataSetChanged();
-
-                if (mActionMode != null) {
-                    mActionMode.finish();
+                if(UtilityStorage.isWritableNormalOrSaf(f,mcontext)) {
+                    new DeleteFileTask(multiselect_list).execute();
                 }
+                else
+                {
+                    UtilityStorage.guideDialogForLEXA(mcontext,f.getParent(),Constants.FILE_DELETE_REQUEST_CODE);
+                }
+
+
+             // this task  is now being done of post execute of delete file task
+
+//                for(int i=0;i<multiselect_list.size();i++)
+//                    animList.remove(multiselect_list.get(i));
+//
+//                multiSelectAdapter.notifyDataSetChanged();
+//
+//                if (mActionMode != null) {
+//                    mActionMode.finish();
+//                }
+
+
 
             }
         }
@@ -419,6 +463,12 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
 
     private class DeleteFileTask extends AsyncTask<Void,Void,Integer>
     {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            CustomProgressDialog.show(mcontext,getResources().getString(R.string.deleting_file));
+        }
+
         ArrayList<Model_Anim> multiselect_list;
         DeleteFileTask( ArrayList<Model_Anim> multiselect_list)
         {
@@ -435,7 +485,23 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
         protected void onPostExecute(Integer FileCount) {
             super.onPostExecute(FileCount);
 
+
+            // remove  the  file from  img list  if deleted;
+            if(FileCount>0)
+            {
+                for (int i = 0; i < multiselect_list.size(); i++)
+                    animList.remove(multiselect_list.get(i));
+
+                multiSelectAdapter.notifyDataSetChanged();
+
+                if (mActionMode != null) {
+                    mActionMode.finish();
+                }
+            }
+
+
             Toast.makeText(mcontext, FileCount+" file deleted", Toast.LENGTH_SHORT).show();
+            CustomProgressDialog.dismiss();
 
 
         }
@@ -535,11 +601,29 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
         for(int i=0;i<delete_list.size();i++)
         {
             File f=new File(String.valueOf(delete_list.get(i).getFilePath()));
-            if(f.exists())
-                if(f.delete()) {
+            if(f.exists()) {
+                if (f.delete()) {
                     count++;
-                   sendBroadcast(f);
+                    sendBroadcast(f);
                 }
+                //new
+                else {
+                    boolean st = UtilityStorage.isWritableNormalOrSaf(f, mcontext);
+                    System.out.println("" + st);
+                    if (st) {
+                        boolean status = UtilityStorage.deleteWithAccesFramework(mcontext, f);
+                        if (status) {
+                            count++;
+                            Utility.RunMediaScan(mcontext, f);
+                        }
+                    } else {
+                       // UtilityStorage.triggerStorageAccessFramework(mcontext);
+                    }
+
+
+                }
+                //new
+            }
 
         }
         Constants.DELETED_ANIMATION_FILES=count;

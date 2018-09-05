@@ -1,26 +1,33 @@
 package com.example.filehunt;
 
+import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.SyncStateContract;
 import android.speech.tts.UtteranceProgressListener;
+import android.support.annotation.RequiresApi;
 import android.support.v4.content.FileProvider;
+import android.support.v4.provider.DocumentFile;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,11 +46,15 @@ import com.example.filehunt.Model.Model_Apk;
 import com.example.filehunt.Model.Model_Audio;
 import com.example.filehunt.Utils.AlertDialogHelper;
 import com.example.filehunt.Utils.AutoFitGridLayoutManager;
+import com.example.filehunt.Utils.CustomProgressDialog;
 import com.example.filehunt.Utils.RecyclerItemClickListener;
 import com.example.filehunt.Utils.Utility;
+import com.example.filehunt.Utils.UtilityStorage;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class AudioActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener ,MultiSelectAdapter_Audio.AudioListener {
@@ -72,6 +83,8 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
     static  AudioActivityRe instance;
     private boolean isUnseleAllEnabled=false;
 
+    private SharedPreferences sharedPrefs;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,6 +92,8 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         blankIndicator=(ImageView) findViewById(R.id.blankIndicator);
         mcontext=AudioActivityRe.this;
+        UtilityStorage.InitilaizePrefs(mcontext);
+        //sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         Utility.setActivityTitle(mcontext,getResources().getString(R.string.cat_Audio));
         int_position = getIntent().getIntExtra("value", 0);
 
@@ -143,6 +158,36 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
 
 
     }
+//    //public SharedPreferences getPrefs() {
+//        return sharedPrefs;
+//    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int responseCode, Intent data) {
+        super.onActivityResult(requestCode, responseCode, data);
+
+
+        if(requestCode==Constants.FILE_DELETE_REQUEST_CODE) {
+            boolean isPersistUriSet = UtilityStorage.setUriForStorage(requestCode, responseCode, data);
+            if (isPersistUriSet && multiselect_list.size() > 0)
+                new DeleteFileTask(multiselect_list).execute();
+        }
+        if(requestCode==Constants.FILE_RENAME_REQUEST_CODE)
+        {
+            boolean isPersistUriSet = UtilityStorage.setUriForStorage(requestCode, responseCode, data);
+            if (isPersistUriSet && multiselect_list.size() > 0)
+            {
+                // call rename function  here in the case of premission granted first  time;
+
+                Utility.renameFile(mcontext,multiselect_list.get(0).getAudioPath(),Constants.Global_File_Rename_NewName,2);
+            }
+
+        }
+
+
+
+    }
+
     public static AudioActivityRe getInstance() {
         return instance;
     }
@@ -379,15 +424,32 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
         {
             if(multiselect_list.size()>0)
             {
-                new  DeleteFileTask(multiselect_list).execute();
-                for(int i=0;i<multiselect_list.size();i++)
-                    audioList.remove(multiselect_list.get(i));
 
-                multiSelectAdapter.notifyDataSetChanged();
 
-                if (mActionMode != null) {
-                    mActionMode.finish();
+                //
+                File f =new File(multiselect_list.get(0).getAudioPath());
+
+                if(UtilityStorage.isWritableNormalOrSaf(f,mcontext)) {
+                    new DeleteFileTask(multiselect_list).execute();
                 }
+                else
+                {
+                    UtilityStorage.guideDialogForLEXA(mcontext,f.getParent(),Constants.FILE_DELETE_REQUEST_CODE);
+                }
+
+
+                //  now this task  is being done on  postexecute of detefiletask
+
+//                for(int i=0;i<multiselect_list.size();i++)
+//                    audioList.remove(multiselect_list.get(i));
+//
+//                multiSelectAdapter.notifyDataSetChanged();
+//
+//                if (mActionMode != null) {
+//                    mActionMode.finish();
+//                }
+
+
 
             }
         }
@@ -417,6 +479,12 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
     }
     private class DeleteFileTask extends AsyncTask<Void,Void,Integer>
     {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            CustomProgressDialog.show(mcontext,getResources().getString(R.string.deleting_file));
+        }
+
         ArrayList<Model_Audio> multiselect_list;
         DeleteFileTask( ArrayList<Model_Audio> multiselect_list)
         {
@@ -432,10 +500,20 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
         @Override
         protected void onPostExecute(Integer FileCount) {
             super.onPostExecute(FileCount);
+            if(FileCount>0)
+            {
+                for (int i = 0; i < multiselect_list.size(); i++)
+                    audioList.remove(multiselect_list.get(i));
 
+                multiSelectAdapter.notifyDataSetChanged();
+
+                if (mActionMode != null) {
+                    mActionMode.finish();
+                }
+            }
             Toast.makeText(mcontext, FileCount+" file deleted", Toast.LENGTH_SHORT).show();
 
-
+            CustomProgressDialog.dismiss();
         }
     }
     private void selectAll()
@@ -535,16 +613,146 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
         for(int i=0;i<delete_list.size();i++)
         {
             File f=new File(String.valueOf(delete_list.get(i).getAudioPath()));
-            if(f.exists())
-                if(f.delete()) {
+            if(f.exists()) {
+                if (f.delete()) {
                     count++;
                     sendBroadcast(f);
                 }
+                //new
+                else {
+                    boolean st = UtilityStorage.isWritableNormalOrSaf(f, mcontext);
+                    System.out.println("" + st);
+                    if (st) {
+                        boolean status = UtilityStorage.deleteWithAccesFramework(mcontext, f);
+                        if (status) {
+                            count++;
+                            Utility.RunMediaScan(mcontext, f);
+                        }
+                    }
+                    else {
+                      //  UtilityStorage.triggerStorageAccessFramework(mcontext);
+                    }
+
+
+                }
+                //new
+            }
 
         }
         Constants.DELETED_AUDIO_FILES=count;
         return count;
     }
+    //new
+    private  boolean deleteWithAccesFramework(Context context, File file)
+    {
+        // Try with Storage Access Framework.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && isOnExtSdCard(file, context)) {
+
+            DocumentFile document = getDocumentFile(file, false, context);
+            return document.delete();
+
+        }
+        else
+        {
+            return  false;
+        }
+
+    }
+    public static boolean isOnExtSdCard(final File file, Context c) {
+        return getExtSdCardFolder(file, c) != null;
+    }
+    public static DocumentFile getDocumentFile(final File file, final boolean isDirectory, Context context) {
+
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT)
+            return DocumentFile.fromFile(file);
+
+        String baseFolder = getExtSdCardFolder(file, context);
+        boolean originalDirectory = false;
+        if (baseFolder == null) {
+            return null;
+        }
+
+        String relativePath = null;
+        try {
+            String fullPath = file.getCanonicalPath();
+            if (!baseFolder.equals(fullPath))
+                relativePath = fullPath.substring(baseFolder.length() + 1);
+            else originalDirectory = true;
+        } catch (IOException e) {
+            return null;
+        } catch (Exception f) {
+            originalDirectory = true;
+            //continue
+        }
+        String as = PreferenceManager.getDefaultSharedPreferences(context).getString(Constants.PREFERENCE_URI,
+                null);
+
+        Uri treeUri = null;
+        if (as != null) treeUri = Uri.parse(as);
+        if (treeUri == null) {
+            return null;
+        }
+
+        // start with root of SD card and then parse through document tree.
+        DocumentFile document = DocumentFile.fromTreeUri(context, treeUri);
+        if (originalDirectory) return document;
+        String[] parts = relativePath.split("\\/");
+        for (int i = 0; i < parts.length; i++) {
+            DocumentFile nextDocument = document.findFile(parts[i]);
+
+            if (nextDocument == null) {
+                if ((i < parts.length - 1) || isDirectory) {
+                    nextDocument = document.createDirectory(parts[i]);
+                } else {
+                    nextDocument = document.createFile("image", parts[i]);
+                }
+            }
+            document = nextDocument;
+        }
+
+        return document;
+    }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private static String getExtSdCardFolder(final File file, Context context) {
+        String[] extSdPaths = getExtSdCardPaths(context);
+        try {
+            for (int i = 0; i < extSdPaths.length; i++) {
+                if (file.getCanonicalPath().startsWith(extSdPaths[i])) {
+                    return extSdPaths[i];
+                }
+            }
+        } catch (IOException e) {
+            return null;
+        }
+        return null;
+    }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private static String[] getExtSdCardPaths(Context context) {
+        List<String> paths = new ArrayList<>();
+        for (File file : context.getExternalFilesDirs("external")) {
+            if (file != null && !file.equals(context.getExternalFilesDir("external"))) {
+                int index = file.getAbsolutePath().lastIndexOf("/Android/data");
+                if (index < 0) {
+                    Log.w("Log", "Unexpected external file dir: " + file.getAbsolutePath());
+                } else {
+                    String path = file.getAbsolutePath().substring(0, index);
+                    try {
+                        path = new File(path).getCanonicalPath();
+                    } catch (IOException e) {
+                        // Keep non-canonical path.
+                    }
+                    paths.add(path);
+                }
+            }
+        }
+        if (paths.isEmpty()) paths.add("/storage/sdcard1");
+        return paths.toArray(new String[0]);
+    }
+
+
+    //new
 
     private void sendBroadcast(File outputFile)
     {

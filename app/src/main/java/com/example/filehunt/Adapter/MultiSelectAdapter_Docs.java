@@ -45,7 +45,7 @@ public class MultiSelectAdapter_Docs extends RecyclerView.Adapter<MultiSelectAda
              fileSize=(TextView)view.findViewById(R.id.FileSize);
              fileMdate=(TextView)view.findViewById(R.id.FileMdate);
              fileDuration=(TextView)view.findViewById(R.id.FileDuration);
-              chbx=(CheckBox) view.findViewById(R.id.chbx);
+             chbx=(CheckBox) view.findViewById(R.id.chbx);
              rellayout=(RelativeLayout)view.findViewById(R.id.rellayout);
              FileIcon=(ImageView)view.findViewById(R.id.FileIcon);
 

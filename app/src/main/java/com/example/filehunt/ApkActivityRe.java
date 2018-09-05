@@ -42,8 +42,10 @@ import com.example.filehunt.Model.Model_Docs;
 import com.example.filehunt.Model.Model_Recent;
 import com.example.filehunt.Utils.AlertDialogHelper;
 import com.example.filehunt.Utils.AsynctaskUtility;
+import com.example.filehunt.Utils.CustomProgressDialog;
 import com.example.filehunt.Utils.RecyclerItemClickListener;
 import com.example.filehunt.Utils.Utility;
+import com.example.filehunt.Utils.UtilityStorage;
 
 
 import java.io.File;
@@ -85,6 +87,7 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
         blankIndicator=(ImageView) findViewById(R.id.blankIndicator);
         instance=this;
         mcontext=ApkActivityRe.this;
+        UtilityStorage.InitilaizePrefs(mcontext);
         Constants.DELETED_APK_FILES=0;
 
         Utility.setActivityTitle(mcontext,getResources().getString(R.string.cat_Apk));
@@ -128,6 +131,32 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
 
 
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode==Constants.FILE_DELETE_REQUEST_CODE) {
+            boolean isPersistUriSet = UtilityStorage.setUriForStorage(requestCode, resultCode, data);
+            if (isPersistUriSet && multiselect_list.size() > 0)
+                new DeleteFileTask(multiselect_list).execute();
+        }
+        if(requestCode==Constants.FILE_RENAME_REQUEST_CODE)
+        {
+            boolean isPersistUriSet = UtilityStorage.setUriForStorage(requestCode, resultCode, data);
+            if (isPersistUriSet && multiselect_list.size() > 0)
+            {
+                // call rename function  here in the case of premission granted first  time;
+
+                Utility.renameFile(mcontext,multiselect_list.get(0).getFilePath(),Constants.Global_File_Rename_NewName,7);
+            }
+
+        }
+
+
+
+    }
+
     public static ApkActivityRe getInstance() {
         return instance;
     }
@@ -366,15 +395,31 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
         {
             if(multiselect_list.size()>0)
             {
-                new  DeleteFileTask(multiselect_list).execute();
-                for(int i=0;i<multiselect_list.size();i++)
-                    ApkList.remove(multiselect_list.get(i));
 
-                multiSelectAdapter.notifyDataSetChanged();
+                //
+                File f =new File(multiselect_list.get(0).getFilePath());
 
-                if (mActionMode != null) {
-                    mActionMode.finish();
+                if(UtilityStorage.isWritableNormalOrSaf(f,mcontext)) {
+                    new DeleteFileTask(multiselect_list).execute();
                 }
+                else
+                {
+                    UtilityStorage.guideDialogForLEXA(mcontext,f.getParent(),Constants.FILE_DELETE_REQUEST_CODE);
+                }
+
+                //
+
+                // now this task  is being done  on post execute of delete task
+
+
+//                for(int i=0;i<multiselect_list.size();i++)
+//                    ApkList.remove(multiselect_list.get(i));
+//
+//                multiSelectAdapter.notifyDataSetChanged();
+//
+//                if (mActionMode != null) {
+//                    mActionMode.finish();
+//                }
 
             }
         }
@@ -428,6 +473,13 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
 
     private class DeleteFileTask extends AsyncTask<Void,Void,Integer>
     {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            CustomProgressDialog.show(mcontext,getResources().getString(R.string.deleting_file));
+        }
+
         ArrayList<Model_Apk> multiselect_list;
         DeleteFileTask( ArrayList<Model_Apk> multiselect_list)
         {
@@ -444,9 +496,26 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
         protected void onPostExecute(Integer FileCount) {
             super.onPostExecute(FileCount);
 
+
+            // remove  the  file from ApkList list if deleted;
+
+            if(FileCount>0)
+            {
+                for (int i = 0; i < multiselect_list.size(); i++)
+                    ApkList.remove(multiselect_list.get(i));
+
+                multiSelectAdapter.notifyDataSetChanged();
+
+                if (mActionMode != null) {
+                    mActionMode.finish();
+                }
+            }
+
+
+
             Toast.makeText(mcontext, FileCount+" file deleted", Toast.LENGTH_SHORT).show();
 
-
+            CustomProgressDialog.dismiss();
         }
     }
     private void selectAll()
@@ -548,14 +617,32 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
     {
         int count=0;
 
-        for(int i=0;i<delete_list.size();i++)
-        {
-            File f=new File(String.valueOf(delete_list.get(i).getFilePath()));
-            if(f.exists())
-                if(f.delete()) {
-                    count++;
-                   sendBroadcast(f);
-                }
+                      for(int i=0;i<delete_list.size();i++)
+                {
+                    File f=new File(String.valueOf(delete_list.get(i).getFilePath()));
+                    if(f.exists()) {
+                        if (f.delete()) {
+                            count++;
+                            sendBroadcast(f);
+                        }
+                        //new
+                        else {
+                            boolean st = UtilityStorage.isWritableNormalOrSaf(f, mcontext);
+                            System.out.println("" + st);
+                            if (st) {
+                                boolean status = UtilityStorage.deleteWithAccesFramework(mcontext, f);
+                                if (status) {
+                                    count++;
+                                    Utility.RunMediaScan(mcontext, f);
+                                }
+                            } else {
+                               // UtilityStorage.triggerStorageAccessFramework(mcontext);
+                            }
+
+
+                        }
+                        //new
+                    }
 
         }
         Constants.DELETED_APK_FILES=count;
