@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.filehunt">
+    package="com.mojodigi.filehunt">
 
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -14,6 +14,7 @@
     <protected-broadcast android:name="android.intent.action.MEDIA_MOUNTED" />
 
     <application
+        android:name="com.mojodigi.filehunt.Application.MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -21,24 +22,24 @@
 
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".SplashActivity"  >
+        <activity android:name="com.mojodigi.filehunt.SplashActivity"  >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity" android:screenOrientation="portrait"></activity>
-        <activity android:name=".Category_Explore_Activity" android:screenOrientation="portrait"></activity>
-        <activity android:name=".PhotosActivity" android:screenOrientation="portrait"></activity>
-        <activity android:name="SingleViewMediaActivity" android:screenOrientation="portrait"></activity>
-        <activity android:name=".PhotosActivityRe" android:screenOrientation="portrait"></activity>
-        <activity android:name=".VideoActivityRe" android:screenOrientation="portrait"></activity>
-        <activity android:name=".AudioActivityRe" android:screenOrientation="portrait"></activity>
-        <activity android:name=".DocsActivityRe" android:screenOrientation="portrait"></activity>
-        <activity android:name=".AnimationActivityRe" android:screenOrientation="portrait"></activity>
-        <activity android:name=".ApkActivityRe" android:screenOrientation="portrait"></activity>
-        <activity android:name=".DownloadActivityRe" android:screenOrientation="portrait"></activity>
-        <activity android:name=".RecentActivityRe" android:screenOrientation="portrait"></activity>
+        <activity android:name="com.mojodigi.filehunt.MainActivity" android:screenOrientation="portrait"></activity>
+        <activity android:name="com.mojodigi.filehunt.Category_Explore_Activity" android:screenOrientation="portrait"></activity>
+        <activity android:name="com.mojodigi.filehunt.PhotosActivity" android:screenOrientation="portrait"></activity>
+        <activity android:name="com.mojodigi.filehunt.SingleViewMediaActivity" android:screenOrientation="portrait"></activity>
+        <activity android:name="com.mojodigi.filehunt.PhotosActivityRe" android:screenOrientation="portrait"></activity>
+        <activity android:name="com.mojodigi.filehunt.VideoActivityRe" android:screenOrientation="portrait"></activity>
+        <activity android:name="com.mojodigi.filehunt.AudioActivityRe" android:screenOrientation="portrait"></activity>
+        <activity android:name="com.mojodigi.filehunt.DocsActivityRe" android:screenOrientation="portrait"></activity>
+        <activity android:name="com.mojodigi.filehunt.AnimationActivityRe" android:screenOrientation="portrait"></activity>
+        <activity android:name="com.mojodigi.filehunt.ApkActivityRe" android:screenOrientation="portrait"></activity>
+        <activity android:name="com.mojodigi.filehunt.DownloadActivityRe" android:screenOrientation="portrait"></activity>
+        <activity android:name="com.mojodigi.filehunt.RecentActivityRe" android:screenOrientation="portrait"></activity>
 
 
         <provider
@@ -53,6 +54,29 @@
 
 
 
+
+        <receiver
+            android:name="com.google.android.gms.analytics.AnalyticsReceiver"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.analytics.ANALYTICS_DISPATCH" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name="com.google.android.gms.analytics.AnalyticsService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <receiver
+            android:name="com.google.android.gms.analytics.CampaignTrackingReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.vending.INSTALL_REFERRER" />
+            </intent-filter>
+        </receiver>
+
+        <service android:name="com.google.android.gms.analytics.CampaignTrackingService" />
 
 
     </application>

@@ -91,7 +91,7 @@ Files with the same name already exist. Do you want to overwrite them?
     <string name="sort_time">Sort by date</string>
     <string name="sort_size">Sort by size</string>
     <string name="sort_type">Sort by type</string>
-    <string name="sort_name">Sort by name</string>
+    <string name="sort_name">Name</string>
 
     <string name="unzip_file">Unzip the file</string>
     <string name="unzip_to_current_directory">Unzip to the current path</string>
@@ -170,6 +170,7 @@ Operation completed. Files will be uploaded in the background
 </string>
     <string name="menu_item_delete">Delete</string>
     <string name="action_search">Search</string>
+    <string name="action_sort">Sort</string>
     <string name="rar_extract_message">Extraction not supported for encrypted RAR files</string>
     <!--taken from filemangaer app-->
 
@@ -200,7 +201,7 @@ Operation completed. Files will be uploaded in the background
 
     <string name="save">SAVE</string>
     <string name="cancel">CANCEL</string>
-   <string name="versiontxt">V 1.8</string>
+    <string name="versiontxt">V 1.0</string>
 
 
     <string name="rename_success">File renamed successfully</string>
@@ -214,5 +215,20 @@ Operation completed. Files will be uploaded in the background
     <string name="permission_txt">Read/Write permission is required</string>
     <string name="open">OPEN</string>
     <string name="deleting_file">Deleting files </string>
+
+    <string-array name="sortbyApps">
+        <item>@string/sortName</item>
+        <item>@string/lastModified</item>
+        <item>@string/sortSize</item>
+    </string-array>
+
+    <string name="sortName">Name</string>
+    <string name="lastModified">Last Modified</string>
+    <string name="sortSize">Size</string>
+    <string name="type">Type</string>
+
+    <string name="sortby">Sort By</string>
+    <string name="ascending">Ascending</string>
+    <string name="descending">Descending</string>
 
 </resources>

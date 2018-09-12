@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 27
     defaultConfig {
-        applicationId "com.example.filehunt"
+        applicationId "com.mojodigi.filehunt"
         minSdkVersion 16
         targetSdkVersion 27
         versionCode 1
@@ -34,6 +34,8 @@ dependencies {
      //zoom image library
     //https://android-arsenal.com/details/1/1509     library url
     implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.10.0'
+    implementation 'com.google.android.gms:play-services-analytics:7.3.0'
+
 
 
 
