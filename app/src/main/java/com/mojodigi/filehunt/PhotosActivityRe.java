@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -18,19 +19,24 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.util.DisplayMetrics;
 import android.view.ActionMode;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.ads.AdView;
 import com.mojodigi.filehunt.Adapter.MultiSelectAdapter;
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Model.Grid_Model;
 //
+
 import com.mojodigi.filehunt.Utils.AlertDialogHelper;
 import com.mojodigi.filehunt.Utils.AutoFitGridLayoutManager;
 import com.mojodigi.filehunt.Utils.CustomProgressDialog;
@@ -40,6 +46,8 @@ import com.mojodigi.filehunt.Utils.UtilityStorage;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import static com.mojodigi.filehunt.Class.Constants.DELETED_IMG_FILES;
 import static com.mojodigi.filehunt.Utils.Utility.pathToBitmap;
@@ -73,6 +81,9 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photos_activity_re);
+
+
+
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         blankIndicator=(ImageView) findViewById(R.id.blankIndicator);
         mcontext=PhotosActivityRe.this;
@@ -148,6 +159,19 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
 
             }
         }));
+
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
 
 
     }
@@ -254,7 +278,9 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         if(id==R.id.action_sort)
         {
 
+            sortDialog(mcontext);
         }
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -263,6 +289,14 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
 
         for (int i = 0; i < Intent_Images_List.size(); i++) {
             Grid_Model gridImg = new Grid_Model();
+            try
+            {
+                File f=new File(Intent_Images_List.get(i));
+                gridImg.setDateToSort(f.lastModified());
+                gridImg.setFileName(f.getName());
+                gridImg.setFileSizeCmpr(f.length());
+            }
+            catch (Exception e){}
             gridImg.setImgPath(Intent_Images_List.get(i));
             img_ImgList.add(gridImg);
         }
@@ -329,16 +363,23 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
-                case R.id.action_copy:
-                    if(multiselect_list.size()>=1)
-                    {
 
-                      for(int i=0;i<multiselect_list.size();i++) {
-                          UtilityStorage.copyFileOrDirectory(mcontext, multiselect_list.get(i).getImgPath().toString(), "/storage/emulated/0/Download/");
-                      }
-                       //System.out.print(fstatus);
-                        return  true;
+                case R.id.action_copy:
+                    if(multiselect_list.size()>0)
+                    {
+                        for(int i=0;i<multiselect_list.size();i++)
+                        {
+                            String fPath=multiselect_list.get(0).getFileName().toString();
+                            System.out.println(""+fPath);
+                            Constants.filesToCopy.add(multiselect_list.get(i).getImgPath().toString());
+                        }
+                        // redirect to  storage fragment;
+                        Constants.redirectToStorage=true;
+
+                        finish();
+
                     }
+                    return true ;
                 case R.id.action_rename:
                     if(multiselect_list.size()==1)
                         Utility.fileRenameDialog(mcontext,multiselect_list.get(0).getImgPath(), Constants.IMAGES);
@@ -793,6 +834,173 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         }
 
         return  Utility.humanReadableByteCount(totalSize,true);
+    }
+
+    String action="";
+    public  void sortDialog(final Context ctx)
+    {
+        action="Name";
+        System.out.print(""+img_ImgList);
+        android.support.v7.app.AlertDialog.Builder  dialog=new android.support.v7.app.AlertDialog.Builder(ctx) ;
+        LayoutInflater layoutInflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        final View view = layoutInflater.inflate(R.layout.dialog_sort, null);
+        dialog.setView(view);
+
+        RadioGroup radioGroup =view.findViewById(R.id.radioGroup);
+        RadioButton name=view.findViewById(R.id.sort_name);
+        RadioButton last=view.findViewById(R.id.sort_last_modified);
+        RadioButton size=view.findViewById(R.id.sort_size);
+        RadioButton type=view.findViewById(R.id.sort_type);
+
+        name.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
+        last.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
+        size.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
+        type.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
+
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                RadioButton rb = (RadioButton) group.findViewById(checkedId);
+                if (null != rb)
+                {
+
+
+
+                    switch (checkedId)
+                    {
+                        case R.id.sort_name:
+                            action="Name";
+                            break;
+
+                        case R.id.sort_last_modified:
+                            action="Last";
+                            break;
+                        case R.id.sort_size:
+                            action="Size";
+                            break;
+                        case R.id.sort_type:
+                            action="Type";
+                            break;
+
+
+
+                    }
+                   // Toast.makeText(ctx, action, Toast.LENGTH_SHORT).show();
+
+
+                }
+
+            }
+        });
+
+
+        dialog.setPositiveButton(ctx.getResources().getString(R.string.descending), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                dialog.dismiss();
+                if(action.equalsIgnoreCase("Name"))
+                {
+                    Collections.sort(img_ImgList, new Comparator<Grid_Model>() {
+                        public int compare(Grid_Model o1, Grid_Model o2) {
+                            return o2.getFileName().compareToIgnoreCase(o1.getFileName());
+
+                        }
+                    });
+                }
+                else if(action.equalsIgnoreCase("Last"))
+                {
+                    Collections.sort(img_ImgList, new Comparator<Grid_Model>() {
+                        public int compare(Grid_Model o1, Grid_Model o2) {
+                            return Utility.longToDate(o2.getDateToSort()).compareTo(Utility.longToDate(o1.getDateToSort()));
+
+                        }
+                    });
+                }
+                else if(action.equalsIgnoreCase("Size"))
+                {
+                    Collections.sort(img_ImgList, new Comparator<Grid_Model>()
+                    {
+                        public int compare(Grid_Model o1, Grid_Model o2) {
+
+                            return (int) (o2.getFileSizeCmpr() - o1.getFileSizeCmpr());
+
+                        }
+                    });
+                }
+                else if(action.equalsIgnoreCase("Type"))
+                {
+
+
+
+                }
+
+                System.out.print(""+img_ImgList);
+                refreshAdapter();
+
+            }
+        });
+        dialog.setNegativeButton(ctx.getResources().getString(R.string.ascending), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                dialog.dismiss();
+
+
+
+                if(action.equalsIgnoreCase("Name"))
+                {
+                    Collections.sort(img_ImgList, new Comparator<Grid_Model>() {
+                        public int compare(Grid_Model o1, Grid_Model o2) {
+                            return o1.getFileName().compareToIgnoreCase(o2.getFileName());
+
+                        }
+                    });
+
+
+                }
+                else if(action.equalsIgnoreCase("Last"))
+                {
+                    Collections.sort(img_ImgList, new Comparator<Grid_Model>() {
+                        public int compare(Grid_Model o1, Grid_Model o2) {
+                            return Utility.longToDate(o1.getDateToSort()).compareTo(Utility.longToDate(o2.getDateToSort()));
+
+                        }
+                    });
+                }
+                else if(action.equalsIgnoreCase("Size"))
+                {
+
+
+                    Collections.sort(img_ImgList, new Comparator<Grid_Model>()
+                    {
+                        public int compare(Grid_Model o1, Grid_Model o2) {
+
+                            return (int) (o1.getFileSizeCmpr() - o2.getFileSizeCmpr());
+
+                        }
+                    });
+
+
+                }
+                else if(action.equalsIgnoreCase("Type"))
+                {
+
+                }
+
+
+                System.out.print(""+img_ImgList);
+                refreshAdapter();
+
+
+            }
+        });
+
+
+        dialog.show();
+
+
+
     }
 
 }

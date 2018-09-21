@@ -47,7 +47,7 @@
 
     android:textSize="@dimen/sp10"
     android:gravity="center"
-    android:text="Copyright © 2018 jack morris media.All rights reserved."
+    android:text="Copyright © 2018 Mojodigitech.All rights reserved."
     android:layout_width="wrap_content"
     android:layout_height="wrap_content" />
 

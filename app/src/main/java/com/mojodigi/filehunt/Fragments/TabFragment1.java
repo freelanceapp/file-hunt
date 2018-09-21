@@ -31,14 +31,18 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdView;
 import com.mojodigi.filehunt.AnimationActivityRe;
 import com.mojodigi.filehunt.ApkActivityRe;
 import com.mojodigi.filehunt.Category_Explore_Activity;
+import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.DocsActivityRe;
 import com.mojodigi.filehunt.DownloadActivityRe;
+import com.mojodigi.filehunt.MainActivity;
 import com.mojodigi.filehunt.Model.category_Model;
 //
 import com.mojodigi.filehunt.RecentActivityRe;
+
 import com.mojodigi.filehunt.Utils.EqualSpacingItemDecoration;
 import com.mojodigi.filehunt.Utils.Utility;
 import com.mojodigi.filehunt.Utils.UtilityStorage;
@@ -124,9 +128,9 @@ public class TabFragment1 extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
            ctx=getActivity();
-        cat_List.clear();
+           cat_List.clear();
 
-        permissionStatus = getActivity().getSharedPreferences("permissionStatus", MODE_PRIVATE);
+           permissionStatus = getActivity().getSharedPreferences("permissionStatus", MODE_PRIVATE);
         ext_layout=(RelativeLayout)view.findViewById(R.id.ext_layout);
         category_recycler_view= (RecyclerView) view.findViewById(R.id.category_recycler_view);
         progressBar=(ProgressBar)view.findViewById(R.id.progressBar);
@@ -369,6 +373,16 @@ public class TabFragment1 extends Fragment {
 
 
     }
+    @Override
+    public void onPause() {
+
+        super.onPause();
+    }
+    @Override
+    public void onDestroy() {
+
+        super.onDestroy();
+    }
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
@@ -376,12 +390,16 @@ public class TabFragment1 extends Fragment {
 
         if(isVisibleToUser)
         {
+           try {
 
+               ((MainActivity) getActivity()).ShowHideMenu();
 
+           }catch (Exception e)
+           {
 
+           }
 
-
-        }
+            }
     }
 
     private void getCategories()
@@ -453,6 +471,8 @@ public class TabFragment1 extends Fragment {
 
 
 
+
+
     }
 
     public class categoryAdapter extends  RecyclerView.Adapter<categoryAdapter.categoryViewHolder>
@@ -512,8 +532,10 @@ public class TabFragment1 extends Fragment {
                     }
                     else  if(position==7)
                     {
+
                         Intent i = new Intent(getActivity(), ApkActivityRe.class);
                         startActivity(i);
+
                     }
                     else {
                         Intent i = new Intent(getActivity(), Category_Explore_Activity.class);
@@ -657,7 +679,6 @@ public class TabFragment1 extends Fragment {
     }
     private void fillProgressBar()
     {
-
 
            progressBar.setProgress(0);
            progressBar.setMax(100);
@@ -1104,10 +1125,14 @@ public class TabFragment1 extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+             try {
+                 cat_Recent = new category_Model(getResources().getString(R.string.cat_Recent), String.valueOf(recentFiles.size()), R.mipmap.cat_ic_recent);
+                 cat_List.set(6, cat_Recent);
+                 adapter.notifyDataSetChanged();
+             }catch (Exception e)
+             {
 
-            cat_Recent=new category_Model(getResources().getString(R.string.cat_Recent),String.valueOf(recentFiles.size()),R.mipmap.cat_ic_recent);
-            cat_List.set(6, cat_Recent);
-            adapter.notifyDataSetChanged();
+             }
 
         }
 

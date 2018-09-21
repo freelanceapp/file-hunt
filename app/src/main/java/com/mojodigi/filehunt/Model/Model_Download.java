@@ -12,6 +12,10 @@ public class Model_Download
     public String FileDateModified;
     public String Filetype;
     public long dateToSort;
+
+
+
+    long fileSizeCmpr;
     public long getDateToSort() {
         return dateToSort;
     }
@@ -60,6 +64,13 @@ public class Model_Download
 
     public void setFileDateModified(String fileDateModified) {
         FileDateModified = fileDateModified;
+    }
+    public long getFileSizeCmpr() {
+        return fileSizeCmpr;
+    }
+
+    public void setFileSizeCmpr(long fileSizeCmpr) {
+        this.fileSizeCmpr = fileSizeCmpr;
     }
 
 

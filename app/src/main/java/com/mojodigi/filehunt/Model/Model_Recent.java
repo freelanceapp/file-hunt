@@ -8,6 +8,11 @@ public class Model_Recent  {
     private String FileMdate;
     private String FileSize;
 
+     long dateToSort;
+     long fileSizeCmpr;
+
+
+
     public String getFileType() {
         return FileType;
     }
@@ -48,5 +53,21 @@ public class Model_Recent  {
 
     public void setFileSize(String fileSize) {
         FileSize = fileSize;
+    }
+
+    public long getDateToSort() {
+        return dateToSort;
+    }
+
+    public void setDateToSort(long dateToSort) {
+        this.dateToSort = dateToSort;
+    }
+
+    public long getFileSizeCmpr() {
+        return fileSizeCmpr;
+    }
+
+    public void setFileSizeCmpr(long fileSizeCmpr) {
+        this.fileSizeCmpr = fileSizeCmpr;
     }
 }

@@ -3,6 +3,7 @@ package com.mojodigi.filehunt;
 import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -16,18 +17,24 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.util.DisplayMetrics;
 import android.view.ActionMode;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdView;
 import com.mojodigi.filehunt.Adapter.MultiSelectAdapter_Video;
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Model.Grid_Model;
 //
+
+import com.mojodigi.filehunt.Model.Model_Docs;
 import com.mojodigi.filehunt.Utils.AlertDialogHelper;
 import com.mojodigi.filehunt.Utils.AutoFitGridLayoutManager;
 import com.mojodigi.filehunt.Utils.CustomProgressDialog;
@@ -37,6 +44,8 @@ import com.mojodigi.filehunt.Utils.UtilityStorage;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 
 public class VideoActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener,MultiSelectAdapter_Video.VdoListener {
@@ -64,11 +73,15 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
     private Grid_Model fileTorename;
     private int renamePosition;
     public static  VideoActivityRe instance;
-
+    private AdView mAdView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photos_activity_re);
+
+
+
+
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         blankIndicator=(ImageView) findViewById(R.id.blankIndicator);
         mcontext=VideoActivityRe.this;
@@ -150,6 +163,19 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
 
 
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+    }
+
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -240,6 +266,13 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
             return true;
         }
 
+        if(id==R.id.action_sort)
+        {
+
+            sortDialog(mcontext);
+        }
+
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -248,6 +281,15 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         for (int i = 0; i < Intent_Video_List.size(); i++)
         {
             Grid_Model gridImg = new Grid_Model();
+             try
+             {
+                 File f=new File(Intent_Video_List.get(i));
+                 gridImg.setDateToSort(f.lastModified());
+                 gridImg.setFileName(f.getName());
+                 gridImg.setFileSizeCmpr(f.length());
+             }
+             catch (Exception e){}
+
             gridImg.setImgPath(Intent_Video_List.get(i));
             if(i<thumbList.size())
             gridImg.setImgBitmap(thumbList.get(i));
@@ -357,6 +399,23 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
+
+                case R.id.action_copy:
+                    if(multiselect_list.size()>0)
+                    {
+                        for(int i=0;i<multiselect_list.size();i++)
+                        {
+                            String fPath=multiselect_list.get(0).getFileName().toString();
+                            System.out.println(""+fPath);
+                            Constants.filesToCopy.add(multiselect_list.get(i).getImgPath().toString());
+                        }
+                        // redirect to  storage fragment;
+                        Constants.redirectToStorage=true;
+
+                        finish();
+
+                        }
+                    return true ;
                 case R.id.action_rename:
                     if(multiselect_list.size()==1)
                         Utility.fileRenameDialog(mcontext,multiselect_list.get(0).getImgPath(),Constants.VIDEO);
@@ -741,6 +800,173 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         }
 
         return  Utility.humanReadableByteCount(totalSize,true);
+    }
+
+    String action="";
+    public  void sortDialog(final Context ctx)
+    {
+        action="Name";
+        System.out.print(""+vidioList);
+        android.support.v7.app.AlertDialog.Builder  dialog=new android.support.v7.app.AlertDialog.Builder(ctx) ;
+        LayoutInflater layoutInflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        final View view = layoutInflater.inflate(R.layout.dialog_sort, null);
+        dialog.setView(view);
+
+        RadioGroup radioGroup =view.findViewById(R.id.radioGroup);
+        RadioButton name=view.findViewById(R.id.sort_name);
+        RadioButton last=view.findViewById(R.id.sort_last_modified);
+        RadioButton size=view.findViewById(R.id.sort_size);
+        RadioButton type=view.findViewById(R.id.sort_type);
+
+        name.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
+        last.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
+        size.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
+        type.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
+
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                RadioButton rb = (RadioButton) group.findViewById(checkedId);
+                if (null != rb)
+                {
+
+
+
+                    switch (checkedId)
+                    {
+                        case R.id.sort_name:
+                            action="Name";
+                            break;
+
+                        case R.id.sort_last_modified:
+                            action="Last";
+                            break;
+                        case R.id.sort_size:
+                            action="Size";
+                            break;
+                        case R.id.sort_type:
+                            action="Type";
+                            break;
+
+
+
+                    }
+                    //Toast.makeText(ctx, action, Toast.LENGTH_SHORT).show();
+
+
+                }
+
+            }
+        });
+
+
+        dialog.setPositiveButton(ctx.getResources().getString(R.string.descending), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                dialog.dismiss();
+                if(action.equalsIgnoreCase("Name"))
+                {
+                    Collections.sort(vidioList, new Comparator<Grid_Model>() {
+                        public int compare(Grid_Model o1, Grid_Model o2) {
+                            return o2.getFileName().compareToIgnoreCase(o1.getFileName());
+
+                        }
+                    });
+                }
+                else if(action.equalsIgnoreCase("Last"))
+                {
+                    Collections.sort(vidioList, new Comparator<Grid_Model>() {
+                        public int compare(Grid_Model o1, Grid_Model o2) {
+                            return Utility.longToDate(o2.getDateToSort()).compareTo(Utility.longToDate(o1.getDateToSort()));
+
+                        }
+                    });
+                }
+                else if(action.equalsIgnoreCase("Size"))
+                {
+                    Collections.sort(vidioList, new Comparator<Grid_Model>()
+                    {
+                        public int compare(Grid_Model o1, Grid_Model o2) {
+
+                            return (int) (o2.getFileSizeCmpr() - o1.getFileSizeCmpr());
+
+                        }
+                    });
+                }
+                else if(action.equalsIgnoreCase("Type"))
+                {
+
+
+
+                }
+
+                System.out.print(""+vidioList);
+                refreshAdapter();
+
+            }
+        });
+        dialog.setNegativeButton(ctx.getResources().getString(R.string.ascending), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                dialog.dismiss();
+
+
+
+                if(action.equalsIgnoreCase("Name"))
+                {
+                    Collections.sort(vidioList, new Comparator<Grid_Model>() {
+                        public int compare(Grid_Model o1, Grid_Model o2) {
+                            return o1.getFileName().compareToIgnoreCase(o2.getFileName());
+
+                        }
+                    });
+
+
+                }
+                else if(action.equalsIgnoreCase("Last"))
+                {
+                    Collections.sort(vidioList, new Comparator<Grid_Model>() {
+                        public int compare(Grid_Model o1, Grid_Model o2) {
+                            return Utility.longToDate(o1.getDateToSort()).compareTo(Utility.longToDate(o2.getDateToSort()));
+
+                        }
+                    });
+                }
+                else if(action.equalsIgnoreCase("Size"))
+                {
+
+
+                    Collections.sort(vidioList, new Comparator<Grid_Model>()
+                    {
+                        public int compare(Grid_Model o1, Grid_Model o2) {
+
+                            return (int) (o1.getFileSizeCmpr() - o2.getFileSizeCmpr());
+
+                        }
+                    });
+
+
+                }
+                else if(action.equalsIgnoreCase("Type"))
+                {
+
+                }
+
+
+                System.out.print(""+vidioList);
+                refreshAdapter();
+
+
+            }
+        });
+
+
+        dialog.show();
+
+
+
     }
 
 }

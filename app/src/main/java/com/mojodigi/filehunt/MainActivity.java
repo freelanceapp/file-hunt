@@ -3,6 +3,7 @@ package com.mojodigi.filehunt;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v4.app.Fragment;
@@ -13,16 +14,22 @@ import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
+import com.google.android.gms.ads.AdView;
 import com.mojodigi.filehunt.Adapter.pagerAdapter2;
+import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Fragments.TabFragment1;
 import com.mojodigi.filehunt.Fragments.TabFragment2;
 //
+
 import com.mojodigi.filehunt.Utils.Utility;
 
 import java.io.File;
@@ -38,19 +45,17 @@ public class MainActivity extends AppCompatActivity {
     pagerAdapter2 adapter;
     TabLayout tabLayout;
     CardView cardLayout;
+    Menu context_menu;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
+
         centerTitle();
 
         tabLayout = (TabLayout) findViewById(R.id.tab_layout);
-//        tabLayout.addTab(tabLayout.newTab().setText("CATEGORIES"));
-//        tabLayout.addTab(tabLayout.newTab().setText("STORAGE"));
 
-    //    tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
          viewPager = (ViewPager) findViewById(R.id.pager);
 
@@ -62,6 +67,9 @@ public class MainActivity extends AppCompatActivity {
       //  setSpace();
         viewPager.setCurrentItem(0);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+
+
+
 
 
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -82,9 +90,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        //
 
-        //
+
+
+
 
         viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -105,6 +114,103 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+//        int position = 0;
+//        Bundle extras = getIntent().getExtras();
+//        if(extras != null) {
+//            position = extras.getInt("viewpager_position");
+//
+//            final int finalPosition = position;
+//            new Handler().postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//
+//                    viewPager.setCurrentItem(finalPosition);
+//                }
+//            },1000);
+//
+//        }
+
+
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+
+    }
+    @Override
+    public void onPause() {
+
+        super.onPause();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.menu_paste, menu);
+        context_menu=menu;
+        return super.onCreateOptionsMenu(menu);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(Constants.redirectToStorage) {
+            viewPager.setCurrentItem(1);
+            ShowHideMenu();
+        }
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        int id = item.getItemId();
+
+        if(id==R.id.action_paste)
+        {
+
+               Fragment page = (Fragment) adapter.instantiateItem(viewPager,viewPager.getCurrentItem());
+               if(page!=null )
+                 if(page instanceof TabFragment2) {
+                     ((TabFragment2) page).pasteData();
+                 }
+
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+
+        ShowHideMenu();
+        return super.onPrepareOptionsMenu(menu);
+    }
+    public void ShowHideMenu()
+    {
+
+
+        if(context_menu!=null)
+        {
+                   Fragment page = (Fragment) adapter.instantiateItem(viewPager,viewPager.getCurrentItem());
+
+                  for (int i = 0; i < context_menu.size(); i++) {
+                      MenuItem item = context_menu.getItem(i);
+                      if (item.getTitle().toString().equalsIgnoreCase(getResources().getString(R.string.menu_paste))) {
+                          if (Constants.filesToCopy.size() > 0 && page instanceof  TabFragment2) {
+                              item.setVisible(true);
+                          } else {
+                              item.setVisible(false);
+                          }
+                      }
+
+              }
+            invalidateOptionsMenu();
+        }
+
     }
 
     private void setSpace() {
@@ -122,6 +228,7 @@ public class MainActivity extends AppCompatActivity {
         adapter.addFragment(new TabFragment1(), "Categories");
         adapter.addFragment(new TabFragment2(), "Storage");
         viewPager.setAdapter(adapter);
+
     }
 
     private void setupTabLayout() {
@@ -191,6 +298,7 @@ public class MainActivity extends AppCompatActivity {
 
                 break;
         }
+        ShowHideMenu();
     }
     private void centerTitle() {
         ArrayList<View> textViews = new ArrayList<>();
@@ -223,9 +331,14 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
 
+
+        super.onDestroy();
+        Constants.filesToCopy.clear();// clear  the array list  that  contains the files to  be copied;
+        Constants.redirectToStorage=false; // set variable false because if it is true it redirect to  Tabfragmnet2 on load of MainActivity (it may crash app if remained to  true)
         clearApplicationData(MainActivity.this);
+
+
     }
     public void clearApplicationData(Context context) {
         File cache = context.getCacheDir();

@@ -15,10 +15,12 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
 
+import com.google.android.gms.ads.AdView;
 import com.mojodigi.filehunt.Adapter.Adapter_PhotosFolder;
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Model.Model_images;
 //
+
 import com.mojodigi.filehunt.Utils.AsynctaskUtility;
 import com.mojodigi.filehunt.Utils.Utility;
 
@@ -42,6 +44,7 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
     int AUDIO=3;
     int VIDEO=2;
     int IMAGES=1;
+
     public static ArrayList<Model_images> al_images = new ArrayList<>();
 
     Uri uri;
@@ -111,13 +114,30 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
         });
 
 
-        }
 
+
+
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
 
+
+        if(Constants.redirectToStorage)
+        {
+            finish();  // if copy operation is selected then finish this activity  to open
+             // the MainActivity with storage option;
+            return;
+        }
 
         if(Constants.DELETED_VDO_FILES>0 && position==1)
         {
@@ -133,6 +153,10 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
             new AsynctaskUtility<Model_images>(ctx,this,IMAGES).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         }
+
+
+
+
 
 
     }

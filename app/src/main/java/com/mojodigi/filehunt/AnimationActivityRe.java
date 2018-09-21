@@ -3,6 +3,7 @@ package com.mojodigi.filehunt;
 import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -18,19 +19,25 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.view.ActionMode;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.mojodigi.filehunt.Adapter.MultiSelectAdapter_Anim;
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Model.Model_Anim;
 //
+
 import com.mojodigi.filehunt.Utils.AlertDialogHelper;
 import com.mojodigi.filehunt.Utils.AsynctaskUtility;
 import com.mojodigi.filehunt.Utils.CustomProgressDialog;
@@ -41,6 +48,8 @@ import com.mojodigi.filehunt.Utils.UtilityStorage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 
 
 public class AnimationActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener,MultiSelectAdapter_Anim.AnimListener,AsynctaskUtility.AsyncResponse{
@@ -72,6 +81,9 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photos_activity_re);
+
+
+
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         blankIndicator=(ImageView) findViewById(R.id.blankIndicator);
         mcontext=AnimationActivityRe.this;
@@ -126,6 +138,18 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
 
 
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -210,9 +234,17 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+
+
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_search) {
             return true;
+        }
+
+        if(id==R.id.action_sort)
+        {
+
+            sortDialog(mcontext);
         }
 
         return super.onOptionsItemSelected(item);
@@ -324,6 +356,25 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
+
+
+                case R.id.action_copy:
+                    if(multiselect_list.size()>0)
+                    {
+                        for(int i=0;i<multiselect_list.size();i++)
+                        {
+                            String fPath=multiselect_list.get(0).getFilePath().toString();
+                            System.out.println(""+fPath);
+                            Constants.filesToCopy.add(multiselect_list.get(i).getFilePath().toString());
+                        }
+                        // redirect to  storage fragment;
+                        Constants.redirectToStorage=true;
+
+                        finish();
+
+
+                    }
+                    return true ;
 
                 case R.id.action_rename:
                     if(multiselect_list.size()==1)
@@ -839,5 +890,173 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
 
         return  Utility.humanReadableByteCount(totalSize,true);
     }
+
+    String action="";
+    public  void sortDialog(final Context ctx)
+    {
+        action="Name";
+        System.out.print(""+animList);
+        android.support.v7.app.AlertDialog.Builder  dialog=new android.support.v7.app.AlertDialog.Builder(ctx) ;
+        LayoutInflater layoutInflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view = layoutInflater.inflate(R.layout.dialog_sort, null);
+        dialog.setView(view);
+
+        RadioGroup radioGroup =view.findViewById(R.id.radioGroup);
+        RadioButton name=view.findViewById(R.id.sort_name);
+        RadioButton last=view.findViewById(R.id.sort_last_modified);
+        RadioButton size=view.findViewById(R.id.sort_size);
+        RadioButton type=view.findViewById(R.id.sort_type);
+
+        name.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
+        last.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
+        size.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
+        type.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
+
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                RadioButton rb = (RadioButton) group.findViewById(checkedId);
+                if (null != rb)
+                {
+
+
+
+                    switch (checkedId)
+                    {
+                        case R.id.sort_name:
+                            action="Name";
+                            break;
+
+                        case R.id.sort_last_modified:
+                            action="Last";
+                            break;
+                        case R.id.sort_size:
+                            action="Size";
+                            break;
+                        case R.id.sort_type:
+                            action="Type";
+                            break;
+
+
+
+                    }
+
+
+
+                }
+
+            }
+        });
+
+
+        dialog.setPositiveButton(ctx.getResources().getString(R.string.descending), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                dialog.dismiss();
+                if(action.equalsIgnoreCase("Name"))
+                {
+                    Collections.sort(animList, new Comparator<Model_Anim>() {
+                        public int compare(Model_Anim o1, Model_Anim o2) {
+                            return o2.getFileName().compareToIgnoreCase(o1.getFileName());
+
+                        }
+                    });
+                }
+                else if(action.equalsIgnoreCase("Last"))
+                {
+                    Collections.sort(animList, new Comparator<Model_Anim>() {
+                        public int compare(Model_Anim o1, Model_Anim o2) {
+                            return Utility.longToDate(o2.getDateToSort()).compareTo(Utility.longToDate(o1.getDateToSort()));
+
+                        }
+                    });
+                }
+                else if(action.equalsIgnoreCase("Size"))
+                {
+                    Collections.sort(animList, new Comparator<Model_Anim>()
+                    {
+                        public int compare(Model_Anim o1, Model_Anim o2) {
+
+                            return (int) (o2.getFileSizeCmpr() - o1.getFileSizeCmpr());
+
+                        }
+                    });
+                }
+                else if(action.equalsIgnoreCase("Type"))
+                {
+
+
+
+                }
+
+                System.out.print(""+animList);
+                refreshAdapter();
+
+            }
+        });
+        dialog.setNegativeButton(ctx.getResources().getString(R.string.ascending), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                dialog.dismiss();
+
+
+
+                if(action.equalsIgnoreCase("Name"))
+                {
+                    Collections.sort(animList, new Comparator<Model_Anim>() {
+                        public int compare(Model_Anim o1, Model_Anim o2) {
+                            return o1.getFileName().compareToIgnoreCase(o2.getFileName());
+
+                        }
+                    });
+
+
+                }
+                else if(action.equalsIgnoreCase("Last"))
+                {
+                    Collections.sort(animList, new Comparator<Model_Anim>() {
+                        public int compare(Model_Anim o1, Model_Anim o2) {
+                            return Utility.longToDate(o1.getDateToSort()).compareTo(Utility.longToDate(o2.getDateToSort()));
+
+                        }
+                    });
+                }
+                else if(action.equalsIgnoreCase("Size"))
+                {
+
+
+                    Collections.sort(animList, new Comparator<Model_Anim>()
+                    {
+                        public int compare(Model_Anim o1, Model_Anim o2) {
+
+                            return (int) (o1.getFileSizeCmpr() - o2.getFileSizeCmpr());
+
+                        }
+                    });
+
+
+                }
+                else if(action.equalsIgnoreCase("Type"))
+                {
+
+                }
+
+
+                System.out.print(""+animList);
+                refreshAdapter();
+
+
+            }
+        });
+
+
+        dialog.show();
+
+
+
+    }
+
 
 }

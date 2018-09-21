@@ -1,5 +1,6 @@
 <RelativeLayout android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/bckimg"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -15,11 +16,22 @@
         android:layout_height="match_parent"
         android:id="@+id/gv_folder"
         android:numColumns="2"
+        android:layout_above="@+id/adView"
+        android:layout_marginTop="@dimen/dp5"
+        android:layout_marginRight="@dimen/dp5"
+        android:layout_marginLeft="@dimen/dp5"
 
-        android:layout_margin="@dimen/dp5"
        ></GridView>
 
-
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/adView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        ads:adSize="SMART_BANNER"
+        android:visibility="gone"
+        ads:adUnitId="@string/banner_add_id"></com.google.android.gms.ads.AdView>
 
 
 

@@ -1,17 +1,16 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.example.filehunt.com.mobpro.filehunt.PhotosActivityRe">
+  >
 
 
     <item
-
         android:id="@+id/action_sort"
         android:icon="@mipmap/ic_sort"
         android:orderInCategory="100"
         android:title="@string/action_sort"
-        android:visible="false"
         app:showAsAction="always"
+
        />
 
     <item

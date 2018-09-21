@@ -455,7 +455,7 @@ public  class  UtilityStorage {
     }
 
 
-    public static void copyFileOrDirectory(Context  ctx,String srcDir, String dstDir) {
+    public static int copyFileOrDirectory(Context  ctx,String srcDir, String dstDir) {
 
         try {
             File src = new File(srcDir);
@@ -472,14 +472,16 @@ public  class  UtilityStorage {
 
                 }
             } else {
-                copyFile(ctx,src, dst);
+               return copyFile(ctx,src, dst);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return 0;
     }
 
-    public static void copyFile(Context ctx,File sourceFile, File destFile) throws IOException {
+    public static int copyFile(Context ctx,File sourceFile, File destFile) throws IOException {
+
         if (!destFile.getParentFile().exists())
             destFile.getParentFile().mkdirs();
 
@@ -495,10 +497,11 @@ public  class  UtilityStorage {
             destination = new FileOutputStream(destFile).getChannel();
             destination.transferFrom(source, 0, source.size());
 
-
             Utility.RunMediaScan(ctx,destFile);
+            return  1;
 
-        } finally {
+        }
+        finally {
             if (source != null) {
                 source.close();
             }

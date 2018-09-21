@@ -368,7 +368,10 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
                     model.setFileName(fileName);
                     model.setFilePath(path);
                     model.setFileSize(Utility.humanReadableByteCount(fileSize,true));
+                    model.setFileSizeCmpr(fileSize);
                     model.setFileMDate(Utility.LongToDate(fileDateModified));
+                    model.setDateCmpr(Long.parseLong(fileDateModified));
+
                     ApkList.add(model);
 
                 }
@@ -436,6 +439,8 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
                     model.setFileSize(Utility.humanReadableByteCount(fileSize,true));
                     model.setFileName(fileName);
                     model.setFileMdate(Utility.LongToDate(String.valueOf(mDate)));
+                    model.setDateToSort(mDate);
+                    model.setFileSizeCmpr(fileSize);
                     model.setFilePath(path);
                     model.setFileType(Utility.getFileExtensionfromPath(path));
                     RecentListLocal.add(model);
@@ -508,6 +513,8 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
                     model.setFileSize(Utility.humanReadableByteCount(fileSize,true));
                     model.setFileMDate(Utility.LongToDate(fileDateModified));
                     model.setFileType(FileType);
+                    model.setFileSizeCmpr(fileSize);
+                    model.setDateToSort(Long.parseLong(fileDateModified));
 
                     docsList.add(model);
 
@@ -540,9 +547,12 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
                     model.setFilePath(listFile[i].toString());
                     model.setFileDateModified(Utility.LongToDate(f.lastModified()));
                     model.setDateToSort(f.lastModified());
+                    model.setFileSizeCmpr(f.length());
                     model.setFileSize(Utility.humanReadableByteCount(f.length(),true));
+
                     model.setFileName(f.getName());
                     model.setFiletype(Utility.getFileExtensionfromPath(listFile[i].toString()));
+
                     downLoadListLocal.add(model);
                 }
             }
@@ -583,6 +593,8 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
                     model.setFilePath(path);
                     model.setFileSize(Utility.humanReadableByteCount(fileSize,true));
                     model.setFileMDate(Utility.LongToDate(fileDateModified));
+                    model.setFileSizeCmpr(fileSize);
+                    model.setDateToSort(Long.parseLong(fileDateModified));
                     // model.setFileType(FileType);
 
                     animList.add(model);

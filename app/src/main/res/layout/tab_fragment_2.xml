@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:ads="http://schemas.android.com/tools"
     android:orientation="vertical">
 
     <ImageView
@@ -38,12 +39,14 @@
     <android.support.v7.widget.CardView
         android:visibility="visible"
         android:elevation="@dimen/dp10"
-        android:id="@+id/storage_Layout"
         android:layout_alignParentBottom="true"
+        android:id="@+id/storage_Layout"
         android:background="@color/gradation_03_dark"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <LinearLayout
+            android:visibility="visible"
             android:weightSum="2"
             android:showDividers="middle"
             android:divider="@drawable/divider"
@@ -85,6 +88,12 @@
                     android:layout_height="wrap_content" />
             </RelativeLayout>
         </LinearLayout>
+
+
+
+
     </android.support.v7.widget.CardView>
+
+
 
 </RelativeLayout>

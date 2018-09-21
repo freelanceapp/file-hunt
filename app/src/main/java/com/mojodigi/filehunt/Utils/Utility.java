@@ -1022,5 +1022,10 @@ public static boolean IsNotEmpty(EditText view)
         System.out.print(""+str);
     }
 }
+public static Date longToDate(Long  l)
+{
+    Date  d =  new Date(l);
+    return  d;
+}
 
 }
