@@ -9,6 +9,28 @@ public class Model_Anim {
     String fileSize;
     String fileType;
     String fileMDate;
+
+    long dateToSort;
+    long fileSizeCmpr;
+
+    public long getDateToSort() {
+        return dateToSort;
+    }
+
+    public void setDateToSort(long dateToSort) {
+        this.dateToSort = dateToSort;
+    }
+
+    public long getFileSizeCmpr() {
+        return fileSizeCmpr;
+    }
+
+
+
+    public void setFileSizeCmpr(long fileSizeCmpr) {
+        this.fileSizeCmpr = fileSizeCmpr;
+    }
+
     public String getFileMDate() {
         return fileMDate;
     }

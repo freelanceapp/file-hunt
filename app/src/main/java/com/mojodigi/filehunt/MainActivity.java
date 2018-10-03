@@ -13,16 +13,21 @@ import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 
+import com.google.android.gms.ads.AdView;
 import com.mojodigi.filehunt.Adapter.pagerAdapter2;
+import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Fragments.TabFragment1;
 import com.mojodigi.filehunt.Fragments.TabFragment2;
 //
+import com.mojodigi.filehunt.Utils.AddMobUtils;
 import com.mojodigi.filehunt.Utils.Utility;
 
 import java.io.File;
@@ -38,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
     pagerAdapter2 adapter;
     TabLayout tabLayout;
     CardView cardLayout;
+    Menu context_menu;
+    private AdView mAdView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
 //        tabLayout.addTab(tabLayout.newTab().setText("STORAGE"));
 
     //    tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
-
+         mAdView = (AdView) findViewById(R.id.adView);
          viewPager = (ViewPager) findViewById(R.id.pager);
 
         cardLayout=(CardView)findViewById(R.id.cardLayout);
@@ -106,6 +113,30 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        AddMobUtils addutil=new AddMobUtils();
+        addutil.displayBannerAdd(mAdView);
+    }
+    @Override
+    public void onPause() {
+        if (mAdView != null) {
+            mAdView.pause();
+        }
+        super.onPause();
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.menu_paste, menu);
+        context_menu=menu;
+        return super.onCreateOptionsMenu(menu);
+
+    }
+
 
     private void setSpace() {
         for(int i=0; i < tabLayout.getTabCount(); i++) {
@@ -185,12 +216,13 @@ public class MainActivity extends AppCompatActivity {
 
                 Fragment page = (Fragment) adapter.instantiateItem(viewPager,viewPager.getCurrentItem());
                 if(page!=null)
-                   flag=((TabFragment2)page).onBackPressed();
-                 if(flag==0)
-                     viewPager.setCurrentItem(0);
+                    flag=((TabFragment2)page).onBackPressed();
+                if(flag==0)
+                    viewPager.setCurrentItem(0);
 
                 break;
         }
+        ShowHideMenu();
     }
     private void centerTitle() {
         ArrayList<View> textViews = new ArrayList<>();
@@ -222,8 +254,69 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if(Constants.redirectToStorage) {
+            viewPager.setCurrentItem(1);
+            ShowHideMenu();
+        }
+    }
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+
+        ShowHideMenu();
+        return super.onPrepareOptionsMenu(menu);
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        int id = item.getItemId();
+
+        if(id==R.id.action_paste)
+        {
+
+            Fragment page = (Fragment) adapter.instantiateItem(viewPager,viewPager.getCurrentItem());
+            if(page!=null )
+                if(page instanceof TabFragment2) {
+                    ((TabFragment2) page).pasteData();
+                }
+
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    public void ShowHideMenu()
+    {
+
+
+        if(context_menu!=null)
+        {
+            Fragment page = (Fragment) adapter.instantiateItem(viewPager,viewPager.getCurrentItem());
+
+            for (int i = 0; i < context_menu.size(); i++) {
+                MenuItem item = context_menu.getItem(i);
+                if (item.getTitle().toString().equalsIgnoreCase(getResources().getString(R.string.menu_paste))) {
+                    if (Constants.filesToCopy.size() > 0 && page instanceof  TabFragment2) {
+                        item.setVisible(true);
+                    } else {
+                        item.setVisible(false);
+                    }
+                }
+
+            }
+            invalidateOptionsMenu();
+        }
+
+    }
+
+    @Override
     protected void onDestroy() {
+
+        if (mAdView != null) {
+            mAdView.destroy();
+        }
         super.onDestroy();
+        Constants.filesToCopy.clear();// clear  the array list  that  contains the files to  be copied;
+        Constants.redirectToStorage=false; // set variable false because if it is true it redirect to  Tabfragmnet2 on load of MainActivity (it may crash app if remained to  true)
 
         clearApplicationData(MainActivity.this);
     }

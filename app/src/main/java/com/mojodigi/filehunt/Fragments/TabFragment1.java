@@ -31,14 +31,17 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdView;
 import com.mojodigi.filehunt.AnimationActivityRe;
 import com.mojodigi.filehunt.ApkActivityRe;
 import com.mojodigi.filehunt.Category_Explore_Activity;
 import com.mojodigi.filehunt.DocsActivityRe;
 import com.mojodigi.filehunt.DownloadActivityRe;
+import com.mojodigi.filehunt.MainActivity;
 import com.mojodigi.filehunt.Model.category_Model;
 //
 import com.mojodigi.filehunt.RecentActivityRe;
+import com.mojodigi.filehunt.Utils.AddMobUtils;
 import com.mojodigi.filehunt.Utils.EqualSpacingItemDecoration;
 import com.mojodigi.filehunt.Utils.Utility;
 import com.mojodigi.filehunt.Utils.UtilityStorage;
@@ -60,39 +63,40 @@ import static com.mojodigi.filehunt.Class.Constants.DELETED_IMG_FILES;
 import static com.mojodigi.filehunt.Class.Constants.DELETED_RECENT_FILES;
 import static com.mojodigi.filehunt.Class.Constants.DELETED_VDO_FILES;
 import static com.mojodigi.filehunt.Class.Constants.POSITION;
+
 import com.mojodigi.filehunt.R;
+
 public class TabFragment1 extends Fragment {
 
 
     private Context ctx;
     private RecyclerView category_recycler_view;
-    ProgressBar progressBar,progressBar_Ext;
-    TextView avlbMemory,    totalMemmory,internalTxt,avlbTxt;
-    TextView avlbMemory_Ext,    totalMemmory_Ext,internalTxt_Ext,avlbTxt_Ext;
+    ProgressBar progressBar, progressBar_Ext;
+    TextView avlbMemory, totalMemmory, internalTxt, avlbTxt;
+    TextView avlbMemory_Ext, totalMemmory_Ext, internalTxt_Ext, avlbTxt_Ext;
     RelativeLayout ext_layout;
-    private List<category_Model>cat_List=new ArrayList<category_Model>();
+    private List<category_Model> cat_List = new ArrayList<category_Model>();
     private categoryAdapter adapter;
     private int j;
 
-    List<String>pngList=new ArrayList<>();
-    List<String>jpgList=new ArrayList<>();
-    List<String>pdfList=new ArrayList<>();
-    List<String>txtList=new ArrayList<>();
-    List<String>mp4List=new ArrayList<>();
-    List<String>mp3List=new ArrayList<>();
-    List<String>apkList=new ArrayList<>();
-    List<String>wordList=new ArrayList<>();
-    List<String>excelList=new ArrayList<>();
-    List<String>pptlList=new ArrayList<>();
-    List<String>flashlList=new ArrayList<>();
-    List<String>ziplList=new ArrayList<>();
-    List<String>giflList=new ArrayList<>();
+    List<String> pngList = new ArrayList<>();
+    List<String> jpgList = new ArrayList<>();
+    List<String> pdfList = new ArrayList<>();
+    List<String> txtList = new ArrayList<>();
+    List<String> mp4List = new ArrayList<>();
+    List<String> mp3List = new ArrayList<>();
+    List<String> apkList = new ArrayList<>();
+    List<String> wordList = new ArrayList<>();
+    List<String> excelList = new ArrayList<>();
+    List<String> pptlList = new ArrayList<>();
+    List<String> flashlList = new ArrayList<>();
+    List<String> ziplList = new ArrayList<>();
+    List<String> giflList = new ArrayList<>();
 
-    List<String>otherList=new ArrayList<>();
+    List<String> otherList = new ArrayList<>();
 
-    List<String>downLoadList=new ArrayList<>();
+    List<String> downLoadList = new ArrayList<>();
     ArrayList<String> recentFiles = new ArrayList<>();
-
 
 
     category_Model cat_Img;
@@ -104,7 +108,7 @@ public class TabFragment1 extends Fragment {
     category_Model cat_Document;
     category_Model cat_Recent;
 
-    String[] permissionsRequired = new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE};
+    String[] permissionsRequired = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
     private static final int PERMISSION_CALLBACK_CONSTANT = 100;
     private static final int REQUEST_PERMISSION_SETTING = 101;
     private SharedPreferences permissionStatus;
@@ -116,51 +120,48 @@ public class TabFragment1 extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.tab_fragment_1, container, false);
 
-        }
-
+    }
 
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-           ctx=getActivity();
+        ctx = getActivity();
         cat_List.clear();
 
-        permissionStatus = getActivity().getSharedPreferences("permissionStatus", MODE_PRIVATE);
-        ext_layout=(RelativeLayout)view.findViewById(R.id.ext_layout);
-        category_recycler_view= (RecyclerView) view.findViewById(R.id.category_recycler_view);
-        progressBar=(ProgressBar)view.findViewById(R.id.progressBar);
-        avlbMemory=(TextView)view.findViewById(R.id.avlbMemory);
-        totalMemmory=(TextView)view.findViewById(R.id.totalMemmory);
-        internalTxt=(TextView)view.findViewById(R.id.internalTxt);
-        avlbTxt=(TextView)view.findViewById(R.id.avlbTxt);
 
-        progressBar_Ext=(ProgressBar)view.findViewById(R.id.progressBar_ext);
-        avlbMemory_Ext=(TextView)view.findViewById(R.id.avlbMemory_ext);
-        totalMemmory_Ext=(TextView)view.findViewById(R.id.totalMemmory_ext);
-        internalTxt_Ext=(TextView)view.findViewById(R.id.externalTxt);
-        avlbTxt_Ext=(TextView)view.findViewById(R.id.avlbTxt_ext);
+        permissionStatus = getActivity().getSharedPreferences("permissionStatus", MODE_PRIVATE);
+        ext_layout = (RelativeLayout) view.findViewById(R.id.ext_layout);
+        category_recycler_view = (RecyclerView) view.findViewById(R.id.category_recycler_view);
+        progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
+        avlbMemory = (TextView) view.findViewById(R.id.avlbMemory);
+        totalMemmory = (TextView) view.findViewById(R.id.totalMemmory);
+        internalTxt = (TextView) view.findViewById(R.id.internalTxt);
+        avlbTxt = (TextView) view.findViewById(R.id.avlbTxt);
+
+        progressBar_Ext = (ProgressBar) view.findViewById(R.id.progressBar_ext);
+        avlbMemory_Ext = (TextView) view.findViewById(R.id.avlbMemory_ext);
+        totalMemmory_Ext = (TextView) view.findViewById(R.id.totalMemmory_ext);
+        internalTxt_Ext = (TextView) view.findViewById(R.id.externalTxt);
+        avlbTxt_Ext = (TextView) view.findViewById(R.id.avlbTxt_ext);
 
         setTypeFace();
 
 
-
-        if (ActivityCompat.checkSelfPermission(getActivity(), permissionsRequired[0]) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(getActivity(), permissionsRequired[1]) != PackageManager.PERMISSION_GRANTED)
-        {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), permissionsRequired[0]) || ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), permissionsRequired[1]))
-            {
+        if (ActivityCompat.checkSelfPermission(getActivity(), permissionsRequired[0]) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(getActivity(), permissionsRequired[1]) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), permissionsRequired[0]) || ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), permissionsRequired[1])) {
                 //Show Information about why you need the permission
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
                 builder.setTitle("Need Permissions");
-                builder.setMessage(getActivity().getString(R.string.app_name)+" needs to access your storage.");
+                builder.setMessage(getActivity().getString(R.string.app_name) + " needs to access your storage.");
 
                 builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
-                      //  ActivityCompat.requestPermissions((Activity) ctx, permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
-                       requestPermissions(permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
+                        //  ActivityCompat.requestPermissions((Activity) ctx, permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
+                        requestPermissions(permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
                     }
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -176,7 +177,7 @@ public class TabFragment1 extends Fragment {
                 // Redirect to Settings after showing Information about why you need the permission
                 AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
                 builder.setTitle("Need Permissions");
-                builder.setMessage(getActivity().getString(R.string.app_name)+" app need stoarge permission.");
+                builder.setMessage(getActivity().getString(R.string.app_name) + " app need stoarge permission.");
                 builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -198,20 +199,18 @@ public class TabFragment1 extends Fragment {
                 builder.show();
             } else {
                 //just request the permission
-               requestPermissions(permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
+                requestPermissions(permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
 
             }
 
             SharedPreferences.Editor editor = permissionStatus.edit();
             editor.putBoolean(permissionsRequired[0], false);
             editor.commit();
-        }
-        else {
+        } else {
             //You already have the permission, just go ahead.
             getCategories();
         }
         //new  permission
-
 
 
 //       ItemOffsetDecoration itemDecoration = new ItemOffsetDecoration(getActivity(), R.dimen.dp10);
@@ -224,7 +223,6 @@ public class TabFragment1 extends Fragment {
 //        category_recycler_view.addItemDecoration(new GridSpacingItemDecoration(spanCount, spacing, includeEdge));
 
 
-
     }
 
     @Override
@@ -233,7 +231,7 @@ public class TabFragment1 extends Fragment {
 
 
         // detetct  which activity  was in stack  then  apply a swich case  for better  result;
-        if(DELETED_APK_FILES>0) {
+        if (DELETED_APK_FILES > 0) {
             if (cat_Apk != null) {
                 try {
 
@@ -249,7 +247,7 @@ public class TabFragment1 extends Fragment {
             }
         }
 
-        if(DELETED_ANIMATION_FILES>0) {
+        if (DELETED_ANIMATION_FILES > 0) {
             if (cat_Animation != null) {
                 try {
 
@@ -265,7 +263,7 @@ public class TabFragment1 extends Fragment {
             }
         }
 
-        if(DELETED_IMG_FILES>0) {
+        if (DELETED_IMG_FILES > 0) {
             if (cat_Img != null) {
                 try {
 
@@ -281,7 +279,7 @@ public class TabFragment1 extends Fragment {
             }
         }
 
-        if(DELETED_VDO_FILES>0) {
+        if (DELETED_VDO_FILES > 0) {
             if (cat_Video != null) {
                 try {
 
@@ -297,7 +295,7 @@ public class TabFragment1 extends Fragment {
             }
         }
 
-        if(DELETED_AUDIO_FILES>0) {
+        if (DELETED_AUDIO_FILES > 0) {
             if (cat_Audio != null) {
                 try {
 
@@ -313,7 +311,7 @@ public class TabFragment1 extends Fragment {
             }
         }
 
-        if(DELETED_DOCUMENT_FILES>0) {
+        if (DELETED_DOCUMENT_FILES > 0) {
             if (cat_Document != null) {
                 try {
 
@@ -329,7 +327,7 @@ public class TabFragment1 extends Fragment {
             }
         }
 
-        if(DELETED_DOWNLOAD_FILES>0) {
+        if (DELETED_DOWNLOAD_FILES > 0) {
             if (cat_Download != null) {
                 try {
 
@@ -345,7 +343,7 @@ public class TabFragment1 extends Fragment {
             }
         }
 
-        if(DELETED_RECENT_FILES>0) {
+        if (DELETED_RECENT_FILES > 0) {
             if (cat_Recent != null) {
                 try {
 
@@ -362,12 +360,18 @@ public class TabFragment1 extends Fragment {
         }
 
 
+    }
 
+    @Override
+    public void onPause() {
 
+        super.onPause();
+    }
 
+    @Override
+    public void onDestroy() {
 
-
-
+        super.onDestroy();
     }
 
     @Override
@@ -376,27 +380,30 @@ public class TabFragment1 extends Fragment {
 
         if(isVisibleToUser)
         {
+            try {
 
+                ((MainActivity) getActivity()).ShowHideMenu();
 
+            }catch (Exception e)
+            {
 
-
+            }
 
         }
     }
 
-    private void getCategories()
-    {
+    private void getCategories() {
 
-         cat_List.clear();
+        cat_List.clear();
 
-         cat_Img=new category_Model(getResources().getString(R.string.cat_Images),String.valueOf(pngList.size()+jpgList.size()+flashlList.size()),R.mipmap.cat_ic_image);
-         cat_Apk=new category_Model(getResources().getString(R.string.cat_Apk),String.valueOf(apkList.size()),R.mipmap.cat_ic_apk);
-         cat_Animation=new category_Model(getResources().getString(R.string.cat_Animation),String.valueOf(giflList.size()),R.mipmap.cat_ic_animation);
-         cat_Audio=new category_Model(getResources().getString(R.string.cat_Audio),String.valueOf(mp3List.size()),R.mipmap.cat_ic_music);
-         cat_Video=new category_Model(getResources().getString(R.string.cat_Videos),String.valueOf(mp4List.size()),R.mipmap.cat_ic_vdo);
-         cat_Download=new category_Model(getResources().getString(R.string.cat_Download),String.valueOf(downLoadList.size()),R.mipmap.cat_ic_download);
-         cat_Document=new category_Model(getResources().getString(R.string.cat_Documents),String.valueOf(pptlList.size()+wordList.size()+pdfList.size()+txtList.size()),R.mipmap.cat_ic_docs);
-         cat_Recent=new category_Model(getResources().getString(R.string.cat_Recent),String.valueOf(recentFiles.size()),R.mipmap.cat_ic_recent);
+        cat_Img = new category_Model(getResources().getString(R.string.cat_Images), String.valueOf(pngList.size() + jpgList.size() + flashlList.size()), R.mipmap.cat_ic_image);
+        cat_Apk = new category_Model(getResources().getString(R.string.cat_Apk), String.valueOf(apkList.size()), R.mipmap.cat_ic_apk);
+        cat_Animation = new category_Model(getResources().getString(R.string.cat_Animation), String.valueOf(giflList.size()), R.mipmap.cat_ic_animation);
+        cat_Audio = new category_Model(getResources().getString(R.string.cat_Audio), String.valueOf(mp3List.size()), R.mipmap.cat_ic_music);
+        cat_Video = new category_Model(getResources().getString(R.string.cat_Videos), String.valueOf(mp4List.size()), R.mipmap.cat_ic_vdo);
+        cat_Download = new category_Model(getResources().getString(R.string.cat_Download), String.valueOf(downLoadList.size()), R.mipmap.cat_ic_download);
+        cat_Document = new category_Model(getResources().getString(R.string.cat_Documents), String.valueOf(pptlList.size() + wordList.size() + pdfList.size() + txtList.size()), R.mipmap.cat_ic_docs);
+        cat_Recent = new category_Model(getResources().getString(R.string.cat_Recent), String.valueOf(recentFiles.size()), R.mipmap.cat_ic_recent);
 
         cat_List.add(cat_Img);
         cat_List.add(cat_Video);
@@ -407,8 +414,8 @@ public class TabFragment1 extends Fragment {
         cat_List.add(cat_Recent);
         cat_List.add(cat_Apk);
 
-         adapter= new categoryAdapter(cat_List);
-         int per_col_spacing= Utility.percentOfValue(getScreenHeight(),2);
+        adapter = new categoryAdapter(cat_List);
+        int per_col_spacing = Utility.percentOfValue(getScreenHeight(), 2);
 
         category_recycler_view.setLayoutManager(new GridLayoutManager(getActivity(), 2));
         category_recycler_view.addItemDecoration(new EqualSpacingItemDecoration(per_col_spacing, EqualSpacingItemDecoration.GRID));
@@ -419,23 +426,20 @@ public class TabFragment1 extends Fragment {
         //
 
 
+        try {
+            String sdCardPath = UtilityStorage.getExternalStoragePath(ctx, true);
+            // if sdcard is ejected the returned path will not exist;
+            if (sdCardPath != null && Utility.isPathExist(sdCardPath, getActivity())) {
+                ext_layout.setVisibility(View.VISIBLE);
+                fillProgressBar_Ext();
 
-     try {
-         String sdCardPath = UtilityStorage.getExternalStoragePath(ctx, true);
-         // if sdcard is ejected the returned path will not exist;
-         if (sdCardPath != null && Utility.isPathExist(sdCardPath,getActivity())) {
-             ext_layout.setVisibility(View.VISIBLE);
-             fillProgressBar_Ext();
+            }
+        } catch (Exception e) {
 
-         }
-     }catch (Exception e)
-     {
-
-     }
+        }
 
 
         //
-
 
 
         new LoadApkTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -451,12 +455,9 @@ public class TabFragment1 extends Fragment {
         new LoadDocumentTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 
-
-
     }
 
-    public class categoryAdapter extends  RecyclerView.Adapter<categoryAdapter.categoryViewHolder>
-    {
+    public class categoryAdapter extends RecyclerView.Adapter<categoryAdapter.categoryViewHolder> {
         private List<category_Model> catList;
 
         @Override
@@ -468,54 +469,43 @@ public class TabFragment1 extends Fragment {
         }
 
         @Override
-        public void onBindViewHolder(categoryViewHolder holder, final int position)
-        {
+        public void onBindViewHolder(categoryViewHolder holder, final int position) {
             holder.catName.setText(catList.get(position).getCatName());
 
             holder.catIcon.setImageResource(catList.get(position).getCat_icon());
-            holder.itemCount.setText(Utility.putStrinBrckt(catList.get(position).getIteCount()+" items"));
-           holder.catName.setTextColor(getTextColor(position));
+            holder.itemCount.setText(Utility.putStrinBrckt(catList.get(position).getIteCount() + " items"));
+            holder.catName.setTextColor(getTextColor(position));
 
             holder.catName.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(getActivity()));
             holder.itemCount.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(getActivity()));
 
-             ViewGroup.LayoutParams params =  holder.container_Layout.getLayoutParams();
-             params.width=(getScreenWidth()-Utility.dpToPx(24,ctx))*45/100;
-             holder.container_Layout.setLayoutParams(params);
+            ViewGroup.LayoutParams params = holder.container_Layout.getLayoutParams();
+            params.width = (getScreenWidth() - Utility.dpToPx(24, ctx)) * 45 / 100;
+            holder.container_Layout.setLayoutParams(params);
 
             holder.container_Layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
 
-
-                    if(position==3)
-                    {
+                    if (position == 3) {
                         Intent i = new Intent(getActivity(), DocsActivityRe.class);
                         startActivity(i);
-                    }
-                    else  if(position==4)
-                    {
+                    } else if (position == 4) {
                         Intent i = new Intent(getActivity(), DownloadActivityRe.class);
                         startActivity(i);
-                    }
-                    else  if(position==5)
-                    {
+                    } else if (position == 5) {
                         Intent i = new Intent(getActivity(), AnimationActivityRe.class);
                         startActivity(i);
 
-                    }
-                    else if(position==6)
-                    {
+                    } else if (position == 6) {
                         Intent i = new Intent(getActivity(), RecentActivityRe.class);
                         startActivity(i);
-                    }
-                    else  if(position==7)
-                    {
+                    } else if (position == 7) {
+
                         Intent i = new Intent(getActivity(), ApkActivityRe.class);
                         startActivity(i);
-                    }
-                    else {
+                    } else {
                         Intent i = new Intent(getActivity(), Category_Explore_Activity.class);
                         i.putExtra(POSITION, position);
                         startActivity(i);
@@ -526,7 +516,6 @@ public class TabFragment1 extends Fragment {
             });
 
 
-
         }
 
         @Override
@@ -535,7 +524,7 @@ public class TabFragment1 extends Fragment {
         }
 
         public class categoryViewHolder extends RecyclerView.ViewHolder {
-            public TextView catName,itemCount;
+            public TextView catName, itemCount;
             ImageView catIcon;
             private RelativeLayout container_Layout;
 
@@ -544,8 +533,8 @@ public class TabFragment1 extends Fragment {
                 super(view);
                 catName = (TextView) view.findViewById(R.id.catName);
                 itemCount = (TextView) view.findViewById(R.id.itemCount);
-                catIcon=(ImageView)view.findViewById(R.id.cat_Icon);
-                container_Layout=(RelativeLayout)view.findViewById(R.id.container_Layout);
+                catIcon = (ImageView) view.findViewById(R.id.cat_Icon);
+                container_Layout = (RelativeLayout) view.findViewById(R.id.container_Layout);
             }
         }
 
@@ -558,35 +547,42 @@ public class TabFragment1 extends Fragment {
     private int getTextColor(int position) {
 
         switch (position) {
-            case  0: return   getActivity().getResources().getColor(R.color.color_img);
-            case  1: return   getActivity().getResources().getColor(R.color.color_vdo);
-            case  2: return   getActivity().getResources().getColor(R.color.color_audio);
-            case  3: return   getActivity().getResources().getColor(R.color.color_docs);
-            case  4: return   getActivity().getResources().getColor(R.color.color_download);
-            case  5: return   getActivity().getResources().getColor(R.color.color_anim);
-            case  6: return   getActivity().getResources().getColor(R.color.color_recent);
-            case  7: return   getActivity().getResources().getColor(R.color.color_apk);
-            default: return   getActivity().getResources().getColor(R.color.black);
+            case 0:
+                return getActivity().getResources().getColor(R.color.color_img);
+            case 1:
+                return getActivity().getResources().getColor(R.color.color_vdo);
+            case 2:
+                return getActivity().getResources().getColor(R.color.color_audio);
+            case 3:
+                return getActivity().getResources().getColor(R.color.color_docs);
+            case 4:
+                return getActivity().getResources().getColor(R.color.color_download);
+            case 5:
+                return getActivity().getResources().getColor(R.color.color_anim);
+            case 6:
+                return getActivity().getResources().getColor(R.color.color_recent);
+            case 7:
+                return getActivity().getResources().getColor(R.color.color_apk);
+            default:
+                return getActivity().getResources().getColor(R.color.black);
 
         }
 
     }
 
-    private List<String>getDownLoad(File dir)
-    {
-        List<String>downLoadListLocal=new ArrayList<>();
+    private List<String> getDownLoad(File dir) {
+        List<String> downLoadListLocal = new ArrayList<>();
         File[] listFile;
         listFile = dir.listFiles();
-        System.out.print(""+listFile.toString());
+        // System.out.print(""+listFile.toString());
 
         if (listFile != null) {
             for (int i = 0; i < listFile.length; i++) {
                 if (listFile[i].isDirectory()) {
                     getDownLoad(listFile[i]);
-                } else
-                    {
-                        downLoadListLocal.add(listFile[i].toString());
-                     }
+                } else {
+                    downLoadListLocal.add(listFile[i].toString());
+                }
             }
         }
         return downLoadListLocal;
@@ -632,77 +628,88 @@ public class TabFragment1 extends Fragment {
 
 
                      */
-                    if (listFile[i].getName().toLowerCase().endsWith(".png")||  listFile[i].getName().toLowerCase().endsWith(".bmp")) { pngList.add(listFile[i].toString()); }
-                    else if (listFile[i].getName().toLowerCase().endsWith(".pdf")) { pdfList.add(listFile[i].toString()); }
-                    else if (listFile[i].getName().toLowerCase().endsWith(".txt")||listFile[i].getName().toLowerCase().endsWith(".rtf")) { txtList.add(listFile[i].toString()); }
-                    else if (listFile[i].getName().toLowerCase().endsWith(".mp4") || listFile[i].getName().toLowerCase().endsWith(".mpg") || listFile[i].getName().toLowerCase().endsWith(".mpe") ) { mp4List.add(listFile[i].toString()); }
-                    else if (listFile[i].getName().toLowerCase().endsWith(".mp3")|| listFile[i].getName().toLowerCase().endsWith(".m4a") || listFile[i].getName().toLowerCase().endsWith(".amr") ||  listFile[i].getName().toLowerCase().endsWith(".aac") ||  listFile[i].getName().toLowerCase().endsWith(".opus")) { mp3List.add(listFile[i].toString()); }
-                    else if (listFile[i].getName().toLowerCase().endsWith(".apk")) { apkList.add(listFile[i].toString()); }
-                    else if (listFile[i].getName().toLowerCase().endsWith(".jpg")  ||listFile[i].getName().toLowerCase().endsWith(".jpeg") ||listFile[i].getName().toLowerCase().endsWith(".jpe") ) { jpgList.add(listFile[i].toString()); }
-                    else if (listFile[i].getName().toLowerCase().endsWith(".docx") || listFile[i].getName().toLowerCase().endsWith(".doc") || listFile[i].getName().toLowerCase().endsWith(".dot")  ) { wordList.add(listFile[i].toString()); }
-                    else if (listFile[i].getName().toLowerCase().endsWith(".xlsx") || (listFile[i].getName().toLowerCase().endsWith(".xlt") )) { excelList.add(listFile[i].toString()); }
-                    else if (listFile[i].getName().toLowerCase().endsWith(".ppt")) { pptlList.add(listFile[i].toString()); }
-                    else if (listFile[i].getName().toLowerCase().endsWith(".swf")) { flashlList.add(listFile[i].toString()); }
-                    else if (listFile[i].getName().toLowerCase().endsWith(".zip")) { ziplList.add(listFile[i].toString()); }
-                    else if (listFile[i].getName().toLowerCase().endsWith(".gif")) { giflList.add(listFile[i].toString()); }
-
-                    else { otherList.add(listFile[i].toString());    System.out.println(j + " OtherFiles-->" + listFile[i] + " \n"); }
+                    if (listFile[i].getName().toLowerCase().endsWith(".png") || listFile[i].getName().toLowerCase().endsWith(".bmp")) {
+                        pngList.add(listFile[i].toString());
+                    } else if (listFile[i].getName().toLowerCase().endsWith(".pdf")) {
+                        pdfList.add(listFile[i].toString());
+                    } else if (listFile[i].getName().toLowerCase().endsWith(".txt") || listFile[i].getName().toLowerCase().endsWith(".rtf")) {
+                        txtList.add(listFile[i].toString());
+                    } else if (listFile[i].getName().toLowerCase().endsWith(".mp4") || listFile[i].getName().toLowerCase().endsWith(".mpg") || listFile[i].getName().toLowerCase().endsWith(".mpe")) {
+                        mp4List.add(listFile[i].toString());
+                    } else if (listFile[i].getName().toLowerCase().endsWith(".mp3") || listFile[i].getName().toLowerCase().endsWith(".m4a") || listFile[i].getName().toLowerCase().endsWith(".amr") || listFile[i].getName().toLowerCase().endsWith(".aac") || listFile[i].getName().toLowerCase().endsWith(".opus")) {
+                        mp3List.add(listFile[i].toString());
+                    } else if (listFile[i].getName().toLowerCase().endsWith(".apk")) {
+                        apkList.add(listFile[i].toString());
+                    } else if (listFile[i].getName().toLowerCase().endsWith(".jpg") || listFile[i].getName().toLowerCase().endsWith(".jpeg") || listFile[i].getName().toLowerCase().endsWith(".jpe")) {
+                        jpgList.add(listFile[i].toString());
+                    } else if (listFile[i].getName().toLowerCase().endsWith(".docx") || listFile[i].getName().toLowerCase().endsWith(".doc") || listFile[i].getName().toLowerCase().endsWith(".dot")) {
+                        wordList.add(listFile[i].toString());
+                    } else if (listFile[i].getName().toLowerCase().endsWith(".xlsx") || (listFile[i].getName().toLowerCase().endsWith(".xlt"))) {
+                        excelList.add(listFile[i].toString());
+                    } else if (listFile[i].getName().toLowerCase().endsWith(".ppt")) {
+                        pptlList.add(listFile[i].toString());
+                    } else if (listFile[i].getName().toLowerCase().endsWith(".swf")) {
+                        flashlList.add(listFile[i].toString());
+                    } else if (listFile[i].getName().toLowerCase().endsWith(".zip")) {
+                        ziplList.add(listFile[i].toString());
+                    } else if (listFile[i].getName().toLowerCase().endsWith(".gif")) {
+                        giflList.add(listFile[i].toString());
+                    } else {
+                        otherList.add(listFile[i].toString());
+                        System.out.println(j + " OtherFiles-->" + listFile[i] + " \n");
+                    }
 
 
                 }
             }
         }
-       // String str="png files-> "+pngList.size()+"\n jpg files-> "+jpgList.size()+" \n Gif files"+giflList.size()+"\n docs file-> "+wordList.size()+"\n ppt files ->"+pptlList.size()+"\n Excel files->"+excelList.size()+"\n flash files->"+flashlList.size()+"\n zip files->"+ziplList.size()+"\n pdf files->"+pdfList.size()+"\n Notepad file -> "+txtList.size()+" \n mp4 file->"+mp4List.size()+" \n Audio files->"+mp3List.size()+"\n apk files->"+apkList.size()+"\n other files->"+otherList.size()+"\n Total files"+j;
-       // info.setText(str);
+        // String str="png files-> "+pngList.size()+"\n jpg files-> "+jpgList.size()+" \n Gif files"+giflList.size()+"\n docs file-> "+wordList.size()+"\n ppt files ->"+pptlList.size()+"\n Excel files->"+excelList.size()+"\n flash files->"+flashlList.size()+"\n zip files->"+ziplList.size()+"\n pdf files->"+pdfList.size()+"\n Notepad file -> "+txtList.size()+" \n mp4 file->"+mp4List.size()+" \n Audio files->"+mp3List.size()+"\n apk files->"+apkList.size()+"\n other files->"+otherList.size()+"\n Total files"+j;
+        // info.setText(str);
     }
-    private void fillProgressBar()
-    {
+
+    private void fillProgressBar() {
 
 
-           progressBar.setProgress(0);
-           progressBar.setMax(100);
-           long TotalInternalMemory=   Utility.getTotalInternalMemorySize();
-           long AvailableInternalMemory=Utility.getAvailableInternalMemorySize();
+        progressBar.setProgress(0);
+        progressBar.setMax(100);
+        long TotalInternalMemory = Utility.getTotalInternalMemorySize();
+        long AvailableInternalMemory = Utility.getAvailableInternalMemorySize();
 
 
-           float per= (float)AvailableInternalMemory / (float) (TotalInternalMemory/100);
-           System.out.print("Memory Stats--> Total "+TotalInternalMemory+" Avaailable"+AvailableInternalMemory+""+Utility.setdecimalPoints(String.valueOf(per),2));
-          // avlbMemory.setText(Utility.formatSize(Utility.getAvailableInternalMemorySize()));
-           avlbMemory.setText(Utility.humanReadableByteCount(Utility.getAvailableInternalMemorySize(),true)+"("+Utility.setdecimalPoints(String.valueOf(per),2)+"%)");
-           // totalMemmory.setText("Total "+Utility.formatSize(Utility.getTotalInternalMemorySize()));
-            totalMemmory.setText("Total "+Utility.humanReadableByteCount(Utility.getTotalInternalMemorySize(),true));
-           int progress=100 -(int) per;
-           progressBar.setProgress(progress);
-
+        float per = (float) AvailableInternalMemory / (float) (TotalInternalMemory / 100);
+        System.out.print("Memory Stats--> Total " + TotalInternalMemory + " Avaailable" + AvailableInternalMemory + "" + Utility.setdecimalPoints(String.valueOf(per), 2));
+        // avlbMemory.setText(Utility.formatSize(Utility.getAvailableInternalMemorySize()));
+        avlbMemory.setText(Utility.humanReadableByteCount(Utility.getAvailableInternalMemorySize(), true) + "(" + Utility.setdecimalPoints(String.valueOf(per), 2) + "%)");
+        // totalMemmory.setText("Total "+Utility.formatSize(Utility.getTotalInternalMemorySize()));
+        totalMemmory.setText("Total " + Utility.humanReadableByteCount(Utility.getTotalInternalMemorySize(), true));
+        int progress = 100 - (int) per;
+        progressBar.setProgress(progress);
 
 
     }
-    private void fillProgressBar_Ext()
-    {
 
-
+    private void fillProgressBar_Ext() {
 
 
         progressBar_Ext.setProgress(0);
         progressBar_Ext.setMax(100);
-        long TotalMemory_Ext=   Utility.getTotalExternalMemorySize(UtilityStorage.getExternalStoragePath(ctx,true));
-        long AvailableMemory_Ext=Utility.getAvailableExternalMemorySize(UtilityStorage.getExternalStoragePath(ctx,true));
+        long TotalMemory_Ext = Utility.getTotalExternalMemorySize(UtilityStorage.getExternalStoragePath(ctx, true));
+        long AvailableMemory_Ext = Utility.getAvailableExternalMemorySize(UtilityStorage.getExternalStoragePath(ctx, true));
 
 
-        long per= AvailableMemory_Ext / (TotalMemory_Ext/100);
-        System.out.print("Memory Stats--> Total "+TotalMemory_Ext+" Avaailable"+AvailableMemory_Ext+""+per);
+        long per = AvailableMemory_Ext / (TotalMemory_Ext / 100);
+        System.out.print("Memory Stats--> Total " + TotalMemory_Ext + " Avaailable" + AvailableMemory_Ext + "" + per);
 
-        avlbMemory_Ext.setText(Utility.humanReadableByteCount(AvailableMemory_Ext,true)+"("+per+"%)");
+        avlbMemory_Ext.setText(Utility.humanReadableByteCount(AvailableMemory_Ext, true) + "(" + per + "%)");
 
-        totalMemmory_Ext.setText("Total "+Utility.humanReadableByteCount(TotalMemory_Ext,true));
-        int progress=100 -(int) per;
+        totalMemmory_Ext.setText("Total " + Utility.humanReadableByteCount(TotalMemory_Ext, true));
+        int progress = 100 - (int) per;
         progressBar_Ext.setProgress(progress);
 
 
-
     }
-    private void setTypeFace()
-    {
+
+    private void setTypeFace() {
         avlbMemory.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(getActivity()));
         totalMemmory.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(getActivity()));
         internalTxt.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(getActivity()));
@@ -716,9 +723,7 @@ public class TabFragment1 extends Fragment {
     }
 
 
-
-    private int listRecentFiles()
-    {
+    private int listRecentFiles() {
 
         final String[] projection = {MediaStore.Files.FileColumns.DATA};
         Calendar c = Calendar.getInstance();
@@ -735,20 +740,20 @@ public class TabFragment1 extends Fragment {
             return recentFiles.size();
         if (cursor.getCount() > 0 && cursor.moveToFirst()) {
 
-            String[] types = new String[]{"pdf","png","jpeg","jpg","mp4","mp3","aac","amr","gif","doc", "docx", "txt", "wpd", "wps","xls","xlsx",
+            String[] types = new String[]{"pdf", "png", "jpeg", "jpg", "mp4", "mp3", "aac", "amr", "gif", "doc", "docx", "txt", "wpd", "wps", "xls", "xlsx",
                     "pptx"
             };
             // if any file type needed add extension here and task is done
 
             do {
                 String path = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA));
-                String FileType=Utility.getFileExtensionfromPath(path);
+                String FileType = Utility.getFileExtensionfromPath(path);
                 File f = new File(path);
                 if (d.compareTo(new Date(f.lastModified())) != 1 && !f.isDirectory() && Arrays.asList(types).contains(FileType)) {
 
                     recentFiles.add(f.getAbsolutePath());
 
-                    }
+                }
             } while (cursor.moveToNext());
         }
         cursor.close();
@@ -768,7 +773,6 @@ public class TabFragment1 extends Fragment {
     }
 
 
-
     //new
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -785,21 +789,19 @@ public class TabFragment1 extends Fragment {
                 }
             }
 
-            if (allgranted)
-            {
-              getCategories();
+            if (allgranted) {
+                getCategories();
 
-            }
-            else if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), permissionsRequired[0]) || ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), permissionsRequired[1])) {
+            } else if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), permissionsRequired[0]) || ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), permissionsRequired[1])) {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
                 builder.setTitle("Need Permissions");
-                builder.setMessage(getActivity().getString(R.string.app_name)+" app needs storage permission.");
+                builder.setMessage(getActivity().getString(R.string.app_name) + " app needs storage permission.");
                 builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
-                       requestPermissions(permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
+                        requestPermissions(permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
                     }
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -809,8 +811,7 @@ public class TabFragment1 extends Fragment {
                     }
                 });
                 builder.show();
-            } else
-            {
+            } else {
                 Toast.makeText(getActivity(), "Unable to get Permission", Toast.LENGTH_LONG).show();
             }
         }
@@ -827,56 +828,53 @@ public class TabFragment1 extends Fragment {
         if (requestCode == REQUEST_PERMISSION_SETTING) {
             if (ActivityCompat.checkSelfPermission(getActivity(), permissionsRequired[0]) == PackageManager.PERMISSION_GRANTED) {
                 //Got Permission
-               getCategories();
+                getCategories();
             }
         }
     }
 
-    private class LoadIamgesTask extends AsyncTask<Void,Void,Integer>
-    {
+    private class LoadIamgesTask extends AsyncTask<Void, Void, Integer> {
 
 
         @Override
         protected Integer doInBackground(Void... voids) {
-           return listImages();
+            return listImages();
         }
 
         @Override
         protected void onPostExecute(Integer count) {
             super.onPostExecute(count);
+            try {
+                cat_Img = new category_Model(getResources().getString(R.string.cat_Images), String.valueOf(count), R.mipmap.cat_ic_image);
+                cat_List.set(0, cat_Img);
+                adapter.notifyDataSetChanged();
+            } catch (Exception e) {
 
-                  cat_Img=new category_Model(getResources().getString(R.string.cat_Images),String.valueOf(count),R.mipmap.cat_ic_image);
-                  cat_List.set(0,cat_Img);
-                  adapter.notifyDataSetChanged();
+            }
 
-                  }
+        }
     }
 
-    private int listImages()
-    {
+    private int listImages() {
         ArrayList<String> images = new ArrayList<>();
         final String[] projection = {MediaStore.Images.Media.DATA};
         final Cursor cursor = ctx.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                 projection, null, null, null);
         if (cursor == null) {
-            System.out.println("Iamge data Count"+0);
+            System.out.println("Image data Count" + 0);
             return 0;
-        }
-         else
-        {
-            int count=cursor.getCount();
+        } else {
+            int count = cursor.getCount();
             cursor.close();
-            System.out.println("Iamge data Count"+count);
+            System.out.println("Image data Count" + count);
             return count;
         }
-
 
 
     }
 
 
-    private class LoadVideosTask extends AsyncTask<Void,Void,Integer>
-    {
+    private class LoadVideosTask extends AsyncTask<Void, Void, Integer> {
 
         @Override
         protected Integer doInBackground(Void... voids) {
@@ -888,11 +886,11 @@ public class TabFragment1 extends Fragment {
         protected void onPostExecute(Integer count) {
             super.onPostExecute(count);
 
-            cat_Video=new category_Model(getResources().getString(R.string.cat_Videos),String.valueOf(count),R.mipmap.cat_ic_vdo);
-            cat_List.set(1,cat_Video);
+            cat_Video = new category_Model(getResources().getString(R.string.cat_Videos), String.valueOf(count), R.mipmap.cat_ic_vdo);
+            cat_List.set(1, cat_Video);
             adapter.notifyDataSetChanged();
 
-            }
+        }
 
     }
 
@@ -903,11 +901,9 @@ public class TabFragment1 extends Fragment {
                 projection, null, null, null);
         if (cursor == null) {
             return 0;
-        }
-        else
-        {
-            int count=cursor.getCount();
-            System.out.println("video data Count"+count);
+        } else {
+            int count = cursor.getCount();
+            System.out.println("video data Count" + count);
             cursor.close();
             return count;
         }
@@ -915,71 +911,82 @@ public class TabFragment1 extends Fragment {
 
     }
 
-    private class LoadDocumentTask extends AsyncTask<Void,Void,Integer>
-    {
+    private class LoadDocumentTask extends AsyncTask<Void, Void, Integer> {
         @Override
         protected Integer doInBackground(Void... voids) {
 
 
-
-
-            return  listDocs() ;
+            return listDocs();
         }
 
         @Override
         protected void onPostExecute(Integer count) {
             super.onPostExecute(count);
+            try {
 
-            cat_Document=new category_Model(getResources().getString(R.string.cat_Documents),String.valueOf(count),R.mipmap.cat_ic_docs);
-            cat_List.set(3,cat_Document);
-            adapter.notifyDataSetChanged();
 
+                cat_Document = new category_Model(getResources().getString(R.string.cat_Documents), String.valueOf(count), R.mipmap.cat_ic_docs);
+                cat_List.set(3, cat_Document);
+                adapter.notifyDataSetChanged();
+            } catch (Exception e) {
 
             }
-    }
 
 
-    private int listDocs()
-    {
-
-        ArrayList<String> docs = new ArrayList<>();
-        final String[] projection = {MediaStore.Files.FileColumns.DATA};
-        Cursor cursor = getContext().getContentResolver().query(MediaStore.Files.getContentUri("external"),
-                projection, null, null, null);
-        String[] types = new String[]{"pdf","doc", "docx", "txt", "wpd", "wps","xls","xlsx","ppt",
-                "pptx"
-        };     // if any file type needed add extension here and task is done
-
-        if (cursor == null) {
-            System.out.println("docs data count" + 0);
-            return 0;
-        } else if (cursor.getCount() > 0 && cursor.moveToFirst()) {
-            do {
-                String FileType="";
-                String path = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA));
-                String[] filePath=   path.split("/");
-                String FileName=filePath[filePath.length-1];
-                String[] s1=FileName.split("\\.");
-                if(s1.length==1)
-                 FileType=s1[0];
-                else if(s1.length==2)
-                    FileType=s1[1];
-
-
-                System.out.println("ArrayLength-> "+s1.length);
-                if (path != null && Arrays.asList(types).contains(FileType)) {
-                    docs.add(path);
-                }
-            }
-            while (cursor.moveToNext());
         }
-                cursor.close();
-                System.out.println("docs data count" + docs.size());
-                return docs.size();
+    }
 
+
+    private int listDocs() {
+
+        try {
+            ArrayList<String> docs = new ArrayList<>();
+            final String[] projection = {MediaStore.Files.FileColumns.DATA};
+            Cursor cursor = getContext().getContentResolver().query(MediaStore.Files.getContentUri("external"),
+                    projection, null, null, null);
+            String[] types = new String[]{"pdf", "doc", "docx", "txt", "wpd", "wps", "xls", "xlsx", "ppt",
+                    "pptx"
+            };     // if any file type needed add extension here and task is done
+
+            if (cursor == null) {
+                System.out.println("docs data count" + 0);
+                return 0;
+            } else if (cursor.getCount() > 0 && cursor.moveToFirst()) {
+                do {
+                    String FileType = "";
+                    String path = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA));
+                    String[] filePath = path.split("/");
+                    String FileName = filePath[filePath.length - 1];
+                    String[] s1 = FileName.split("\\.");
+                    if (s1.length == 1)
+                        FileType = s1[0];
+                    else if (s1.length == 2)
+                        FileType = s1[1];
+
+
+                    System.out.println("ArrayLength-> " + s1.length);
+                    if (path != null && Arrays.asList(types).contains(FileType)) {
+                        docs.add(path);
+                    }
+                }
+                while (cursor.moveToNext());
+            }
+
+            cursor.close();
+            System.out.println("docs data count" + docs.size());
+            return docs.size();
+        }
+        catch (Exception e)
+        {
+
+        }
+
+
+          return  0;
 
     }
-    private class LoadAudioTask extends AsyncTask<Void,Void,Integer> {
+
+    private class LoadAudioTask extends AsyncTask<Void, Void, Integer> {
         @Override
         protected Integer doInBackground(Void... voids) {
 
@@ -989,13 +996,18 @@ public class TabFragment1 extends Fragment {
         @Override
         protected void onPostExecute(Integer count) {
             super.onPostExecute(count);
-            cat_Audio = new category_Model(getResources().getString(R.string.cat_Audio), String.valueOf(count), R.mipmap.cat_ic_music);
-            cat_List.set(2, cat_Audio);
-            adapter.notifyDataSetChanged();
+            try {
+                cat_Audio = new category_Model(getResources().getString(R.string.cat_Audio), String.valueOf(count), R.mipmap.cat_ic_music);
+                cat_List.set(2, cat_Audio);
+                adapter.notifyDataSetChanged();
+            } catch (Exception e) {
+
+            }
 
 
         }
     }
+
     private int listaudio() {
         String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
         String[] projection = {
@@ -1011,65 +1023,74 @@ public class TabFragment1 extends Fragment {
 
 
         if (cursor == null) {
-            System.out.println("audio data Count"+0);
+            System.out.println("audio data Count" + 0);
             return 0;
-        }
-        else {
-            System.out.println("audio data Count"+cursor.getCount());
+        } else {
+            System.out.println("audio data Count" + cursor.getCount());
             return cursor.getCount();
         }
 
     }
 
-        private class LoadDownloadTask extends AsyncTask<Void,Void,Void> {
-            File dir;
+    private class LoadDownloadTask extends AsyncTask<Void, Void, Void> {
+        File dir;
 
-            private LoadDownloadTask(File dir) {
-                super();
-                this.dir = dir;
-            }
+        private LoadDownloadTask(File dir) {
+            super();
+            this.dir = dir;
+        }
 
 
-            @Override
-            protected Void doInBackground(Void... voids) {
-               downLoadList.clear();
+        @Override
+        protected Void doInBackground(Void... voids) {
+            downLoadList.clear();
 
-               downLoadList=getDownLoad(dir);
+            downLoadList = getDownLoad(dir);
 
-                return null;
-            }
+            return null;
+        }
 
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            try {
                 cat_Download = new category_Model(getResources().getString(R.string.cat_Download), String.valueOf(downLoadList.size()), R.mipmap.cat_ic_download);
                 cat_List.set(4, cat_Download);
                 adapter.notifyDataSetChanged();
+            } catch (Exception e) {
 
-                }
+            }
+
+
         }
+    }
 
-    private class LoadAnimationTask extends AsyncTask<Void,Void,Integer> {
+    private class LoadAnimationTask extends AsyncTask<Void, Void, Integer> {
 
         @Override
         protected Integer doInBackground(Void... voids) {
 
 
-
-            return  listAnimation();
+            return listAnimation();
         }
 
         @Override
         protected void onPostExecute(Integer count) {
             super.onPostExecute(count);
-            cat_Animation=new category_Model(getResources().getString(R.string.cat_Animation),String.valueOf(count),R.mipmap.cat_ic_animation);
-            cat_List.set(5, cat_Animation);
-            adapter.notifyDataSetChanged();
+            try {
+
+
+                cat_Animation = new category_Model(getResources().getString(R.string.cat_Animation), String.valueOf(count), R.mipmap.cat_ic_animation);
+                cat_List.set(5, cat_Animation);
+                adapter.notifyDataSetChanged();
+            } catch (Exception e) {
 
             }
 
+        }
+
     }
+
     private int listAnimation() {
         ArrayList<String> animation = new ArrayList<>();
         final String[] projection = {MediaStore.Files.FileColumns.DATA};
@@ -1082,7 +1103,7 @@ public class TabFragment1 extends Fragment {
             do {
                 String path = cursor.getString(cursor.getColumnIndex
                         (MediaStore.Files.FileColumns.DATA));
-                if (path != null && path.endsWith(".gif") ||  path.endsWith(".swf")|| path.endsWith(".ani")) {
+                if (path != null && path.endsWith(".gif") || path.endsWith(".swf") || path.endsWith(".ani")) {
                     animation.add(path);
                 }
             } while (cursor.moveToNext());
@@ -1091,7 +1112,7 @@ public class TabFragment1 extends Fragment {
         return animation.size();
     }
 
-    private class LoadrecentTask extends AsyncTask<Void,Void,Void> {
+    private class LoadrecentTask extends AsyncTask<Void, Void, Void> {
 
 
         @Override
@@ -1104,16 +1125,19 @@ public class TabFragment1 extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            try {
+                cat_Recent = new category_Model(getResources().getString(R.string.cat_Recent), String.valueOf(recentFiles.size()), R.mipmap.cat_ic_recent);
+                cat_List.set(6, cat_Recent);
+                adapter.notifyDataSetChanged();
+            } catch (Exception e) {
 
-            cat_Recent=new category_Model(getResources().getString(R.string.cat_Recent),String.valueOf(recentFiles.size()),R.mipmap.cat_ic_recent);
-            cat_List.set(6, cat_Recent);
-            adapter.notifyDataSetChanged();
+            }
 
         }
 
     }
 
-    private class LoadApkTask extends AsyncTask<Void,Void,Integer> {
+    private class LoadApkTask extends AsyncTask<Void, Void, Integer> {
 
 
         @Override
@@ -1126,76 +1150,80 @@ public class TabFragment1 extends Fragment {
         protected void onPostExecute(Integer count) {
             super.onPostExecute(count);
 
-            cat_Apk=new category_Model(getResources().getString(R.string.cat_Apk),String.valueOf(count),R.mipmap.cat_ic_apk);
+            cat_Apk = new category_Model(getResources().getString(R.string.cat_Apk), String.valueOf(count), R.mipmap.cat_ic_apk);
             cat_List.set(7, cat_Apk);
             adapter.notifyDataSetChanged();
 
         }
 
     }
-    private int listApks() {
-        ArrayList<String> apkList = new ArrayList<>();
-        final String[] projection = {MediaStore.Files.FileColumns.DATA};
 
-        Cursor cursor = ctx.getContentResolver()
-                .query(MediaStore.Files.getContentUri("external"), projection, null, null, null);
-        if (cursor == null)
-            return apkList.size();
-        else if (cursor.getCount() > 0 && cursor.moveToFirst()) {
-            do {
-                String path = cursor.getString(cursor.getColumnIndex
-                        (MediaStore.Files.FileColumns.DATA));
-                if (path != null && path.endsWith(".apk")) {
-                    apkList.add(path);
-                }
-            } while (cursor.moveToNext());
+    private int listApks() {
+        try {
+            ArrayList<String> apkList = new ArrayList<>();
+            final String[] projection = {MediaStore.Files.FileColumns.DATA};
+
+            Cursor cursor = ctx.getContentResolver()
+                    .query(MediaStore.Files.getContentUri("external"), projection, null, null, null);
+            if (cursor == null)
+                return apkList.size();
+            else if (cursor.getCount() > 0 && cursor.moveToFirst()) {
+                do {
+                    String path = cursor.getString(cursor.getColumnIndex
+                            (MediaStore.Files.FileColumns.DATA));
+                    if (path != null && path.endsWith(".apk")) {
+                        apkList.add(path);
+                    }
+                } while (cursor.moveToNext());
+            }
+
+            cursor.close();
+        }catch (Exception e)
+        {
+
         }
-        cursor.close();
         return apkList.size();
     }
 
 
+    public void ListAudioFile() {
 
+        // will be used  later to fetch audio  file
+        ContentResolver contentResolver = getActivity().getContentResolver();
+        Uri songUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        Cursor songCursor = contentResolver.query(songUri, null, null, null, null);
 
+        if (songCursor != null && songCursor.moveToFirst()) {
+            int songId = songCursor.getColumnIndex(MediaStore.Audio.Media._ID);
+            int songTitle = songCursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
 
-    public void ListAudioFile(){
-
-            // will be used  later to fetch audio  file
-            ContentResolver contentResolver = getActivity().getContentResolver();
-            Uri songUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-            Cursor songCursor = contentResolver.query(songUri, null, null, null, null);
-
-            if(songCursor != null && songCursor.moveToFirst())
-            {
-                int songId = songCursor.getColumnIndex(MediaStore.Audio.Media._ID);
-                int songTitle = songCursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
-
-                do {
-                    long currentId = songCursor.getLong(songId);
-                    String currentTitle = songCursor.getString(songTitle);
-                    if(!mp3List.contains(currentTitle))
-                     mp3List.add(currentTitle);
-                } while(songCursor.moveToNext());
-            }
+            do {
+                long currentId = songCursor.getLong(songId);
+                String currentTitle = songCursor.getString(songTitle);
+                if (!mp3List.contains(currentTitle))
+                    mp3List.add(currentTitle);
+            } while (songCursor.moveToNext());
         }
+    }
 
-    private  int getScreenWidth() {
+    private int getScreenWidth() {
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         // int height = displayMetrics.heightPixels;
         int width = displayMetrics.widthPixels;
         System.out.println(width);
-        return  width;
+        return width;
     }
-    private  int getScreenHeight() {
+
+    private int getScreenHeight() {
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-         int height = displayMetrics.heightPixels;
+        int height = displayMetrics.heightPixels;
         //int width = displayMetrics.widthPixels;
         System.out.println(height);
-        return  height;
+        return height;
     }
 
 }

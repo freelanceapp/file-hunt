@@ -5,6 +5,34 @@ import android.graphics.Bitmap;
 public class Grid_Model {
 
 
+    private String ImgPath;
+    String fileName;
+    long dateToSort;
+    long fileSizeCmpr;
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public long getDateToSort() {
+        return dateToSort;
+    }
+
+    public void setDateToSort(long dateToSort) {
+        this.dateToSort = dateToSort;
+    }
+
+    public long getFileSizeCmpr() {
+        return fileSizeCmpr;
+    }
+
+    public void setFileSizeCmpr(long fileSizeCmpr) {
+        this.fileSizeCmpr = fileSizeCmpr;
+    }
 
     public String getImgPath() {
         return ImgPath;
@@ -14,7 +42,7 @@ public class Grid_Model {
         ImgPath = imgPath;
     }
 
-    private String ImgPath;
+
 
     public String getImgBitmapStr() {
         return imgBitmap;

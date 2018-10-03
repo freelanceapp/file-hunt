@@ -12,12 +12,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -30,11 +32,19 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.mojodigi.filehunt.Adapter.MultiSelectAdapter_Apk;
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Model.Model_Apk;
 import com.mojodigi.filehunt.Model.Model_Recent;
 //
+import com.mojodigi.filehunt.Utils.AddMobUtils;
 import com.mojodigi.filehunt.Utils.AlertDialogHelper;
 import com.mojodigi.filehunt.Utils.AsynctaskUtility;
 import com.mojodigi.filehunt.Utils.CustomProgressDialog;
@@ -49,7 +59,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 
-public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener,MultiSelectAdapter_Apk.ApkListener,AsynctaskUtility.AsyncResponse{
+public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener,MultiSelectAdapter_Apk.ApkListener,AsynctaskUtility.AsyncResponse {
 
     ActionMode mActionMode;
     Menu context_menu;
@@ -69,16 +79,30 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
 
     ImageView blankIndicator;
     Context mcontext;
-     int APK=8;
-     boolean isUnseleAllEnabled=false;
-     static  ApkActivityRe instance;
-     private  int renamePosition;
+    int APK = 8;
+    boolean isUnseleAllEnabled = false;
+    static ApkActivityRe instance;
+    private int renamePosition;
     private Model_Apk fileTorename;
+
+
+    private AdView mAdView;
+    private RewardedVideoAd mRewardedVideoAd;
+    private int lastCheckedSortOptions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photos_activity_re);
+
+        //  banner add
+        mAdView = (AdView) findViewById(R.id.adView);
+        AddMobUtils adutil = new AddMobUtils();
+        adutil.displayBannerAdd(mAdView);
+
+        //  banner add
+
+
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         blankIndicator=(ImageView) findViewById(R.id.blankIndicator);
         instance=this;
@@ -128,6 +152,7 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
 
     }
 
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -169,17 +194,43 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
     protected void onResume() {
         super.onResume();
 
+        if (mAdView != null) {
+            mAdView.resume();
+        }
+
+
     }
 
     @Override
-    protected void onPause() {
+    protected void onStart() {
+        super.onStart();
 
+        AddMobUtils addutil= new AddMobUtils();
+        //        addutil.showInterstitial(mcontext);
+        // addutil.displayRewaredVideoAdd(mcontext,mRewardedVideoAd);
+         addutil.showInterstitial(mcontext);
+    }
+
+
+
+
+    @Override
+    public void onPause() {
+        if (mAdView != null) {
+            mAdView.pause();
+        }
         super.onPause();
-
+    }
+    @Override
+    public void onDestroy() {
+        if (mAdView != null) {
+            mAdView.destroy();
+        }
+        super.onDestroy();
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(final Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
        getMenuInflater().inflate(R.menu.menu_common_activity, menu);
 
@@ -211,6 +262,28 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
                 return false;
             }
         });
+
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+
+                MenuItem item= menu.findItem(R.id.action_sort);
+                item.setVisible(true);
+                //invalidateOptionsMenu();
+
+                return false;
+            }
+        });
+        searchView.setOnSearchClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MenuItem item= menu.findItem(R.id.action_sort);
+                item.setVisible(false);
+                //invalidateOptionsMenu();
+            }
+        });
+
+
 
 
         return true;
@@ -343,6 +416,25 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
 
+                case R.id.action_copy:
+                    if(multiselect_list.size()>0)
+                    {
+                        for(int i=0;i<multiselect_list.size();i++)
+                        {
+                            String fPath=multiselect_list.get(0).getFilePath().toString();
+                            System.out.println(""+fPath);
+                            if(!Constants.filesToCopy.contains(multiselect_list.get(i).getFilePath())) {
+                                Constants.filesToCopy.add(multiselect_list.get(i).getFilePath().toString());
+                            }
+                        }
+                        // redirect to  storage fragment;
+                        Constants.redirectToStorage=true;
+
+                        finish();
+
+
+                    }
+                    return true ;
                 case R.id.action_rename:
                     if(multiselect_list.size()==1)
                     Utility.fileRenameDialog(mcontext,multiselect_list.get(0).getFilePath(),Constants.APK);
@@ -789,10 +881,10 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
         return  Utility.humanReadableByteCount(totalSize,true);
     }
 
-    String action="";
+    String action="Name";
     public  void sortDialog(final Context ctx)
     {
-
+        // action="Name";
         System.out.print(""+ApkList);
         android.support.v7.app.AlertDialog.Builder  dialog=new android.support.v7.app.AlertDialog.Builder(ctx) ;
         LayoutInflater layoutInflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -804,6 +896,13 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
         RadioButton last=view.findViewById(R.id.sort_last_modified);
         RadioButton size=view.findViewById(R.id.sort_size);
         RadioButton type=view.findViewById(R.id.sort_type);
+
+        if(lastCheckedSortOptions==0)
+            name.setChecked(true);
+        else if(lastCheckedSortOptions==1)
+            last.setChecked(true);
+        else if(lastCheckedSortOptions==2)
+            size.setChecked(true);
 
         name.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
         last.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
@@ -822,23 +921,28 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
                     switch (checkedId)
                     {
                         case R.id.sort_name:
+
                             action="Name";
                             break;
 
                         case R.id.sort_last_modified:
                             action="Last";
+
                             break;
                         case R.id.sort_size:
+
                             action="Size";
                             break;
+
                         case R.id.sort_type:
                             action="Type";
+
                             break;
 
 
 
                     }
-                    Toast.makeText(ctx, action, Toast.LENGTH_SHORT).show();
+                    // Toast.makeText(ctx, action, Toast.LENGTH_SHORT).show();
 
 
                 }
@@ -852,11 +956,13 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
             public void onClick(DialogInterface dialog, int which) {
 
                 dialog.dismiss();
+                setLastSelectedCheckBoxFlag(action);
+
                 if(action.equalsIgnoreCase("Name"))
                 {
                     Collections.sort(ApkList, new Comparator<Model_Apk>() {
                         public int compare(Model_Apk o1, Model_Apk o2) {
-                            return o1.getFileName().compareToIgnoreCase(o2.getFileName());
+                            return o2.getFileName().compareToIgnoreCase(o1.getFileName());
 
                         }
                     });
@@ -865,16 +971,18 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
                 {
                     Collections.sort(ApkList, new Comparator<Model_Apk>() {
                         public int compare(Model_Apk o1, Model_Apk o2) {
-                            return o1.getFileMDate().compareToIgnoreCase(o2.getFileMDate());
+                            return Utility.longToDate(o2.getDateCmpr()).compareTo(Utility.longToDate(o1.getDateCmpr()));
 
                         }
                     });
                 }
                 else if(action.equalsIgnoreCase("Size"))
                 {
-                    Collections.sort(ApkList, new Comparator<Model_Apk>() {
+                    Collections.sort(ApkList, new Comparator<Model_Apk>()
+                    {
                         public int compare(Model_Apk o1, Model_Apk o2) {
-                            return o1.getFileSize().compareToIgnoreCase(o2.getFileSize());
+
+                            return (int) (o2.getFileSizeCmpr() - o1.getFileSizeCmpr());
 
                         }
                     });
@@ -886,8 +994,8 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
 
                 }
 
-
-
+                System.out.print(""+ApkList);
+                refreshAdapter();
 
             }
         });
@@ -896,19 +1004,42 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
             public void onClick(DialogInterface dialog, int which) {
 
                 dialog.dismiss();
-
+                setLastSelectedCheckBoxFlag(action);
 
 
                 if(action.equalsIgnoreCase("Name"))
                 {
+                    Collections.sort(ApkList, new Comparator<Model_Apk>() {
+                        public int compare(Model_Apk o1, Model_Apk o2) {
+                            return o1.getFileName().compareToIgnoreCase(o2.getFileName());
+
+                        }
+                    });
+
 
                 }
                 else if(action.equalsIgnoreCase("Last"))
                 {
+                    Collections.sort(ApkList, new Comparator<Model_Apk>() {
+                        public int compare(Model_Apk o1, Model_Apk o2) {
+                            return Utility.longToDate(o1.getDateCmpr()).compareTo(Utility.longToDate(o2.getDateCmpr()));
 
+                        }
+                    });
                 }
                 else if(action.equalsIgnoreCase("Size"))
                 {
+
+
+                    Collections.sort(ApkList, new Comparator<Model_Apk>()
+                    {
+                        public int compare(Model_Apk o1, Model_Apk o2) {
+
+                            return (int) (o1.getFileSizeCmpr() - o2.getFileSizeCmpr());
+
+                        }
+                    });
+
 
                 }
                 else if(action.equalsIgnoreCase("Type"))
@@ -917,7 +1048,8 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
                 }
 
 
-
+                System.out.print(""+ApkList);
+                refreshAdapter();
 
 
             }
@@ -926,9 +1058,32 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
 
         dialog.show();
 
-       refreshAdapter();
+
 
     }
+
+    private void setLastSelectedCheckBoxFlag(String action) {
+
+        if(action.equalsIgnoreCase("Name"))
+        {
+            lastCheckedSortOptions=0;
+            this.action=action;
+        }
+        else if(action.equalsIgnoreCase("Last"))
+        {
+            lastCheckedSortOptions=1;
+            this.action=action;
+        }
+        else if(action.equalsIgnoreCase("Size"))
+        {
+            lastCheckedSortOptions=2;
+            this.action=action;
+        }
+    }
+
+
+
+
 
 
 

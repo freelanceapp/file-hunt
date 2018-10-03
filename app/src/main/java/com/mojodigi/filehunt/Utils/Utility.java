@@ -396,9 +396,14 @@ public static  boolean isPathExist(String pathStr,Context ctx)
 
     public static String getFileExtensionfromPath(String path)
     {
-        File file = new File(path);
-        String extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
-        return extension;
+        try {
+            File file = new File(path);
+            String extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
+            return extension;
+        }catch (Exception e)
+        {
+            return  " ";
+        }
     }
     public static void OpenFile(Context ctx,String path)
     {
@@ -1021,6 +1026,14 @@ public static boolean IsNotEmpty(EditText view)
         String str =e.getMessage();
         System.out.print(""+str);
     }
+
+
 }
+
+    public static Date longToDate(Long  l)
+    {
+        Date  d =  new Date(l);
+        return  d;
+    }
 
 }

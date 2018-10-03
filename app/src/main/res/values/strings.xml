@@ -185,10 +185,12 @@ Operation completed. Files will be uploaded in the background
     <string name="download">Downloads</string>
     <string name="recent_file">Recent files</string>
     <string name="loading_msg">Loading</string>
+    <string name="copying_msg">Copying</string>
 
 
     <string name="menu_selectAll">SELECT ALL</string>
     <string name="menu_unselectAll">UNSELECT ALL</string>
+    <string name="menu_paste">PASTE</string>
 
     <string name="cat_Images">Image</string>
     <string name="cat_Videos">Video</string>
@@ -201,7 +203,7 @@ Operation completed. Files will be uploaded in the background
 
     <string name="save">SAVE</string>
     <string name="cancel">CANCEL</string>
-    <string name="versiontxt">V 1.0</string>
+    <string name="versiontxt">V 1.4</string>
 
 
     <string name="rename_success">File renamed successfully</string>
@@ -230,5 +232,30 @@ Operation completed. Files will be uploaded in the background
     <string name="sortby">Sort By</string>
     <string name="ascending">Ascending</string>
     <string name="descending">Descending</string>
+
+
+
+
+    <!-- demo app ids -->
+    <!--
+      <string name="admob_app_id">ca-app-pub-5603925957932903~3576315291</string>
+      <string name="banner_add_id">ca-app-pub-3940256099942544/6300978111</string>
+      <string name="ad_unit_id">ca-app-pub-3940256099942544/1033173712</string>
+      <string name="ad_unit_id_reward">ca-app-pub-3940256099942544/5224354917</string>
+    -->
+      <!-- demo app ids -->
+
+
+
+
+    <!--actual  app id -->
+
+      <string name="admob_app_id">ca-app-pub-5603925957932903~3576315291</string>
+      <string name="banner_add_id">ca-app-pub-5603925957932903/8134685014</string>
+      <string name="ad_unit_id">ca-app-pub-5603925957932903/9183865192</string>
+
+      <string name="ad_unit_id_reward">ca-app-pub-5603925957932903/5622774574</string>
+
+       <!--actualapp id -->
 
 </resources>

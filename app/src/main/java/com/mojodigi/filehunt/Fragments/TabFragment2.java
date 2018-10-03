@@ -15,12 +15,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.AdView;
 import com.mojodigi.filehunt.Adapter.Adapter_Storage;
+import com.mojodigi.filehunt.AsyncTasks.copyAsyncTask;
+import com.mojodigi.filehunt.Class.Constants;
+import com.mojodigi.filehunt.MainActivity;
 import com.mojodigi.filehunt.Model.Model_Storage;
 //
+import com.mojodigi.filehunt.Utils.AddMobUtils;
 import com.mojodigi.filehunt.Utils.Utility;
 import com.mojodigi.filehunt.Utils.UtilityStorage;
 
@@ -30,7 +36,7 @@ import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import com.mojodigi.filehunt.R;
-public class TabFragment2 extends Fragment  implements Adapter_Storage.ItemListener {
+public class TabFragment2 extends Fragment  implements Adapter_Storage.ItemListener , copyAsyncTask.AsyncResponse {
 
 
    private    File path = new File(Environment.getExternalStorageDirectory() + "");
@@ -64,8 +70,6 @@ public class TabFragment2 extends Fragment  implements Adapter_Storage.ItemListe
     RelativeLayout sdcard_change,internal_change;
     CardView storage_Layout;
 
-
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -78,6 +82,9 @@ public class TabFragment2 extends Fragment  implements Adapter_Storage.ItemListe
          mcontext=getActivity();
 
 
+
+
+
         internal_txt=(TextView)view.findViewById(R.id.internal_txt);
         sdcard_txt=(TextView)view.findViewById(R.id.sdcard_txt);
 
@@ -86,7 +93,8 @@ public class TabFragment2 extends Fragment  implements Adapter_Storage.ItemListe
         internal_txt.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(getActivity()));
         sdcard_txt.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(getActivity()));
 
-        storage_Layout=(CardView)view.findViewById(R.id.storage_Layout);
+       // storage_Layout=(CardView)view.findViewById(R.id.storage_Layout);
+        storage_Layout=(CardView) view.findViewById(R.id.storage_Layout);
 
         sdcard_change=(RelativeLayout)view.findViewById(R.id.sdcard_change);
         internal_change=(RelativeLayout)view.findViewById(R.id.internal_change);
@@ -203,6 +211,10 @@ public class TabFragment2 extends Fragment  implements Adapter_Storage.ItemListe
             }
         });
 
+
+
+
+
     }
 
     @Override
@@ -219,6 +231,8 @@ public class TabFragment2 extends Fragment  implements Adapter_Storage.ItemListe
            {
                storage_Layout.setVisibility(View.GONE);
            }
+
+
 
         //  pathList.clear(); new
 
@@ -239,6 +253,13 @@ public class TabFragment2 extends Fragment  implements Adapter_Storage.ItemListe
            //loads the data only fisrt time when fragment is visible to user if this is not done then at the time of installation first time the
            //storage details will not be visible so  call is once when fragment is visible to user
 
+           updateVisibilityPasteMenu();
+
+          // AddMobUtils addutil=new AddMobUtils();
+         //  addutil.showInterstitial(getActivity());
+
+
+
        }
        else {
           // pathList.clear();  new
@@ -247,14 +268,45 @@ public class TabFragment2 extends Fragment  implements Adapter_Storage.ItemListe
 
     }
 
+    private void updateVisibilityPasteMenu()
+    {
+        try {
+            Constants.redirectToStorage=false; //  once we have been redirected to  storage then make it false
+            //as it is set true on click of copy menu;
+            ((MainActivity) getActivity()).ShowHideMenu();
+
+        }catch (Exception e)
+        {
+
+        }
+
+    }
+
     private void setCurrentDispPath() {
 
         String pathstr=path.getAbsolutePath();
+        Constants.pastePath=pathstr;//  this variable is used to paste the file on the path assigned to  this variable in mainActivity
         currentPath.setText(pathstr);
 
 
     }
 
+    @Override
+    public void onPause() {
+
+        super.onPause();
+    }
+    @Override
+    public void onDestroy() {
+
+        super.onDestroy();
+    }
+    public void pasteData()
+    {
+        //fileList_root  is being passed to  check  file already exist in same location;
+        new copyAsyncTask(mcontext,this, Constants.filesToCopy,fileList_root,currentPath.getText().toString()).execute();
+
+    }
 
     public   int onBackPressed() {
 
@@ -444,6 +496,23 @@ private boolean isSdcardPresent()
 
 
 
+
+    }
+    @Override
+    public void copyFinish() {
+        loadFileList();
+
+        if(folderList.size()!=0) {
+
+            blankIndicator.setVisibility(View.GONE);
+            multiSelectAdapter = new Adapter_Storage(mcontext, folderList, this);
+            recyclerView.setAdapter(multiSelectAdapter);
+        }
+        else {
+            blankIndicator.setVisibility(View.VISIBLE);
+        }
+
+        updateVisibilityPasteMenu();
 
     }
 }

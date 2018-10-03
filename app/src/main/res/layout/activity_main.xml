@@ -1,12 +1,12 @@
-<RelativeLayout
-    android:id="@+id/main_layout"
+<RelativeLayout android:id="@+id/main_layout"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:background="@drawable/bckimg"
     android:layout_height="match_parent"
-    tools:context="com.mojodigi.filehunt.MainActivity">
+    tools:context="com.mojodigi.filehunt.MainActivity"
+    xmlns:ads="http://schemas.android.com/apk/res-auto">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
@@ -46,9 +46,19 @@
 
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"
+        android:layout_above="@+id/adView"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:layout_below="@id/cardLayout"/>
+
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/adView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:visibility="gone"
+        ads:adSize="SMART_BANNER"
+        ads:adUnitId="@string/banner_add_id"></com.google.android.gms.ads.AdView>
 
 
 

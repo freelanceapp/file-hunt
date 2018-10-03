@@ -30,20 +30,20 @@ import java.util.TimeZone;
 import com.mojodigi.filehunt.R;
 public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
 
- private Context mcontext;
+    private Context mcontext;
     boolean boolean_folder;
- public  T model_type;
- int fileStorageType;
+    public  T model_type;
+    int fileStorageType;
 
 
     public  AsynctaskUtility(Context mcontext,AsyncResponse delegate,int fileStorageType)
-  {
-      this.mcontext=mcontext;
-      this.delegate=delegate;
-      this.fileStorageType=fileStorageType;
+    {
+        this.mcontext=mcontext;
+        this.delegate=delegate;
+        this.fileStorageType=fileStorageType;
 
 
-  }
+    }
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
@@ -62,31 +62,31 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
     protected ArrayList<T> doInBackground(Void... voids) {
 
         switch (fileStorageType)
-           {
-               case 7:
-                   return  (ArrayList<T>)listRecentFiles();
-               case 4:
-                   return  (ArrayList<T>) FetchDocuments();
-               case 5:
-                   return (ArrayList<T>)getDownLoads((Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)));
-               case 6:
-                   return (ArrayList<T>)fetchAnimationFiles();
-               case 8:
-                   return  (ArrayList<T>) fetchApks();
-               case 3:
-                   return  (ArrayList<T>) FetchAudio();
-               case 2:
-                   return   (ArrayList<T>) FetchVideos();
-               case 1:
-                   return  (ArrayList<T>) Load_Images();
+        {
+            case 7:
+                return  (ArrayList<T>)listRecentFiles();
+            case 4:
+                return  (ArrayList<T>) FetchDocuments();
+            case 5:
+                return (ArrayList<T>)getDownLoads((Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)));
+            case 6:
+                return (ArrayList<T>)fetchAnimationFiles();
+            case 8:
+                return  (ArrayList<T>) fetchApks();
+            case 3:
+                return  (ArrayList<T>) FetchAudio();
+            case 2:
+                return   (ArrayList<T>) FetchVideos();
+            case 1:
+                return  (ArrayList<T>) Load_Images();
 
-
-
-           }
-           return null;
 
 
         }
+        return null;
+
+
+    }
 
 
     @Override
@@ -117,8 +117,8 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
 
         String absolutePathOfImage = null;
 
-          Uri  uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-          String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME,MediaStore.MediaColumns.DATE_MODIFIED};
+        Uri  uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME,MediaStore.MediaColumns.DATE_MODIFIED};
 
         final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
         cursor = mcontext.getContentResolver().query( uri, projection, null, null, orderBy + " DESC");
@@ -162,7 +162,7 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
 
                 al_images.add(obj_model);
 
-                }
+            }
 
 
         }
@@ -176,7 +176,7 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
         Cursor cursor;
         int column_index_data, column_index_folder_name,column_index_date_modified,thumb,column_index_duration;
         String absolutePathOfImage = null;
-          Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+        Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
 
         String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME,MediaStore.MediaColumns.DATE_MODIFIED,MediaStore.Video.Thumbnails.DATA,MediaStore.Video.VideoColumns.DURATION};
 
@@ -268,9 +268,9 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
 
         final String orderBy = MediaStore.Audio.Media.DATE_MODIFIED;
         cursor = mcontext.getContentResolver().query( uri, projection, selection, null, orderBy + " DESC");
-            if(cursor==null) {
-                return al_images;
-            }
+        if(cursor==null) {
+            return al_images;
+        }
         column_index_data = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
         column_index_folder_name = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM);
         column_index_date_modified= cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED);
@@ -352,7 +352,7 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
         Cursor cursor = mcontext.getContentResolver().query(MediaStore.Files.getContentUri("external"),
                 projection, null, null, orderBy+" desc");
         if (cursor == null)
-           return  ApkList;
+            return  ApkList;
         else if (cursor.getCount() > 0 && cursor.moveToFirst()) {
             do {
                 String path = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA));
@@ -368,14 +368,17 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
                     model.setFileName(fileName);
                     model.setFilePath(path);
                     model.setFileSize(Utility.humanReadableByteCount(fileSize,true));
+                    model.setFileSizeCmpr(fileSize);
                     model.setFileMDate(Utility.LongToDate(fileDateModified));
+                    model.setDateCmpr(Long.parseLong(fileDateModified));
+
                     ApkList.add(model);
 
                 }
             } while (cursor.moveToNext());
         }
         cursor.close();
- return  ApkList;
+        return  ApkList;
     }
 
     private  ArrayList<Model_Recent> listRecentFiles()
@@ -411,7 +414,7 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
                 long fileSize=cursor.getLong(cursor.getColumnIndex(MediaStore.Files.FileColumns.SIZE));
                 long mDate=cursor.getLong(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATE_ADDED));
                 // String type=cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.MIME_TYPE));
-              //sent from wahtsapp
+                //sent from wahtsapp
                 String[] types = new String[]{"pdf","png","jpeg","jpg","mp4","mp3","aac","amr","gif","doc", "docx", "txt", "wpd", "wps","xls","xlsx",
                         "pptx"
                 };
@@ -428,7 +431,7 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
                 FileType=Utility.getFileExtensionfromPath(path);
 
 
-               Log.d("recent files mimeType",""+FileType);
+                Log.d("recent files mimeType",""+FileType);
                 File f = new File(path);
                 if (d.compareTo(new Date(f.lastModified())) != 1 && !f.isDirectory()  && Arrays.asList(types).contains(FileType)) {
                     Model_Recent model=new Model_Recent();
@@ -436,6 +439,8 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
                     model.setFileSize(Utility.humanReadableByteCount(fileSize,true));
                     model.setFileName(fileName);
                     model.setFileMdate(Utility.LongToDate(String.valueOf(mDate)));
+                    model.setDateToSort(mDate);
+                    model.setFileSizeCmpr(fileSize);
                     model.setFilePath(path);
                     model.setFileType(Utility.getFileExtensionfromPath(path));
                     RecentListLocal.add(model);
@@ -463,9 +468,9 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
         String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension("pdf");
         String selectionMimeType = MediaStore.Files.FileColumns.MIME_TYPE + "="+mimeType;
 
-         final String[] projection = {MediaStore.Files.FileColumns.DATA,MediaStore.Files.FileColumns.TITLE,MediaStore.Files.FileColumns.SIZE,MediaStore.Files.FileColumns.DATE_ADDED, MediaStore.Files.FileColumns.MEDIA_TYPE};
-         String orderby= MediaStore.Files.FileColumns.DATE_ADDED;
-         Cursor cursor = mcontext.getContentResolver().query(MediaStore.Files.getContentUri("external"),
+        final String[] projection = {MediaStore.Files.FileColumns.DATA,MediaStore.Files.FileColumns.TITLE,MediaStore.Files.FileColumns.SIZE,MediaStore.Files.FileColumns.DATE_ADDED, MediaStore.Files.FileColumns.MEDIA_TYPE};
+        String orderby= MediaStore.Files.FileColumns.DATE_ADDED;
+        Cursor cursor = mcontext.getContentResolver().query(MediaStore.Files.getContentUri("external"),
                 projection, null, null, orderby+" desc");
 
         String[] types = new String[]{"pdf","doc", "docx", "txt", "wpd", "wps","xls","xlsx","ppt",
@@ -475,7 +480,7 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
         // if any file type needed add extension here and task is done
 
         if (cursor == null) {
-          return   docsList;
+            return   docsList;
 
         } else if (cursor.getCount() > 0 && cursor.moveToFirst()) {
             do {
@@ -508,6 +513,8 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
                     model.setFileSize(Utility.humanReadableByteCount(fileSize,true));
                     model.setFileMDate(Utility.LongToDate(fileDateModified));
                     model.setFileType(FileType);
+                    model.setFileSizeCmpr(fileSize);
+                    model.setDateToSort(Long.parseLong(fileDateModified));
 
                     docsList.add(model);
 
@@ -519,7 +526,7 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
         cursor.close();
         System.out.println("docs data count" + docsList.size());
 
-    return docsList;
+        return docsList;
 
     }
     private ArrayList<Model_Download> getDownLoads(File dir)
@@ -540,9 +547,12 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
                     model.setFilePath(listFile[i].toString());
                     model.setFileDateModified(Utility.LongToDate(f.lastModified()));
                     model.setDateToSort(f.lastModified());
+                    model.setFileSizeCmpr(f.length());
                     model.setFileSize(Utility.humanReadableByteCount(f.length(),true));
+
                     model.setFileName(f.getName());
                     model.setFiletype(Utility.getFileExtensionfromPath(listFile[i].toString()));
+
                     downLoadListLocal.add(model);
                 }
             }
@@ -567,7 +577,7 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
                 projection, null, null, orderBy+" desc");
 
         if (cursor == null)
-           return animList;
+            return animList;
         else if (cursor.getCount() > 0 && cursor.moveToFirst()) {
             do {
                 String path = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA));
@@ -583,6 +593,8 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
                     model.setFilePath(path);
                     model.setFileSize(Utility.humanReadableByteCount(fileSize,true));
                     model.setFileMDate(Utility.LongToDate(fileDateModified));
+                    model.setFileSizeCmpr(fileSize);
+                    model.setDateToSort(Long.parseLong(fileDateModified));
                     // model.setFileType(FileType);
 
                     animList.add(model);
@@ -590,7 +602,7 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
             } while (cursor.moveToNext());
         }
         cursor.close();
-           return  animList;
+        return  animList;
     }
 
 

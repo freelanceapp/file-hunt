@@ -6,8 +6,8 @@ android {
         applicationId "com.mojodigi.filehunt"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 1
-        versionName "1.0"
+        versionCode 8
+        versionName "1.7"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -34,7 +34,11 @@ dependencies {
      //zoom image library
     //https://android-arsenal.com/details/1/1509     library url
     implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.10.0'
-    implementation 'com.google.android.gms:play-services-analytics:7.3.0'
+
+   // implementation 'com.google.android.gms:play-services-analytics:7.3.0'
+    implementation 'com.google.android.gms:play-services-analytics:15.0.2'
+    implementation 'com.google.android.gms:play-services-ads:15.0.0'
+
 
 
 
