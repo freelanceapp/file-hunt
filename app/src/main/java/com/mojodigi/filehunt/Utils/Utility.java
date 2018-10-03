@@ -1029,6 +1029,11 @@ public static boolean IsNotEmpty(EditText view)
 
 
 }
+public static Date longToDate(Long  l)
+{
+    Date  d =  new Date(l);
+    return  d;
+}
 
     public static Date longToDate(Long  l)
     {

@@ -45,6 +45,9 @@ public class Constants {
 
 
     public static final String PREFERENCE_URI = "URI";
+    public static ArrayList<String> filesToCopy=new ArrayList<String>();
+    public static boolean redirectToStorage=false;
+    public static String pastePath="";
 
 
     public static ArrayList<String> filesToCopy=new ArrayList<String>();

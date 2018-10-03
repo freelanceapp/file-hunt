@@ -34,4 +34,6 @@ public class pagerAdapter2 extends FragmentStatePagerAdapter {
     public int getCount() {
         return mFragmentList.size();
     }
+
+    
 }
