@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- End current session if app sleeps for a period of time -->
+    <integer name="ga_sessionTimeout">300</integer>
+
+    <!-- Enable automatic Activity measurement -->
+
+
+    <!--
+
+       // Enable this code to track the activity on onResume of every activity
+       // if ga_autoActivityTracking set to false
+      // MyApplication.getInstance().trackScreenView("Second Activity");
+
+
+      // currently ga_autoActivityTracking is true so  no need to write code explicitly
+
+
+  -->
+
+
+    <bool name="ga_autoActivityTracking">true</bool>
+
+    <!--  The property id associated with this analytics tracker -->
+
+
+
+      <string name="ga_trackingId">UA-125259779-1</string>
+
+
+
+     <string name="ga_sampleFrequency">100.0</string>
+
+
+    <!-- will report any crash if happens-->
+
+     <bool name="ga_reportUncaughtExceptions">true</bool>
+
+
+
+
+     <screenName name="com.mojodigi.filehunt.MainActivity">Home Screen</screenName>
+     <screenName name="com.mojodigi.filehunt.PhotosActivityRe">Images</screenName>
+     <screenName name="com.mojodigi.filehunt.VideoActivityRe">Videos</screenName>
+     <screenName name="com.mojodigi.filehunt.RecentActivityRe">Recent</screenName>
+     <screenName name="com.mojodigi.filehunt.DownloadActivityRe">Download</screenName>
+     <screenName name="com.mojodigi.filehunt.DocsActivityRe">Document</screenName>
+     <screenName name="com.mojodigi.filehunt.AnimationActivityRe">Animation</screenName>
+     <screenName name="com.mojodigi.filehunt.ApkActivityRe">Apk</screenName>
+     <screenName name="com.mojodigi.filehunt.AudioActivityRe">Audio</screenName>
+     <screenName name="com.mojodigi.filehunt.Category_Explore_Activity">CategoryFolders</screenName>
+
+     <!--
+       See Project Structure -> Analytics -> Google Analytics -> Learn More
+       to learn more about configuring this file.
+     -->
+
+
+</resources>

@@ -1,0 +1,54 @@
+<LinearLayout android:layout_height="wrap_content" android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/dp15"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+
+    <TextView
+        android:text="@string/sortby"
+        android:textSize="@dimen/sp22"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+
+    <RadioGroup
+        android:id="@+id/radioGroup"
+        android:layout_marginTop="@dimen/dp10"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:checked="true"
+            android:textSize="@dimen/sp20"
+            android:id="@+id/sort_name"
+            android:text="@string/sortName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <RadioButton
+            android:textSize="@dimen/sp20"
+            android:layout_marginTop="@dimen/dp10"
+            android:id="@+id/sort_last_modified"
+            android:text="@string/lastModified"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <RadioButton
+            android:textSize="@dimen/sp20"
+            android:layout_marginTop="@dimen/dp10"
+            android:id="@+id/sort_size"
+            android:text="@string/sortSize"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <RadioButton
+            android:visibility="gone"
+            android:textSize="@dimen/sp20"
+            android:layout_marginTop="@dimen/dp10"
+            android:id="@+id/sort_type"
+            android:text="@string/type"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </RadioGroup>
+
+
+</LinearLayout>
