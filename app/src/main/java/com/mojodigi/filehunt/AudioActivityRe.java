@@ -104,12 +104,17 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
         Utility.setActivityTitle(mcontext,getResources().getString(R.string.cat_Audio));
         int_position = getIntent().getIntExtra("value", 0);
 
-        String tittle=Category_Explore_Activity.al_images.get(int_position).getStr_folder();
-        Utility.setActivityTitle(mcontext,tittle);
+        try {
+            String tittle = Category_Explore_Activity.al_images.get(int_position).getStr_folder();
+            Utility.setActivityTitle(mcontext, tittle);
 
-         Intent_Audio_List = Category_Explore_Activity.al_images.get(int_position).getAl_imagepath();
-         Intent_duration_List=Category_Explore_Activity.al_images.get(int_position).getAl_FileDuration();
-         data_load();
+            Intent_Audio_List = Category_Explore_Activity.al_images.get(int_position).getAl_imagepath();
+            Intent_duration_List = Category_Explore_Activity.al_images.get(int_position).getAl_FileDuration();
+            data_load();
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+        }
          instance=this;
         alertDialogHelper =new AlertDialogHelper(this);
 
@@ -314,7 +319,7 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
             String fName = splitPath[splitPath.length - 1];
 
             Dialog dialog = new Dialog(AudioActivityRe.this);
-            dialog.setContentView(R.layout.file_property_dialog);
+            dialog.setContentView(R.layout.dialog_file_property);
             // Set dialog title
 
             TextView FileName = dialog.findViewById(R.id.FileName);
@@ -446,6 +451,12 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
 
+                case R.id.action_move:
+                    Utility.dispToast(mcontext,"Move");
+                    return true;
+                case R.id.action_encrypt:
+                    Utility.dispToast(mcontext,"encrypt");
+                    return true;
 
                 case R.id.action_copy:
                     if(multiselect_list.size()>0)

@@ -41,6 +41,7 @@ import com.mojodigi.filehunt.Utils.AddMobUtils;
 import com.mojodigi.filehunt.Utils.AlertDialogHelper;
 import com.mojodigi.filehunt.Utils.AsynctaskUtility;
 import com.mojodigi.filehunt.Utils.CustomProgressDialog;
+import com.mojodigi.filehunt.Utils.EncryptDialogUtility;
 import com.mojodigi.filehunt.Utils.RecyclerItemClickListener;
 import com.mojodigi.filehunt.Utils.Utility;
 import com.mojodigi.filehunt.Utils.UtilityStorage;
@@ -52,7 +53,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 
-public class AnimationActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener,MultiSelectAdapter_Anim.AnimListener,AsynctaskUtility.AsyncResponse{
+public class AnimationActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener,MultiSelectAdapter_Anim.AnimListener,AsynctaskUtility.AsyncResponse,EncryptDialogUtility.EncryptDialogListener{
 
     ActionMode mActionMode;
     Menu context_menu;
@@ -95,7 +96,7 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         blankIndicator=(ImageView) findViewById(R.id.blankIndicator);
         mcontext=AnimationActivityRe.this;
-       instance=this;
+        instance=this;
         UtilityStorage.InitilaizePrefs(mcontext);
        Utility.setActivityTitle(mcontext,getResources().getString(R.string.cat_Animation));
 
@@ -347,7 +348,7 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
             String fName = splitPath[splitPath.length - 1];
 
             Dialog dialog = new Dialog(AnimationActivityRe.this);
-            dialog.setContentView(R.layout.file_property_dialog);
+            dialog.setContentView(R.layout.dialog_file_property);
             // Set dialog title
 
             TextView FileName = dialog.findViewById(R.id.FileName);
@@ -398,6 +399,15 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
+
+
+                case R.id.action_move:
+                    Utility.dispToast(mcontext,"Move");
+                    return true;
+                case R.id.action_encrypt:
+                   // Utility.fileEncryptPasswordDialog(mcontext);
+                    new EncryptDialogUtility(instance).fileEncryptPasswordDialog(mcontext);
+                    return true;
 
                 case R.id.action_copy:
                     if(multiselect_list.size()>0)
@@ -543,6 +553,21 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
             recyclerView.setAdapter(multiSelectAdapter);
         }
     }
+
+
+    // methods from EncryptDialogListener;
+    @Override
+    public void onCancelClick() {
+        Utility.dispToast(mcontext,"cancle_click");
+    }
+
+    @Override
+    public void onEncryptClick() {
+          Utility.dispToast(mcontext,"EncyptClick");
+
+
+          }
+
 
     private class DeleteFileTask extends AsyncTask<Void,Void,Integer>
     {

@@ -12,24 +12,26 @@
         android:title="@string/menu_item_delete"
         app:showAsAction="always"/>
 
+
     <item  android:id="@+id/action_copy"
         android:visible="true"
         android:title="Copy"/>
 
 
-    <item  android:id="@+id/item2"
+    <item  android:id="@+id/action_move"
         android:visible="false"
-        android:title="Cut"/>
+        android:title="@string/menu_item_move"/>
 
-    <item  android:id="@+id/item3"
-        android:visible="false"
-        android:title="Add to favourites"/>
 
     <item  android:id="@+id/action_Share"
         android:title="Share"/>
 
     <item  android:id="@+id/action_rename"
         android:title="Rename"/>
+
+    <item  android:id="@+id/action_encrypt"
+        android:visible="false"
+        android:title="Encrypt"/>
 
     <item  android:id="@+id/action_details"
         android:title="Details"/>

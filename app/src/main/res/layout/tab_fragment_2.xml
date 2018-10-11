@@ -35,6 +35,29 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
+    <RelativeLayout
+        android:visibility="gone"
+        android:layout_alignParentRight="true"
+        android:layout_above="@+id/storage_Layout"
+        android:layout_alignParentBottom="true"
+        android:layout_width="wrap_content"
+        android:layout_marginRight="@dimen/dp10"
+        android:layout_marginBottom="@dimen/dp10"
+        android:layout_height="wrap_content">
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
+            app:elevation="@dimen/dp6"
+            app:pressedTranslationZ="@dimen/dp12"
+            app:backgroundTint="@color/grey_ebebeb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/dp10"
+            app:fabSize="normal"
+            android:src="@drawable/ic_pdf" />
+
+    </RelativeLayout>
+
+    <include  layout="@layout/layout_fab_submenu"/>
 
     <android.support.v7.widget.CardView
         android:visibility="visible"

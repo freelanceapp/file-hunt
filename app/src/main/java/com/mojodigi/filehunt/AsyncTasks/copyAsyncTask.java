@@ -48,6 +48,7 @@ public class copyAsyncTask extends AsyncTask<Integer, Integer, Integer> {
     protected Integer doInBackground(Integer... integers) {
 
         int counter = 0;
+        Constants.totalfolderCopied=0;
         try {
             for (int i = 0; i < filesToCopyAsync.size(); i++) {
                 Boolean b = isfileExistonCurrentPath(Constants.filesToCopy.get(i).toString());
@@ -96,8 +97,8 @@ public class copyAsyncTask extends AsyncTask<Integer, Integer, Integer> {
 
         try {
             CustomProgressDialog.dismiss();
-            String msg = integer > 1 ? integer + " files copied" : integer + " file copied";
-            Toast.makeText(mcontext, msg, Toast.LENGTH_SHORT).show();
+            String msg = integer > 1 ? integer + " Items copied" : integer + " Item copied";
+           // Toast.makeText(mcontext, msg, Toast.LENGTH_SHORT).show();    // comments as  incorrect msg is coming;
             delegate.copyFinish();
         }catch (Exception e)
         {

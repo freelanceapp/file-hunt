@@ -169,6 +169,7 @@ Files with the same name already exist. Do you want to overwrite them?
 Operation completed. Files will be uploaded in the background
 </string>
     <string name="menu_item_delete">Delete</string>
+    <string name="menu_item_move">Move</string>
     <string name="action_search">Search</string>
     <string name="action_sort">Sort</string>
     <string name="rar_extract_message">Extraction not supported for encrypted RAR files</string>
@@ -200,12 +201,14 @@ Operation completed. Files will be uploaded in the background
     <string name="cat_Animation">Animation</string>
     <string name="cat_Recent">Recent</string>
     <string name="cat_Apk">Apk</string>
-
+    <string name="createfolder">CREATE</string>
     <string name="save">SAVE</string>
     <string name="cancel">CANCEL</string>
     <string name="versiontxt">V 1.4</string>
-
-
+    <string name="create_folder">Create new folder</string>
+    <string name="encrypt_heading">Encrypt file</string>
+    <string name="password">write password</string>
+    <string name="encrypt">ENCRYPT</string>
     <string name="rename_success">File renamed successfully</string>
     <string name="rename_failed">Rename failed</string>
 
@@ -225,7 +228,7 @@ Operation completed. Files will be uploaded in the background
     </string-array>
 
     <string name="sortName">Name</string>
-    <string name="lastModified">Last Modified</string>
+    <string name="lastModified">Last Modified(Date)</string>
     <string name="sortSize">Size</string>
     <string name="type">Type</string>
 
@@ -236,26 +239,38 @@ Operation completed. Files will be uploaded in the background
 
 
 
-    <!-- demo app ids -->
-    <!--
+    <!-- demo add ids -->
+
       <string name="admob_app_id">ca-app-pub-5603925957932903~3576315291</string>
       <string name="banner_add_id">ca-app-pub-3940256099942544/6300978111</string>
       <string name="ad_unit_id">ca-app-pub-3940256099942544/1033173712</string>
       <string name="ad_unit_id_reward">ca-app-pub-3940256099942544/5224354917</string>
+
+    <!-- demo add ids -->
+
+
+
+
+    <!--actual  add ids for lvvoMobile -->
+    <!--
+       <string name="admob_app_id">ca-app-pub-5603925957932903~7136674365</string>
+
+       <string name="banner_add_id">ca-app-pub-5603925957932903/9547215284</string>
+       <string name="ad_unit_id">ca-app-pub-5603925957932903/4809893925</string>
+
+       <string name="ad_unit_id_reward">ca-app-pub-5603925957932903/5622774574</string>
     -->
-      <!-- demo app ids -->
+    <!--actualapp id -->
 
 
+    <!--actual  add id for FileHunt -->
+    <!--
+     <string name="admob_app_id">ca-app-pub-5603925957932903~3576315291</string>
+     <string name="banner_add_id">ca-app-pub-5603925957932903/8134685014</string>
+     <string name="ad_unit_id">ca-app-pub-5603925957932903/9183865192</string>
 
-
-    <!--actual  app id -->
-
-      <string name="admob_app_id">ca-app-pub-5603925957932903~3576315291</string>
-      <string name="banner_add_id">ca-app-pub-5603925957932903/8134685014</string>
-      <string name="ad_unit_id">ca-app-pub-5603925957932903/9183865192</string>
-
-      <string name="ad_unit_id_reward">ca-app-pub-5603925957932903/5622774574</string>
-
-       <!--actualapp id -->
+     <string name="ad_unit_id_reward">ca-app-pub-5603925957932903/5622774574</string>
+  -->
+     <!--actualapp id -->
 
 </resources>

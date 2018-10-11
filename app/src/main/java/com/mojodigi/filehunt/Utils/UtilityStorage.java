@@ -30,11 +30,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import com.mojodigi.filehunt.R;
@@ -462,22 +464,79 @@ public  class  UtilityStorage {
             File dst = new File(dstDir, src.getName());
 
             if (src.isDirectory()) {
+                //new for copy folder from storage to  storage
+                if (!dst.exists())
+                {
+                    boolean status= dst.mkdir();
+                    if(status)
+                    Constants.totalfolderCopied++;
+                }
 
+                //new for copy folder content  from storage to  storage
                 String files[] = src.list();
                 int filesLength = files.length;
                 for (int i = 0; i < filesLength; i++) {
                     String src1 = (new File(src, files[i]).getPath());
                     String dst1 = dst.getPath();
+                     //copyFile(ctx,new File(src1),new File(dst1,new File(src1).getName()));
                     copyFileOrDirectory(ctx,src1, dst1);
 
                 }
+
             } else {
-                return copyFile(ctx,src, dst);
+
+                if(Constants.totalfolderCopied>0)
+
+                {
+                       copyFile(ctx,src, dst);
+                       return  Constants.totalfolderCopied;
+
+                }
+                else {
+
+                    return copyFile(ctx, src, dst);
+                }
+
+
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return 0;
+    }
+    public static void copyDirectoryOneLocationToAnotherLocation(File sourceLocation, File targetLocation)
+            throws IOException {
+
+        if (sourceLocation.isDirectory())
+        {
+            if (!targetLocation.exists()) {
+                targetLocation.mkdir();
+            }
+
+            String[] children = sourceLocation.list();
+            for (int i = 0; i < sourceLocation.listFiles().length; i++) {
+
+                copyDirectoryOneLocationToAnotherLocation(new File(sourceLocation, children[i]),
+                        new File(targetLocation, children[i]));
+            }
+
+        }
+        else {
+
+            InputStream in = new FileInputStream(sourceLocation);
+
+            OutputStream out = new FileOutputStream(targetLocation);
+
+            // Copy the bits from instream to outstream
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            in.close();
+            out.close();
+        }
+
     }
 
 

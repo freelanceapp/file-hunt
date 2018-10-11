@@ -120,6 +120,7 @@ public class Adapter_Storage extends RecyclerView.Adapter<Adapter_Storage.MyView
                             .diskCacheStrategy(DiskCacheStrategy.ALL)
                             .skipMemoryCache(false).placeholder(R.drawable.img_placeholder).error(R.drawable.img_placeholder)
                             .into(holder.FileIcon);
+
                 } else if (FileType.contains("pdf"))
                 {
                     holder.FileIcon.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_pdf));

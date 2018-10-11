@@ -2,6 +2,8 @@ package com.mojodigi.filehunt;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.widget.ProgressBar;
@@ -15,7 +17,7 @@ import java.util.TimerTask;
 
 public class SplashActivity extends Activity {
 
-    TextView apptxt;
+    TextView apptxt,versiontxt;
     private Timer timer;
     private ProgressBar progressBar;
     private int i=0;
@@ -26,6 +28,19 @@ public class SplashActivity extends Activity {
         setContentView(R.layout.splash_layout);
        apptxt=(TextView)findViewById(R.id.apptxt);
        apptxt.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(SplashActivity.this));
+
+        versiontxt=(TextView)findViewById(R.id.versiontxt);
+
+        try {
+            PackageInfo pInfo = this.getPackageManager().getPackageInfo(getPackageName(), 0);
+            String version = pInfo.versionName;
+            versiontxt.setText("v "+version);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        catch (Exception e){}
+
+
         progressBar=(ProgressBar)findViewById(R.id.progressBar);
         progressBar.setProgress(0);
         progressBar.setMax(30);

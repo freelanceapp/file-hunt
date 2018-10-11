@@ -19,14 +19,18 @@
   -->
 
 
-    <bool name="ga_autoActivityTracking">true</bool>
+    <bool name="ga_autoActivityTracking">false</bool>
 
     <!--  The property id associated with this analytics tracker -->
 
 
+    <!-- lvvoMobile TrackingId
+         <string name="ga_trackingId">UA-127080206-1</string>
 
-      <string name="ga_trackingId">UA-125259779-1</string>
+         -->
 
+    <!-- FileHunt main  TrackingId-->
+    <string name="ga_trackingId">UA-125259779-1</string>
 
 
      <string name="ga_sampleFrequency">100.0</string>
@@ -34,7 +38,7 @@
 
     <!-- will report any crash if happens-->
 
-     <bool name="ga_reportUncaughtExceptions">true</bool>
+     <bool name="ga_reportUncaughtExceptions">false</bool>
 
 
 

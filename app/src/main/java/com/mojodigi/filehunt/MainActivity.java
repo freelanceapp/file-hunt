@@ -28,13 +28,14 @@ import com.mojodigi.filehunt.Fragments.TabFragment1;
 import com.mojodigi.filehunt.Fragments.TabFragment2;
 //
 import com.mojodigi.filehunt.Utils.AddMobUtils;
+import com.mojodigi.filehunt.Utils.AlertDialogHelper;
 import com.mojodigi.filehunt.Utils.Utility;
 
 import java.io.File;
 import java.util.ArrayList;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity  {
 
 
     int check = 0;
@@ -98,7 +99,8 @@ public class MainActivity extends AppCompatActivity {
             public void onPageSelected(int position) {
                 // TODO Auto-generated method stub
                 check = position;
-            }
+
+                }
 
             @Override
             public void onPageScrolled(int arg0, float arg1, int arg2) {
@@ -387,6 +389,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return 0;
     }
+
 
 
 

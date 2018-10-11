@@ -327,7 +327,7 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
             String fName = splitPath[splitPath.length - 1];
 
             Dialog dialog = new Dialog(DownloadActivityRe.this);
-            dialog.setContentView(R.layout.file_property_dialog);
+            dialog.setContentView(R.layout.dialog_file_property);
             // Set dialog title
 
             TextView FileName = dialog.findViewById(R.id.FileName);
@@ -379,6 +379,12 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
 
+                case R.id.action_move:
+                    Utility.dispToast(mcontext,"Move");
+                    return true;
+                case R.id.action_encrypt:
+                    Utility.dispToast(mcontext,"encrypt");
+                    return true;
                 case R.id.action_copy:
                     if(multiselect_list.size()>0)
                     {

@@ -71,7 +71,7 @@
         android:visibility="invisible"
         android:layout_above="@+id/FileMdate"
         android:layout_marginBottom="@dimen/dp2"
-        android:buttonTint="@color/green_900"
+        android:buttonTint="@color/checkbox_tint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 

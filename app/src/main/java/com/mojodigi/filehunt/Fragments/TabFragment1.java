@@ -724,49 +724,54 @@ public class TabFragment1 extends Fragment {
 
 
     private int listRecentFiles() {
+        try {
 
-        final String[] projection = {MediaStore.Files.FileColumns.DATA};
-        Calendar c = Calendar.getInstance();
-        c.set(Calendar.DAY_OF_YEAR, c.get(Calendar.DAY_OF_YEAR) - 7);
-        Date d = c.getTime();
+            final String[] projection = {MediaStore.Files.FileColumns.DATA};
+            Calendar c = Calendar.getInstance();
+            c.set(Calendar.DAY_OF_YEAR, c.get(Calendar.DAY_OF_YEAR) - 7);
+            Date d = c.getTime();
 
-        Cursor cursor = ctx.getContentResolver().query(MediaStore.Files
-                        .getContentUri("external"), projection,
-                null,
-                null, null);
-
-
-        if (cursor == null)
-            return recentFiles.size();
-        if (cursor.getCount() > 0 && cursor.moveToFirst()) {
-
-            String[] types = new String[]{"pdf", "png", "jpeg", "jpg", "mp4", "mp3", "aac", "amr", "gif", "doc", "docx", "txt", "wpd", "wps", "xls", "xlsx",
-                    "pptx"
-            };
-            // if any file type needed add extension here and task is done
-
-            do {
-                String path = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA));
-                String FileType = Utility.getFileExtensionfromPath(path);
-                File f = new File(path);
-                if (d.compareTo(new Date(f.lastModified())) != 1 && !f.isDirectory() && Arrays.asList(types).contains(FileType)) {
-
-                    recentFiles.add(f.getAbsolutePath());
-
-                }
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
+            Cursor cursor = ctx.getContentResolver().query(MediaStore.Files
+                            .getContentUri("external"), projection,
+                    null,
+                    null, null);
 
 
-        //Collections.sort(recentFiles, (lhs, rhs) -> -1 * Long.valueOf(lhs.date).compareTo(rhs.date));
+            if (cursor == null)
+                return recentFiles.size();
+            if (cursor.getCount() > 0 && cursor.moveToFirst()) {
+
+                String[] types = new String[]{"pdf", "png", "jpeg", "jpg", "mp4", "mp3", "aac", "amr", "gif", "doc", "docx", "txt", "wpd", "wps", "xls", "xlsx",
+                        "pptx"
+                };
+                // if any file type needed add extension here and task is done
+
+                do {
+                    String path = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA));
+                    String FileType = Utility.getFileExtensionfromPath(path);
+                    File f = new File(path);
+                    if (d.compareTo(new Date(f.lastModified())) != 1 && !f.isDirectory() && Arrays.asList(types).contains(FileType)) {
+
+                        recentFiles.add(f.getAbsolutePath());
+
+                    }
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+
+
+            //Collections.sort(recentFiles, (lhs, rhs) -> -1 * Long.valueOf(lhs.date).compareTo(rhs.date));
 
 //        if (recentFiles.size() > 20)
 //            for (int i = recentFiles.size() - 1; i > 20; i--) {
 //                recentFiles.remove(i);
 //            }
 
+        }
+        catch (Exception e)
+        {
 
+        }
         return recentFiles.size();
 
 
@@ -1093,24 +1098,30 @@ public class TabFragment1 extends Fragment {
 
     private int listAnimation() {
         ArrayList<String> animation = new ArrayList<>();
-        final String[] projection = {MediaStore.Files.FileColumns.DATA};
+        try {
+            final String[] projection = {MediaStore.Files.FileColumns.DATA};
 
-        Cursor cursor = ctx.getContentResolver()
-                .query(MediaStore.Files.getContentUri("external"), projection, null, null, null);
-        if (cursor == null)
-            return animation.size();
-        else if (cursor.getCount() > 0 && cursor.moveToFirst()) {
-            do {
-                String path = cursor.getString(cursor.getColumnIndex
-                        (MediaStore.Files.FileColumns.DATA));
-                if (path != null && path.endsWith(".gif") || path.endsWith(".swf") || path.endsWith(".ani")) {
-                    animation.add(path);
-                }
-            } while (cursor.moveToNext());
+            Cursor cursor = ctx.getContentResolver()
+                    .query(MediaStore.Files.getContentUri("external"), projection, null, null, null);
+            if (cursor == null)
+                return animation.size();
+            else if (cursor.getCount() > 0 && cursor.moveToFirst()) {
+                do {
+                    String path = cursor.getString(cursor.getColumnIndex
+                            (MediaStore.Files.FileColumns.DATA));
+                    if (path != null && path.endsWith(".gif") || path.endsWith(".swf") || path.endsWith(".ani")) {
+                        animation.add(path);
+                    }
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        }catch (Exception e)
+        {
+
         }
-        cursor.close();
-        return animation.size();
-    }
+            return animation.size();
+        }
+
 
     private class LoadrecentTask extends AsyncTask<Void, Void, Void> {
 
@@ -1159,8 +1170,9 @@ public class TabFragment1 extends Fragment {
     }
 
     private int listApks() {
+        ArrayList<String> apkList = new ArrayList<>();
         try {
-            ArrayList<String> apkList = new ArrayList<>();
+
             final String[] projection = {MediaStore.Files.FileColumns.DATA};
 
             Cursor cursor = ctx.getContentResolver()

@@ -93,15 +93,18 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         instance = this;
         UtilityStorage.InitilaizePrefs(mcontext);
 
-        int_position = getIntent().getIntExtra("value", 0);
-        String tittle = Category_Explore_Activity.al_images.get(int_position).getStr_folder();
-        Utility.setActivityTitle(mcontext, tittle);
-        Intent_Video_List = Category_Explore_Activity.al_images.get(int_position).getAl_imagepath();
-        thumbList = Category_Explore_Activity.al_images.get(int_position).getAl_vdoThumb();// this list  will be part  of  Intent_Video_List using setter getter
-        durationList = Category_Explore_Activity.al_images.get(int_position).getAlVdoDuration();
-
-
-        data_load();
+        try {
+            int_position = getIntent().getIntExtra("value", 0);
+            String tittle = Category_Explore_Activity.al_images.get(int_position).getStr_folder();
+            Utility.setActivityTitle(mcontext, tittle);
+            Intent_Video_List = Category_Explore_Activity.al_images.get(int_position).getAl_imagepath();
+            thumbList = Category_Explore_Activity.al_images.get(int_position).getAl_vdoThumb();// this list  will be part  of  Intent_Video_List using setter getter
+            durationList = Category_Explore_Activity.al_images.get(int_position).getAlVdoDuration();
+            data_load();
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+        }
 
 
         alertDialogHelper = new AlertDialogHelper(this);
@@ -184,6 +187,8 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         super.onBackPressed();
 
     }
+
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -378,7 +383,7 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
             String fName = splitPath[splitPath.length - 1];
 
             Dialog dialog = new Dialog(VideoActivityRe.this);
-            dialog.setContentView(R.layout.file_property_dialog);
+            dialog.setContentView(R.layout.dialog_file_property);
             // Set dialog title
 
             TextView FileName = dialog.findViewById(R.id.FileName);
@@ -426,6 +431,14 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
+
+                case R.id.action_move:
+                    Utility.dispToast(mcontext,"Move");
+                    return true;
+                case R.id.action_encrypt:
+                    Utility.dispToast(mcontext,"encrypt");
+
+                    return true;
 
                 case R.id.action_copy:
                     if(multiselect_list.size()>0)

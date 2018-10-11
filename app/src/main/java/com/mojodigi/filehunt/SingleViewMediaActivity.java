@@ -102,7 +102,7 @@ public class SingleViewMediaActivity extends AppCompatActivity {
 
 
         Dialog dialog = new Dialog(SingleViewMediaActivity.this);
-        dialog.setContentView(R.layout.file_property_dialog);
+        dialog.setContentView(R.layout.dialog_file_property);
         // Set dialog title
 
         TextView FileName=dialog.findViewById(R.id.FileName);

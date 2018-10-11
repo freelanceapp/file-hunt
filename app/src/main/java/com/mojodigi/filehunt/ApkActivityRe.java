@@ -12,14 +12,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -32,12 +30,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.InterstitialAd;
-import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.mojodigi.filehunt.Adapter.MultiSelectAdapter_Apk;
 import com.mojodigi.filehunt.Class.Constants;
@@ -361,7 +354,7 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
             String fName = splitPath[splitPath.length - 1];
 
             Dialog dialog = new Dialog(ApkActivityRe.this);
-            dialog.setContentView(R.layout.file_property_dialog);
+            dialog.setContentView(R.layout.dialog_file_property);
             // Set dialog title
 
             TextView FileName = dialog.findViewById(R.id.FileName);
@@ -416,12 +409,19 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
 
+                case R.id.action_move:
+                    Utility.dispToast(mcontext,"Move");
+                    return true;
+                case R.id.action_encrypt:
+                    Utility.dispToast(mcontext,"encrypt");
+                    return true;
+
                 case R.id.action_copy:
                     if(multiselect_list.size()>0)
                     {
                         for(int i=0;i<multiselect_list.size();i++)
                         {
-                            String fPath=multiselect_list.get(0).getFilePath().toString();
+                            String fPath=multiselect_list.get(i).getFilePath().toString();
                             System.out.println(""+fPath);
                             if(!Constants.filesToCopy.contains(multiselect_list.get(i).getFilePath())) {
                                 Constants.filesToCopy.add(multiselect_list.get(i).getFilePath().toString());
@@ -461,6 +461,7 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
                         if(size!=null)
                             Utility.multiFileDetailsDlg(mcontext,size,multiselect_list.size());
                     }
+
                     return true;
                 default:
                     return false;

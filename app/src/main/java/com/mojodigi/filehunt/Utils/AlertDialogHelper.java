@@ -23,6 +23,14 @@ public class AlertDialogHelper
         this.context = context;
         this.current_activity = (Activity) context;
         callBack = (AlertDialogListener) context;
+
+    }
+    public AlertDialogHelper(Context context, AlertDialogListener callBack)
+    {
+        this.context = context;
+        this.current_activity = (Activity) context;
+        this.callBack =callBack;
+
     }
 
     /**

@@ -6,7 +6,6 @@ import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -27,7 +26,6 @@ import android.support.annotation.ColorInt;
 import android.support.media.ExifInterface;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
-import android.support.v4.provider.DocumentFile;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -35,16 +33,12 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -58,7 +52,7 @@ import com.mojodigi.filehunt.Class.CustomTypefaceSpan;
 import com.mojodigi.filehunt.Class.Icons;
 import com.mojodigi.filehunt.DocsActivityRe;
 import com.mojodigi.filehunt.DownloadActivityRe;
-import com.mojodigi.filehunt.Model.Model_Storage;
+import com.mojodigi.filehunt.Fragments.TabFragment2;
 import com.mojodigi.filehunt.PhotosActivityRe;
 
 import com.mojodigi.filehunt.R;
@@ -67,22 +61,16 @@ import com.mojodigi.filehunt.VideoActivityRe;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -851,7 +839,7 @@ public static boolean IsNotEmpty(EditText view)
        //https://github.com/sang89vh/easyfilemanager/blob/master/AmazeFileManagerSang89vhAdmob/src/main/java/com/mybox/filemanager/services/httpservice/FileUtil.java
         File f =  new File(fPath);
         final Dialog dialog = new Dialog(ctx);
-        dialog.setContentView(R.layout.filerenamedialog);
+        dialog.setContentView(R.layout.dialog_file_rename);
         // Set dialog title
 
         TextView headertxt=dialog.findViewById(R.id.headertxt);
@@ -864,7 +852,8 @@ public static boolean IsNotEmpty(EditText view)
         Edit_Rename.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
         View_cancel.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
         View_save.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
-        if(f!=null) {
+
+        if(f!=null && !f.isDirectory()) {    //!f.isDirectory() new lines
             String extension=Utility.getFileExtensionfromPath(fPath.toLowerCase());
             Edit_Rename.setText(f.getName());
             dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
@@ -874,6 +863,15 @@ public static boolean IsNotEmpty(EditText view)
             else
                 Edit_Rename.setSelection(f.getName().length());
         }
+        // new  part
+        else if(f!=null && f.isDirectory())
+        {
+            Edit_Rename.setText(f.getName());
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+            Edit_Rename.setSelection(f.getName().length());
+        }
+        // new  part
+
 
 
 
@@ -888,9 +886,9 @@ public static boolean IsNotEmpty(EditText view)
             public void onClick(View v) {
                 if(Utility.IsNotEmpty(Edit_Rename)) {
                     // will  be used on activityresult  function of every activity in case of filerename first time when write permission is granted
-                    Constants.Global_File_Rename_NewName=Edit_Rename.getText().toString();
+                       Constants.Global_File_Rename_NewName=Edit_Rename.getText().toString();
                        fileStatus= renameFile(ctx,fPath, Edit_Rename.getText().toString(),MediaType);
-                      dialog.dismiss();
+                       dialog.dismiss();
                       }else {
                       Edit_Rename.setError(ctx.getResources().getString(R.string.emty_error));
                 }
@@ -973,7 +971,16 @@ public static boolean IsNotEmpty(EditText view)
                     ApkActivityRe apk = ApkActivityRe.getInstance();
                     apk.refreshAdapterAfterRename(pathstr + "/" + newName, newName);
                     break;
+
+                case 8:
+                    TabFragment2 storage=TabFragment2.getInstance();
+                    if(storage!=null)
+                        storage.refreshAdapterAfterRename(pathstr + "/" + newName, newName);
+
+                    break;
                     }
+
+
 
                    //
                    Utility.RunMediaScan(pctx,latestname);
@@ -986,6 +993,17 @@ public static boolean IsNotEmpty(EditText view)
 
         return  success;
 
+    }
+
+    public static long getFolderSize(File directory) {
+        long length = 0;
+        for (File file : directory.listFiles()) {
+            if (file.isFile())
+                length += file.length();
+            else
+                length += getFolderSize(file);
+        }
+        return length;
     }
 
 
@@ -1035,10 +1053,62 @@ public static Date longToDate(Long  l)
     return  d;
 }
 
-    public static Date longToDate(Long  l)
+public static void dispToast(Context ctx,String msg)
+{
+    Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show();
+}
+
+    public static   void fileEncryptPasswordDialog(final Context mcontext )
     {
-        Date  d =  new Date(l);
-        return  d;
+        //https://github.com/sang89vh/easyfilemanager/blob/master/AmazeFileManagerSang89vhAdmob/src/main/java/com/mybox/filemanager/services/httpservice/FileUtil.java
+
+        final Dialog dialog = new Dialog(mcontext);
+        dialog.setContentView(R.layout.dialog_folder_create);
+        // Set dialog title
+
+        TextView headertxt = dialog.findViewById(R.id.headertxt);
+        final EditText encrypt_password_box = dialog.findViewById(R.id.encrypt_password_box);
+
+        TextView View_encrypt = dialog.findViewById(R.id.View_encrypt);
+        TextView View_cancel = dialog.findViewById(R.id.View_cancel);
+
+        headertxt.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mcontext));
+        encrypt_password_box.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mcontext));
+        View_cancel.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mcontext));
+        View_encrypt.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mcontext));
+
+        View_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        View_encrypt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (Utility.IsNotEmpty(encrypt_password_box)) {
+
+                    dispToast(mcontext,"encrypt");
+                    dialog.dismiss();
+                }
+
+
+                 else
+                {
+                    encrypt_password_box.setError(mcontext.getResources().getString(R.string.emty_error));
+                }
+
+
+            }
+
+        });
+
+
+        dialog.show();
+
+
     }
+
+
 
 }
