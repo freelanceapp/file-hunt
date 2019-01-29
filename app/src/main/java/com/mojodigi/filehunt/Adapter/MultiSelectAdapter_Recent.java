@@ -2,6 +2,7 @@ package com.mojodigi.filehunt.Adapter;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,11 +17,13 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.mojodigi.filehunt.Model.Model_Recent;
-//
+import com.mojodigi.filehunt.R;
 import com.mojodigi.filehunt.Utils.Utility;
 
+import java.io.File;
 import java.util.ArrayList;
-import com.mojodigi.filehunt.R;
+
+//
 
 public class MultiSelectAdapter_Recent extends RecyclerView.Adapter<MultiSelectAdapter_Recent.MyViewHolder>  implements Filterable {
 
@@ -29,6 +32,7 @@ public class MultiSelectAdapter_Recent extends RecyclerView.Adapter<MultiSelectA
     public ArrayList<Model_Recent> selected_RecentList=new ArrayList<>();
     private  RecentListener listener;
     Context mContext;
+    Drawable iconDrawable = null;
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
         public ImageView FileIcon;
@@ -58,7 +62,7 @@ public class MultiSelectAdapter_Recent extends RecyclerView.Adapter<MultiSelectA
                 public void onClick(View view) {
                     // send selected docs in callback
                     int pos=getAdapterPosition();
-                    if(pos!=RecyclerView.NO_POSITION)
+                    if(pos!= RecyclerView.NO_POSITION)
                     listener.onRecentSelected(RecentListfiltered.get(getAdapterPosition()));
                 }
             });
@@ -85,7 +89,7 @@ public class MultiSelectAdapter_Recent extends RecyclerView.Adapter<MultiSelectA
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
 
-        Drawable iconDrawable = null;
+
         Model_Recent model = RecentListfiltered.get(position);
 
 
@@ -100,11 +104,12 @@ public class MultiSelectAdapter_Recent extends RecyclerView.Adapter<MultiSelectA
                     .skipMemoryCache(false).placeholder(R.drawable.img_placeholder).error(R.drawable.img_placeholder)
                     .into(holder.FileIcon);
             }
-          else if(model.getFileType().equalsIgnoreCase("mp4"))
+          else if(model.getFileType().equalsIgnoreCase("mp4") || model.getFileType().equalsIgnoreCase("webm"))
         {
-
-            holder.FileIcon.setImageBitmap(Utility.creteVdoBitmapFromPath(model.getFilePath()));
-
+            // holder.FileIcon.setImageBitmap(Utility.creteVdoBitmapFromPath(model.getFilePath()));
+            Glide.with(mContext)
+                    .load(Uri.fromFile(new File(model.getFilePath())))
+                    .into(holder.FileIcon);
         }
         else if(model.getFileType().equalsIgnoreCase("gif"))
         {
@@ -115,7 +120,8 @@ public class MultiSelectAdapter_Recent extends RecyclerView.Adapter<MultiSelectA
         }
         else if(model.getFileType().equalsIgnoreCase("mp3")|| model.getFileType().equalsIgnoreCase("aac") || model.getFileType().equalsIgnoreCase("amr"))
         {
-            iconDrawable = mContext.getResources().getDrawable(R.mipmap.ic_audio);
+            //iconDrawable = mContext.getResources().getDrawable(R.mipmap.ic_audio);
+            iconDrawable = mContext.getResources().getDrawable(R.drawable.cat_ic_music);
             holder.FileIcon.setImageDrawable(iconDrawable);
         }
        else if (model.getFileType().equalsIgnoreCase("pdf")) {
@@ -145,7 +151,7 @@ public class MultiSelectAdapter_Recent extends RecyclerView.Adapter<MultiSelectA
         }
         else if(model.getFileType().equalsIgnoreCase("apk"))
         {
-            iconDrawable = mContext.getResources().getDrawable(R.drawable.ic_apk);
+            iconDrawable = mContext.getResources().getDrawable(R.drawable.cat_ic_apk);
             holder.FileIcon.setImageDrawable(iconDrawable);
         }
         else if(model.getFileType().equalsIgnoreCase("db")) {
@@ -154,7 +160,7 @@ public class MultiSelectAdapter_Recent extends RecyclerView.Adapter<MultiSelectA
         }
        else
            {
-            iconDrawable = mContext.getResources().getDrawable(R.drawable.ic_other);
+            iconDrawable = mContext.getResources().getDrawable(R.mipmap.file_icon);
             holder.FileIcon.setImageDrawable(iconDrawable);
         }
 
@@ -170,6 +176,7 @@ public class MultiSelectAdapter_Recent extends RecyclerView.Adapter<MultiSelectA
 
     @Override
     public int getItemCount() {
+
         return RecentListfiltered.size();
     }
 
@@ -187,6 +194,7 @@ public class MultiSelectAdapter_Recent extends RecyclerView.Adapter<MultiSelectA
                     for (Model_Recent row : RecentList) {
 
                         //condition to search for
+                        //if (row.getFileName().toLowerCase().contains(charString.toLowerCase())) {
                         if (row.getFileName().toLowerCase().contains(charString.toLowerCase())) {
                             filteredList.add(row);
                         }

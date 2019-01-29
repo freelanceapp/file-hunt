@@ -1,28 +1,41 @@
 package com.mojodigi.filehunt;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import com.google.android.gms.ads.AdView;
 import com.mojodigi.filehunt.Adapter.Adapter_PhotosFolder;
+import com.mojodigi.filehunt.AddsUtility.AddConstants;
+import com.mojodigi.filehunt.AddsUtility.AddMobUtils;
+import com.mojodigi.filehunt.AddsUtility.SharedPreferenceUtil;
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Model.Model_images;
-//
-import com.mojodigi.filehunt.Utils.AddMobUtils;
 import com.mojodigi.filehunt.Utils.AsynctaskUtility;
+import com.mojodigi.filehunt.Utils.CustomProgressDialog;
 import com.mojodigi.filehunt.Utils.Utility;
+import com.smaato.soma.AdDownloaderInterface;
+import com.smaato.soma.AdListenerInterface;
+import com.smaato.soma.BannerView;
+import com.smaato.soma.ErrorCode;
+import com.smaato.soma.ReceivedBannerInterface;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,12 +46,14 @@ import java.util.TimeZone;
 
 import static com.mojodigi.filehunt.Class.Constants.POSITION;
 
-public class Category_Explore_Activity extends AppCompatActivity implements AsynctaskUtility.AsyncResponse {
+//
+
+public class Category_Explore_Activity extends AppCompatActivity implements Adapter_PhotosFolder.FolderListener, AsynctaskUtility.AsyncResponse,AdListenerInterface {
 
     int position;
     Context ctx;
     boolean boolean_folder;
-    GridView gv_folder;
+    RecyclerView categoryExploreRecycler;
     ImageView blank_indicator;
     Adapter_PhotosFolder obj_adapter;
     int AUDIO=3;
@@ -48,6 +63,16 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
     public static ArrayList<Model_images> al_images = new ArrayList<>();
 
     Uri uri;
+
+    SharedPreferenceUtil addprefs;
+    View adContainer;
+    RelativeLayout smaaToAddContainer;
+    //smaatoAddBanerView
+    BannerView smaaTobannerView;
+
+    SearchView searchView;
+    private boolean isSearchModeActive;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,13 +80,23 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
 
         setContentView(R.layout.category_explore_activity);
 
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Utility.setstatusBarColorBelowM(Category_Explore_Activity.this);
+        }
         blank_indicator=(ImageView)findViewById(R.id.blank_indicatorm);
-        gv_folder = (GridView)findViewById(R.id.gv_folder);
+
+        categoryExploreRecycler = (RecyclerView)findViewById(R.id.categoryExploreRecycler);
+        categoryExploreRecycler.setHasFixedSize(true);
+        categoryExploreRecycler.setLayoutManager(new GridLayoutManager(this, 2));
+
 
         if(getIntent().getExtras() !=null)
 
-           position=getIntent().getIntExtra(POSITION,0) ;
+            position=getIntent().getIntExtra(POSITION,0) ;
 
+        try
+        {
 
         switch (position)
         {
@@ -73,7 +108,7 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
             case 1:
                 Utility.setActivityTitle(ctx,getResources().getString(R.string.cat_Videos));
                 new AsynctaskUtility<Model_images>(ctx,this,VIDEO).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                    break;
+                break;
             case 2:
                 Utility.setActivityTitle(ctx,getResources().getString(R.string.cat_Audio));
                 new AsynctaskUtility<Model_images>(ctx,this,AUDIO).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -81,48 +116,51 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
             case 3:
 
                 break;
-
-                }
-
+        }
 
 
-                gv_folder.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        }
 
-                if(position==0)
+        catch (Exception e){}
+
+        //add netwrk varibales
+
+        mAdView = (AdView) findViewById(R.id.adView);
+        adContainer = findViewById(R.id.adMobView);
+        smaaToAddContainer = findViewById(R.id.smaaToAddContainer);
+
+        smaaTobannerView = new BannerView((this).getApplication());
+        smaaTobannerView.addAdListener(this);
+
+        addprefs = new SharedPreferenceUtil(ctx);
+
+        AddMobUtils adutil = new AddMobUtils();
+
+        if(AddConstants.checkIsOnline(ctx) && adContainer !=null && addprefs !=null)
+        {
+            String AddPrioverId=addprefs.getStringValue(AddConstants.ADD_PROVIDER_ID, AddConstants.NOT_FOUND);
+            if(AddPrioverId.equalsIgnoreCase(AddConstants.Adsense_Admob_GooglePrivideId))
+                adutil.displayServerBannerAdd(addprefs,adContainer , ctx);
+            else if(AddPrioverId.equalsIgnoreCase(AddConstants.SmaatoProvideId))
+            {
+                try {
+                    int publisherId = Integer.parseInt(addprefs.getStringValue(AddConstants.APP_ID, AddConstants.NOT_FOUND));
+                    int addSpaceId = Integer.parseInt(addprefs.getStringValue(AddConstants.BANNER_ADD_ID, AddConstants.NOT_FOUND));
+                    adutil.displaySmaatoBannerAdd(smaaTobannerView, smaaToAddContainer, publisherId, addSpaceId);
+                }catch (Exception e)
                 {
-                Intent intent = new Intent(getApplicationContext(), PhotosActivityRe.class);
-                intent.putExtra("value",i);
-                startActivity(intent);
+                    String string = e.getMessage();
+                    System.out.print(""+string);
                 }
-                else if(position==1)
-                {
-                    Intent intent = new Intent(getApplicationContext(), VideoActivityRe.class);
-                    intent.putExtra("value",i);
-                    startActivity(intent);
-                }
-
-                else if(position==2)
-                {
-                    Intent intent = new Intent(getApplicationContext(), AudioActivityRe.class);
-                    intent.putExtra("value",i);
-                    startActivity(intent);
-                }
-
             }
-        });
 
-
+        }
+        else {
+            adutil.displayLocalBannerAdd(mAdView);
+        }
 
 
         //  banner add
-        mAdView = (AdView) findViewById(R.id.adView);
-        AddMobUtils adutil = new AddMobUtils();
-        adutil.displayBannerAdd(mAdView);
-        // banner add
-
-
 
     }
 
@@ -134,24 +172,33 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
 //        addutil.showInterstitial(ctx);
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
 
-       // AddMobUtils addutil= new AddMobUtils();
-       // addutil.showInterstitial(ctx);
+
+
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+//        try
+//        {
+//            //CustomProgressDialog.dismiss();}catch (Exception e)
+//        {}
+
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        if(Constants.redirectToStorage)
-        {
-            finish();  // if copy operation is selected then finish this activity  to open
-            // the MainActivity with storage option;
-            return;
-        }
+
+//        if(Constants.redirectToStorage)
+//        {
+//            finish();  // if copy operation is selected then finish this activity  to open
+//            // the MainActivity with storage option;
+//            return;
+//        }
 
         if(Constants.DELETED_VDO_FILES>0 && position==1)
         {
@@ -174,7 +221,7 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
     }
 
     // not being used;
-      public ArrayList<Model_images>  Load_Media(int  MediaType)
+    public ArrayList<Model_images> Load_Media(int  MediaType)
     {
         al_images.clear();
 
@@ -185,7 +232,7 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
 
         String absolutePathOfImage = null;
         if(MediaType==IMAGES)
-        uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         else if(MediaType==VIDEO)
             uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
 //            else if(MediaType==AUDIO)
@@ -193,14 +240,14 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
 
 
 
-        String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME,MediaStore.MediaColumns.DATE_MODIFIED};
+        String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME, MediaStore.MediaColumns.DATE_MODIFIED};
 
         final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
         cursor = getApplicationContext().getContentResolver().query( uri, projection, null, null, orderBy + " DESC");
 
-          column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
-          column_index_folder_name = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
-          column_index_date_modified= cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED);
+        column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+        column_index_folder_name = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
+        column_index_date_modified= cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED);
 
         while (cursor.moveToNext()) {
             absolutePathOfImage = cursor.getString(column_index_data);
@@ -249,12 +296,13 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
 ////            }
 ////        }
 
-        obj_adapter = new Adapter_PhotosFolder(getApplicationContext(),al_images,position);
-        gv_folder.setAdapter(obj_adapter);
+        //obj_adapter = new Adapter_PhotosFolder(getApplicationContext(),al_images,position);
+        obj_adapter = new Adapter_PhotosFolder(getApplicationContext(),al_images,position , this);
+        categoryExploreRecycler.setAdapter(obj_adapter);
         return al_images;
     }
     //not being used
-    private  ArrayList<Model_images>   FetchVideos()
+    private ArrayList<Model_images> FetchVideos()
     {
         al_images.clear();
         int int_position = 0;
@@ -263,7 +311,7 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
         String absolutePathOfImage = null;
         uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
 
-        String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME,MediaStore.MediaColumns.DATE_MODIFIED,MediaStore.Video.Thumbnails.DATA,MediaStore.Video.VideoColumns.DURATION};
+        String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME, MediaStore.MediaColumns.DATE_MODIFIED, MediaStore.Video.Thumbnails.DATA, MediaStore.Video.VideoColumns.DURATION};
 
         final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
         cursor = getApplicationContext().getContentResolver().query( uri, projection, null, null, orderBy + " DESC");
@@ -278,8 +326,8 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
             absolutePathOfImage = cursor.getString(column_index_data);
             Log.e("Column", absolutePathOfImage);
             Log.e("Folder", cursor.getString(column_index_folder_name));
-                 String thumbstr=cursor.getString(thumb);
-                 long duration=cursor.getLong(column_index_duration);
+            String thumbstr=cursor.getString(thumb);
+            long duration=cursor.getLong(column_index_duration);
 
 
             for (int i = 0; i < al_images.size(); i++) {
@@ -328,7 +376,7 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
                 obj_model.setAlVdoDuration(al_duration);
 
                 al_images.add(obj_model);
-                }
+            }
 
 
 
@@ -336,13 +384,14 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
 
 
 
-        obj_adapter = new Adapter_PhotosFolder(getApplicationContext(),al_images,position);
-        gv_folder.setAdapter(obj_adapter);
+        //obj_adapter = new Adapter_PhotosFolder(getApplicationContext(),al_images,position);
+        obj_adapter = new Adapter_PhotosFolder(getApplicationContext(),al_images,position , this);
+        categoryExploreRecycler.setAdapter(obj_adapter);
         return al_images;
     }
 
-   //  not being used
-    private ArrayList<Model_images>  FetchAudio()
+    //  not being used
+    private ArrayList<Model_images> FetchAudio()
     {
         al_images.clear();
         int int_position = 0;
@@ -352,7 +401,7 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
         String absolutePathOfImage = null;
         String fileDuration=null;
         uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        String[] projection = { MediaStore.Audio.Media.DATA,MediaStore.Audio.Media.ALBUM,MediaStore.Audio.Media.DATE_MODIFIED,MediaStore.Audio.Media.DURATION};
+        String[] projection = { MediaStore.Audio.Media.DATA, MediaStore.Audio.Media.ALBUM, MediaStore.Audio.Media.DATE_MODIFIED, MediaStore.Audio.Media.DURATION};
 
         final String orderBy = MediaStore.Audio.Media.DATE_MODIFIED;
         cursor = getApplicationContext().getContentResolver().query( uri, projection, selection, null, orderBy + " DESC");
@@ -395,7 +444,7 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
                 al_images.get(int_position).setAl_FileDuration(al_fileduration);
 
 
-                } else {
+            } else {
                 ArrayList<String> al_path = new ArrayList<>();
                 ArrayList<String> al_fileduration = new ArrayList<>();
 
@@ -424,8 +473,9 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
 //        }
 //
 
-        obj_adapter = new Adapter_PhotosFolder(getApplicationContext(),al_images,position);
-        gv_folder.setAdapter(obj_adapter);
+        //obj_adapter = new Adapter_PhotosFolder(getApplicationContext(),al_images,position);
+        obj_adapter = new Adapter_PhotosFolder(getApplicationContext(),al_images,position , this);
+        categoryExploreRecycler.setAdapter(obj_adapter);
         return al_images;
 
 
@@ -435,7 +485,7 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
 
     private String LongToDate(String longV)
     {
-        long input=Long.parseLong(longV);
+        long input= Long.parseLong(longV);
         Date date = new Date(input*1000); // *1000 gives accurate date otherwise returns 1970
         Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
@@ -445,23 +495,206 @@ public class Category_Explore_Activity extends AppCompatActivity implements Asyn
 
     }
 
-  //function from asyncTask class
+    //function from asyncTask class
     @Override
     public void processFinish(ArrayList output) {
 
-          al_images=output;
-          if(al_images.size()!=0) {
-              blank_indicator.setVisibility(View.GONE);
-              obj_adapter = new Adapter_PhotosFolder(getApplicationContext(), al_images, position);
-              gv_folder.setAdapter(obj_adapter);
-          }
-          else
-          {
-              obj_adapter = new Adapter_PhotosFolder(getApplicationContext(), al_images, position);
-              gv_folder.setAdapter(obj_adapter);
-              blank_indicator.setVisibility(View.VISIBLE);
-          }
+        al_images=output;
+        if(al_images.size()!=0) {
+            blank_indicator.setVisibility(View.GONE);
+            //obj_adapter = new Adapter_PhotosFolder(getApplicationContext(), al_images, position);
+            obj_adapter = new Adapter_PhotosFolder(getApplicationContext(),al_images,position , this);
+            categoryExploreRecycler.setAdapter(obj_adapter);
+        }
+        else
+        {
+            //obj_adapter = new Adapter_PhotosFolder(getApplicationContext(), al_images, position);
+            obj_adapter = new Adapter_PhotosFolder(getApplicationContext(),al_images,position , this);
+            categoryExploreRecycler.setAdapter(obj_adapter);
+            blank_indicator.setVisibility(View.VISIBLE);
+        }
 
     }
+
+    @Override
+    public void onReceiveAd(AdDownloaderInterface adDownloaderInterface, ReceivedBannerInterface receivedBannerInterface) {
+        if(receivedBannerInterface.getErrorCode() != ErrorCode.NO_ERROR){
+            //Toast.makeText(getBaseContext(), receivedBannerInterface.getErrorMessage(), Toast.LENGTH_SHORT).show();
+
+            Log.d("SmaatoErrorMsg", ""+receivedBannerInterface.getErrorMessage());
+
+            if(receivedBannerInterface.getErrorMessage().equalsIgnoreCase(AddConstants.NO_ADDS))
+            {
+                smaaToAddContainer.setVisibility(View.GONE);
+            }
+
+        }
+    }
+
+
+
+
+    public boolean onCreateOptionsMenu(final Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_search, menu);
+
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        searchView = (SearchView) menu.findItem(R.id.action_search)
+                .getActionView();
+        searchView.setSearchableInfo(searchManager
+                .getSearchableInfo(getComponentName()));
+        searchView.setMaxWidth(Integer.MAX_VALUE);
+
+        Utility.setCustomizeSeachBar(ctx, searchView);
+
+
+        // listening to search query text change
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                //filter recycler view when query submitted
+                if(obj_adapter!=null)
+                    // Utility.dispToast(ctx,"searchView");
+                    obj_adapter.getFilter().filter(query);
+
+                refreshAdapter();
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String query) {
+                // filter recycler view when text is changed
+                if(obj_adapter!=null)
+                    //Utility.dispToast(ctx,"searchView");
+                    obj_adapter.getFilter().filter(query);
+
+                refreshAdapter();
+
+                return false;
+            }
+        });
+
+        searchView.setOnSearchClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                searchView.requestFocus(1);
+                searchView.setFocusable(true);
+             isSearchModeActive=true;
+                //invalidateOptionsMenu();
+
+                Utility.showKeyboard(Category_Explore_Activity.this);
+                isSearchModeActive=true;
+
+            }
+        });
+
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                searchView.requestFocus(0);
+                searchView.setFocusable(false);
+                isSearchModeActive=false;
+                //invalidateOptionsMenu();
+
+                isSearchModeActive=false;
+                Utility.hideKeyboard(Category_Explore_Activity.this);
+                return false;
+            }
+        });
+
+
+
+        return true;
+
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_search) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        if(isSearchModeActive)
+        {
+            if(searchView !=null)
+            {
+                Utility.hideKeyboard(Category_Explore_Activity.this);
+                isSearchModeActive=false;
+                resetAdapter();
+                searchView.onActionViewCollapsed();
+            }
+
+            return;
+        }
+        else
+            super.onBackPressed();
+        // AddMobUtils addutil= new AddMobUtils();
+        // addutil.showInterstitial(ctx);
+    }
+
+    public void  resetAdapter(){
+
+        obj_adapter = new Adapter_PhotosFolder(getApplicationContext(), al_images, position , this);
+        categoryExploreRecycler.setAdapter(obj_adapter);
+
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+
+
+    public void refreshAdapter()
+    {
+
+        obj_adapter.notifyDataSetChanged();
+    }
+
+
+    @Override
+    public void onFolderSelected(Model_images model,int positionAda) {
+
+        switch (position){
+
+            case 0:
+                Intent intent0 = new Intent(getApplicationContext(), PhotosActivityRe.class);
+               // intent0.putExtra("value",positionAda);
+                Constants.model=model;
+                startActivity(intent0);
+                break;
+
+            case 1:
+                Intent intent1 = new Intent(getApplicationContext(), VideoActivityRe.class);
+                //intent1.putExtra("value",positionAda);
+                Constants.model=model;
+                startActivity(intent1);
+                break;
+
+            case 2:
+                Intent intent2 = new Intent(getApplicationContext(), AudioActivityRe.class);
+                //intent2.putExtra("value",positionAda);
+                Constants.model=model;
+                startActivity(intent2);
+                break;
+        }
+    }
+
+
 }
 

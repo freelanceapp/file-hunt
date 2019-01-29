@@ -14,11 +14,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.mojodigi.filehunt.Model.Model_Apk;
-
+import com.mojodigi.filehunt.R;
 import com.mojodigi.filehunt.Utils.Utility;
 
 import java.util.ArrayList;
-import com.mojodigi.filehunt.R;
 
 public class MultiSelectAdapter_Apk extends RecyclerView.Adapter<MultiSelectAdapter_Apk.MyViewHolder>  implements Filterable {
 
@@ -41,7 +40,7 @@ public class MultiSelectAdapter_Apk extends RecyclerView.Adapter<MultiSelectAdap
              fileSize=(TextView)view.findViewById(R.id.FileSize);
              fileMdate=(TextView)view.findViewById(R.id.FileMdate);
 
-              chbx=(CheckBox) view.findViewById(R.id.chbx);
+             chbx=(CheckBox) view.findViewById(R.id.chbx);
              rellayout=(RelativeLayout)view.findViewById(R.id.rellayout);
              FileIcon=(ImageView)view.findViewById(R.id.FileIcon);
 
@@ -58,7 +57,7 @@ public class MultiSelectAdapter_Apk extends RecyclerView.Adapter<MultiSelectAdap
                 public void onClick(View view) {
                     // send selected apk in callback
                     int pos=getAdapterPosition();
-                    if(pos!=RecyclerView.NO_POSITION)
+                    if(pos!= RecyclerView.NO_POSITION)
                     listener.onApkSelected(ApkListfiltered.get(getAdapterPosition()));
                 }
             });
@@ -94,8 +93,8 @@ public class MultiSelectAdapter_Apk extends RecyclerView.Adapter<MultiSelectAdap
                  holder.fileSize.setText(model.getFileSize());
 
 
-                 iconDrawable=mContext.getResources().getDrawable(R.drawable.ic_apk);
-                holder.FileIcon.setImageDrawable(iconDrawable);
+                 iconDrawable=mContext.getResources().getDrawable(R.drawable.cat_ic_apk);
+                 holder.FileIcon.setImageDrawable(iconDrawable);
 
 
 

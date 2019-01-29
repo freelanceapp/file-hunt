@@ -13,10 +13,9 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.mojodigi.filehunt.Model.Model_images;
-
+import com.mojodigi.filehunt.R;
 
 import java.util.ArrayList;
-import com.mojodigi.filehunt.R;
 
 public class GridViewAdapter extends ArrayAdapter<Model_images> {
 

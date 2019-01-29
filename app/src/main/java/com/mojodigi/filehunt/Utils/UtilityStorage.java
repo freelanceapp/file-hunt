@@ -1,4 +1,5 @@
 package com.mojodigi.filehunt.Utils;
+
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ContentResolver;
@@ -8,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.nfc.NfcAdapter;
 import android.os.Build;
 import android.os.storage.StorageManager;
 import android.preference.PreferenceManager;
@@ -23,7 +25,7 @@ import android.widget.Toast;
 
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Class.MediaStoreHack;
-//
+import com.mojodigi.filehunt.R;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,10 +38,11 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.channels.FileChannel;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import com.mojodigi.filehunt.R;
+
+//
+
 public  class  UtilityStorage {
 
 
@@ -148,7 +151,37 @@ public  class  UtilityStorage {
             }
         }
 
+        if (requestCode == Constants.COPY_REQUEST_CODE) {
+            Uri treeUri;
+            if (resultCode == Activity.RESULT_OK) {
+                // Get Uri from Storage Access Framework.
+                if(data!=null) {
+                    treeUri = data.getData();
+                    // Persist URI - this is required for verification of writability.
+                    if (treeUri != null) {
+                        getPrefs().edit().putString(Constants.PREFERENCE_URI, treeUri.toString()).commit();
+                        return  true; // retutn  true if uri set successfully;
+                    }
+                }
+            }
+        }
+
         if (requestCode == Constants.FILE_RENAME_REQUEST_CODE) {
+            Uri treeUri;
+            if (resultCode == Activity.RESULT_OK) {
+                // Get Uri from Storage Access Framework.
+                if(data!=null) {
+                    treeUri = data.getData();
+                    // Persist URI - this is required for verification of writability.
+                    if (treeUri != null) {
+                        getPrefs().edit().putString(Constants.PREFERENCE_URI, treeUri.toString()).commit();
+                        return  true; // retutn  true if uri set successfully;
+                    }
+                }
+            }
+        }
+
+        if (requestCode == Constants.FOLDER_CREATE_REQUEST_CODE) {
             Uri treeUri;
             if (resultCode == Activity.RESULT_OK) {
                 // Get Uri from Storage Access Framework.
@@ -215,6 +248,7 @@ public  class  UtilityStorage {
     public static boolean isWritableNormalOrSaf(final File folder, Context c) {
 
         // Verify that this is a directory.
+
         if (folder == null || !folder.exists())
             return false;
 
@@ -239,6 +273,7 @@ public  class  UtilityStorage {
 
         // Next check SAF writability.
         DocumentFile document = getDocumentFile(folder, false, c);
+
 
         if (document == null) {
             return false;
@@ -329,7 +364,10 @@ public  class  UtilityStorage {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && isOnExtSdCard(file, context)) {
 
             DocumentFile document = getDocumentFile(file, false, context);
+            if(document !=null)
             return document.delete();
+            else
+                return false;
 
         }
         else
@@ -339,7 +377,7 @@ public  class  UtilityStorage {
 
     }
 
-    public static   boolean reNameWithAccesFramework(Context context, File file,File newFile)
+    public static   boolean reNameWithAccesFramework(Context context, File file, File newFile)
     {
         // Try with Storage Access Framework.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && isOnExtSdCard(file, context)) {
@@ -451,13 +489,13 @@ public  class  UtilityStorage {
 
 
 
-    public static void triggerStorageAccessFramework(Context  ctx,int requestcode) {
+    public static void triggerStorageAccessFramework(Context ctx, int requestcode) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
         ((Activity)ctx).startActivityForResult(intent, requestcode);
     }
 
 
-    public static int copyFileOrDirectory(Context  ctx,String srcDir, String dstDir) {
+    public static int copyFileOrDirectory(Context ctx, String srcDir, String dstDir,boolean isPastinginInternal) {
 
         try {
             File src = new File(srcDir);
@@ -465,23 +503,48 @@ public  class  UtilityStorage {
 
             if (src.isDirectory()) {
                 //new for copy folder from storage to  storage
-                if (!dst.exists())
-                {
-                    boolean status= dst.mkdir();
-                    if(status)
-                    Constants.totalfolderCopied++;
+                String files[]=null;
+                if(isPastinginInternal) {
+                     files = src.list();
+                    if (!dst.exists()) {
+                        boolean status = dst.mkdir();
+                        if (status) {
+                            Constants.totalfolderCopied++;
+                            Utility.RunMediaScan(ctx,dst );
+                        }
+                    }
+                }
+                else {
+
+                    files = src.list();
+                    if (!dst.exists()) {
+                        boolean status =  UtilityStorage.mkdir(dst, ctx);
+                        if (status)
+                        {
+                            Constants.totalfolderCopied++;
+                            Utility.RunMediaScan(ctx,dst );
+                        }
+                    }
+
                 }
 
                 //new for copy folder content  from storage to  storage
-                String files[] = src.list();
-                int filesLength = files.length;
-                for (int i = 0; i < filesLength; i++) {
-                    String src1 = (new File(src, files[i]).getPath());
-                    String dst1 = dst.getPath();
-                     //copyFile(ctx,new File(src1),new File(dst1,new File(src1).getName()));
-                    copyFileOrDirectory(ctx,src1, dst1);
+               // String files[] = src.list();
+                if(files !=null)
+                {
+                    int filesLength = files.length;
 
+                    for (int i = 0; i < filesLength; i++) {
+                        String src1 = (new File(src, files[i]).getPath());
+                        String dst1 = dst.getPath();
+
+                        copyFileOrDirectory(ctx, src1, dst1, isPastinginInternal);
+
+                    }
                 }
+
+                 return   Constants.totalfolderCopied;
+
 
             } else {
 
@@ -539,119 +602,164 @@ public  class  UtilityStorage {
 
     }
 
+// this function was working fine ;
+//    public static int copyFile(Context ctx, File sourceFile, File destFile) throws IOException {
+//
+//        if (!destFile.getParentFile().exists())
+//            destFile.getParentFile().mkdirs();
+//
+//        if (!destFile.exists()) {
+//            destFile.createNewFile();
+//        }
+//
+//        FileChannel source = null;
+//        FileChannel destination = null;
+//
+//        try {
+//            source = new FileInputStream(sourceFile).getChannel();
+//            destination = new FileOutputStream(destFile).getChannel();
+//            destination.transferFrom(source, 0, source.size());
+//
+//            Utility.RunMediaScan(ctx,destFile);
+//            return  1;
+//
+//        }
+//        catch (Exception e)
+//        {
+//            String str=e.getMessage();
+//            System.out.print(""+str);
+//            return  0;
+//        }
+//        finally {
+//            if (source != null) {
+//                source.close();
+//            }
+//            if (destination != null) {
+//                destination.close();
+//            }
+//        }
+//    }
 
-    public static int copyFile(Context ctx,File sourceFile, File destFile) throws IOException {
 
-        if (!destFile.getParentFile().exists())
-            destFile.getParentFile().mkdirs();
 
-        if (!destFile.exists()) {
-            destFile.createNewFile();
-        }
 
-        FileChannel source = null;
-        FileChannel destination = null;
+
+    public static int copyFile(Context context, File source, File target){
+
+        FileInputStream inStream = null;
+        OutputStream outStream = null;
+        FileChannel inChannel = null;
+        FileChannel outChannel = null;
 
         try {
-            source = new FileInputStream(sourceFile).getChannel();
-            destination = new FileOutputStream(destFile).getChannel();
-            destination.transferFrom(source, 0, source.size());
+            inStream = new FileInputStream(source);
 
-            Utility.RunMediaScan(ctx,destFile);
-            return  1;
+            // First try the normal way
+            if (isWritable(target)) {
+                // standard way
+                outStream = new FileOutputStream(target);
+                inChannel = inStream.getChannel();
+                outChannel = ((FileOutputStream) outStream).getChannel();
+                inChannel.transferTo(0, inChannel.size(), outChannel);
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    // Storage Access Framework
+                    DocumentFile targetDocument = getDocumentFile(target, false, context);
+                    outStream =
+                            context.getContentResolver().openOutputStream(targetDocument.getUri());
+                }
 
-        }
-        catch (Exception e)
-        {
-            String str=e.getMessage();
-            System.out.print(""+str);
-            return  0;
-        }
-        finally {
-            if (source != null) {
-                source.close();
+                else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT) {
+                    // Workaround for Kitkat ext SD card
+                    Uri uri = MediaStoreHack.getUriFromFile(target.getAbsolutePath(), context);
+                    outStream = context.getContentResolver().openOutputStream(uri);
+                } else {
+                    return 0;
+                }
+
+                if (outStream != null) {
+                    // Both for SAF and for Kitkat, write to output stream.
+                    byte[] buffer = new byte[16384]; // MAGIC_NUMBER
+                    int bytesRead;
+                    while ((bytesRead = inStream.read(buffer)) != -1) {
+                        outStream.write(buffer, 0, bytesRead);
+                    }
+                }
+
             }
-            if (destination != null) {
-                destination.close();
+        } catch (Exception e) {
+            Log.e("Error",
+                    "Error when copying file from " + source.getAbsolutePath() + " to " + target.getAbsolutePath(), e);
+            return 0;
+        } finally {
+            try {
+                inStream.close();
+            } catch (Exception e) {
+                // ignore exception
+            }
+
+            try {
+                outStream.close();
+            } catch (Exception e) {
+                // ignore exception
+            }
+
+            try {
+                inChannel.close();
+            } catch (Exception e) {
+                // ignore exception
+            }
+
+            try {
+                outChannel.close();
+            } catch (Exception e) {
+                // ignore exception
             }
         }
+        Utility.RunMediaScan(context, target);
+        return 1;
     }
 
 
 
-//    public static boolean copyFile(final File source, final File target, Context context) {
-//        FileInputStream inStream = null;
-//        OutputStream outStream = null;
-//        FileChannel inChannel = null;
-//        FileChannel outChannel = null;
-//
-//        try {
-//            inStream = new FileInputStream(source);
-//
-//            // First try the normal way
-//            if (isWritableTarget(target)) {
-//                // standard way
-//                outStream = new FileOutputStream(target);
-//                inChannel = inStream.getChannel();
-//                outChannel = ((FileOutputStream) outStream).getChannel();
-//                inChannel.transferTo(0, inChannel.size(), outChannel);
-//            } else {
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//                    // Storage Access Framework
-//                    DocumentFile targetDocument = getDocumentFile(target, false, context);
-//                    outStream =
-//                            context.getContentResolver().openOutputStream(targetDocument.getUri());
-//                }
-//
-//                else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT) {
-//                    // Workaround for Kitkat ext SD card
-//                    Uri uri = MediaStoreHack.getUriFromFile(target.getAbsolutePath(), context);
-//                    outStream = context.getContentResolver().openOutputStream(uri);
-//                } else {
-//                    return false;
-//                }
-//
-//                if (outStream != null) {
-//                    // Both for SAF and for Kitkat, write to output stream.
-//                    byte[] buffer = new byte[16384]; // MAGIC_NUMBER
-//                    int bytesRead;
-//                    while ((bytesRead = inStream.read(buffer)) != -1) {
-//                        outStream.write(buffer, 0, bytesRead);
-//                    }
-//                }
-//
-//            }
-//        } catch (Exception e) {
-//            Log.e("Error",
-//                    "Error when copying file from " + source.getAbsolutePath() + " to " + target.getAbsolutePath(), e);
-//            return false;
-//        } finally {
-//            try {
-//                inStream.close();
-//            } catch (Exception e) {
-//                // ignore exception
-//            }
-//
-//            try {
-//                outStream.close();
-//            } catch (Exception e) {
-//                // ignore exception
-//            }
-//
-//            try {
-//                inChannel.close();
-//            } catch (Exception e) {
-//                // ignore exception
-//            }
-//
-//            try {
-//                outChannel.close();
-//            } catch (Exception e) {
-//                // ignore exception
-//            }
-//        }
-//        return true;
-//    }
-//
-//
+    // create folder
+    public static boolean mkdir(final File file, Context context) {
+        if(file==null)
+            return false;
+        if (file.exists()) {
+            // nothing to create.
+            return file.isDirectory();
+        }
+        //here
+        // Try the normal way
+        if (file.mkdirs()) {
+            Utility.RunMediaScan(context, file);
+            return true;
+        }
+
+        // Try with Storage Access Framework.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && isOnExtSdCard(file, context)) {
+            DocumentFile document = getDocumentFile(file, true, context);
+            // getDocumentFile implicitly creates the directory.
+            if(document==null) {
+                return false;
+            }
+            else {
+
+                return document.exists();
+            }
+        }
+
+        // Try the Kitkat workaround.
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT) {
+            try {
+                return MediaStoreHack.mkdir(context, file);
+            } catch (IOException e) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
 }

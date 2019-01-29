@@ -1,6 +1,7 @@
 package com.mojodigi.filehunt.Adapter;
 
 import android.content.Context;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,11 +18,11 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Model.Model_Storage;
-
+import com.mojodigi.filehunt.R;
 import com.mojodigi.filehunt.Utils.Utility;
 
+import java.io.File;
 import java.util.ArrayList;
-import com.mojodigi.filehunt.R;
 
 public class Adapter_Storage extends RecyclerView.Adapter<Adapter_Storage.MyViewHolder>  implements Filterable {
 
@@ -44,7 +45,7 @@ public class Adapter_Storage extends RecyclerView.Adapter<Adapter_Storage.MyView
              fileSize=(TextView)view.findViewById(R.id.FileSize);
              fileMdate=(TextView)view.findViewById(R.id.FileMdate);
              fileDuration=(TextView)view.findViewById(R.id.FileDuration);
-              chbx=(CheckBox) view.findViewById(R.id.chbx);
+             chbx=(CheckBox) view.findViewById(R.id.chbx);
              rellayout=(RelativeLayout)view.findViewById(R.id.rellayout);
              FileIcon=(ImageView)view.findViewById(R.id.FileIcon);
 
@@ -52,8 +53,23 @@ public class Adapter_Storage extends RecyclerView.Adapter<Adapter_Storage.MyView
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    // send selected apk in callback
-                    listener.onItemSelected(modelStorageList.get(getAdapterPosition()));
+
+                    // send selected file/folder in callback
+                   // int pos=getAdapterPosition();
+                   // if(pos!= RecyclerView.NO_POSITION)
+                    try {
+                         int pos=getAdapterPosition();
+                         if(pos!= RecyclerView.NO_POSITION) {
+                             if(modelStorageList.size()>=1)//temp solution;
+                             listener.onItemSelected(modelStorageList.get(pos));
+                         }
+                    }catch (Exception e)
+                    {
+
+                    }
+
+
+
                 }
             });
 
@@ -75,9 +91,7 @@ public class Adapter_Storage extends RecyclerView.Adapter<Adapter_Storage.MyView
         this.modelStorageList = modelStorageList;
         this.listener=listener;
 
-
-
-    }
+        }
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -128,14 +142,18 @@ public class Adapter_Storage extends RecyclerView.Adapter<Adapter_Storage.MyView
                 }
                 else if (FileType.contains("audio"))
                 {
-                    holder.FileIcon.setImageDrawable(mContext.getResources().getDrawable(R.mipmap.ic_audio));
+                    holder.FileIcon.setImageDrawable(mContext.getResources().getDrawable(R.drawable.cat_ic_music));
                 }
                 else if(FileType.contains("video"))
                 {
 
                     //video/mp4  will  be type of File,using video to  play  ant vdo file
                      // animation file  will also  be covered
-                   holder.FileIcon.setImageBitmap(Utility.creteVdoBitmapFromPath(model.getFilePath()));
+                  // holder.FileIcon.setImageBitmap(Utility.creteVdoBitmapFromPath(model.getFilePath()));
+
+                    Glide.with(mContext)
+                            .load(Uri.fromFile(new File(model.getFilePath())))
+                            .into(holder.FileIcon);
 
                 }
                 else if (FileType.contains("msword") || FileType.contains(Constants.WordMimeType))
@@ -146,6 +164,14 @@ public class Adapter_Storage extends RecyclerView.Adapter<Adapter_Storage.MyView
                 else if(FileType.contains("text/plain"))
                 {
                     holder.FileIcon.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_txt));
+                }
+                else if(model.getFilePath().contains(".zip"))
+                {
+                    holder.FileIcon.setImageDrawable(mContext.getResources().getDrawable(R.drawable.cat_ic_zip));
+                }
+                else if(model.getFilePath().contains(".apk"))
+                {
+                    holder.FileIcon.setImageDrawable(mContext.getResources().getDrawable(R.drawable.cat_ic_apk));
                 }
 
 
@@ -172,6 +198,7 @@ public class Adapter_Storage extends RecyclerView.Adapter<Adapter_Storage.MyView
     public int getItemCount() {
         return modelStorageList.size();
     }
+
 
 
     @Override

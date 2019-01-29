@@ -1,81 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <android.support.v7.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    app:cardElevation="@dimen/dp5"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    app:cardElevation="@dimen/dp5" >
+
     <RelativeLayout
         android:id="@+id/rellayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
-    <ImageView
-        android:layout_marginLeft="@dimen/dp10"
-        android:layout_centerInParent="true"
-        android:id="@+id/FileIcon"
-        android:layout_alignParentLeft="true"
-        android:src="@mipmap/ic_audio"
-        android:scaleType="centerCrop"
-        android:layout_width="@dimen/dp50"
-        android:layout_height="@dimen/dp50" />
+        <ImageView
+            android:layout_marginLeft="@dimen/dp10"
+            android:layout_centerInParent="true"
+            android:id="@+id/FileIcon"
+            android:layout_alignParentLeft="true"
+            android:src="@drawable/cat_ic_music"
+            android:scaleType="centerCrop"
+            android:layout_width="@dimen/dp30"
+            android:layout_height="@dimen/dp30"
 
-<RelativeLayout
-    android:padding="@dimen/dp10"
-    android:layout_toRightOf="@+id/FileIcon"
-    android:layout_centerInParent="true"
-    android:layout_width="wrap_content"
-    android:gravity="center"
-    android:layout_height="wrap_content">
-    <TextView
-        android:layout_toLeftOf="@+id/chbx"
-        android:paddingRight="@dimen/dp5"
-        android:layout_alignParentLeft="true"
-        android:id="@+id/AudioFileName"
-        android:text="FileName"
-        android:gravity="start"
-        android:paddingTop="@dimen/dp5"
-        android:paddingBottom="@dimen/dp5"
+            />
 
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    <TextView
-        android:id="@+id/FileSize"
-        android:layout_below="@+id/AudioFileName"
-        android:text="10 kb"
-        android:layout_marginTop="@dimen/dp5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    <TextView
-        android:id="@+id/FileMdate"
-        android:layout_below="@+id/AudioFileName"
-        android:text="10/12/2014"
-        android:layout_alignParentRight="true"
-        android:layout_marginTop="@dimen/dp5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        <RelativeLayout
+            android:id="@+id/container_layout"
 
-    <TextView
-        android:id="@+id/FileDuration"
-        android:layout_below="@+id/AudioFileName"
-        android:text=""
-        android:layout_centerInParent="true"
-        android:layout_marginTop="@dimen/dp5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    <CheckBox
-        android:id="@+id/chbx"
-        android:layout_alignParentRight="true"
-        android:checked="true"
-        android:visibility="invisible"
-        android:layout_above="@+id/FileMdate"
-        android:layout_marginBottom="@dimen/dp2"
-        android:buttonTint="@color/checkbox_tint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+            android:paddingTop="@dimen/dp5"
+            android:paddingBottom="@dimen/dp5"
+            android:paddingLeft="@dimen/dp10"
+            android:paddingRight="@dimen/dp10"
 
-</RelativeLayout>
+            android:layout_toRightOf="@+id/FileIcon"
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:gravity="center"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_toLeftOf="@+id/chbx"
+                android:paddingRight="@dimen/dp5"
+                android:layout_alignParentLeft="true"
+                android:id="@+id/AudioFileName"
+                android:text="FileName"
+                android:gravity="start"
+                android:paddingTop="@dimen/dp3"
+                android:paddingBottom="@dimen/dp3"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/FileSize"
+                android:layout_below="@+id/AudioFileName"
+                android:text="10 kb"
+                android:layout_marginTop="@dimen/dp3"
+                android:layout_marginBottom="@dimen/dp2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/FileMdate"
+                android:layout_below="@+id/AudioFileName"
+                android:text="10/12/2014"
+                android:layout_alignParentRight="true"
+                android:layout_marginTop="@dimen/dp3"
+                android:layout_marginBottom="@dimen/dp2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/FileDuration"
+                android:layout_below="@+id/AudioFileName"
+                android:text=""
+                android:layout_centerInParent="true"
+                android:layout_marginTop="@dimen/dp3"
+                android:layout_marginBottom="@dimen/dp2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <!--android:buttonTint="@color/checkbox_tint"-->
+            <CheckBox
+                android:id="@+id/chbx"
+                android:layout_alignParentRight="true"
+                android:checked="true"
+                android:visibility="invisible"
+                android:layout_above="@+id/FileMdate"
+                android:layout_marginBottom="@dimen/dp2"
+
+                android:buttonTint="@color/onePlusAccentColor_device_default_dark"
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
+
+        <View
+            android:layout_below="@+id/container_layout"
+            android:layout_toRightOf="@+id/FileIcon"
+            android:layout_marginLeft="@dimen/sp10"
+            style="@style/Divider"/>
+
     </RelativeLayout>
+
 </android.support.v7.widget.CardView>
 

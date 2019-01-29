@@ -13,11 +13,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.mojodigi.filehunt.Model.Model_Audio;
-
+import com.mojodigi.filehunt.R;
 import com.mojodigi.filehunt.Utils.Utility;
 
 import java.util.ArrayList;
-import com.mojodigi.filehunt.R;
 
 public class MultiSelectAdapter_Audio extends RecyclerView.Adapter<MultiSelectAdapter_Audio.MyViewHolder>   implements Filterable {
 
@@ -65,7 +64,7 @@ public class MultiSelectAdapter_Audio extends RecyclerView.Adapter<MultiSelectAd
         }
     }
 
-     public MultiSelectAdapter_Audio(Context context, ArrayList<Model_Audio> AudioList, ArrayList<Model_Audio> selectedAudioList,AudioListener listener) {
+     public MultiSelectAdapter_Audio(Context context, ArrayList<Model_Audio> AudioList, ArrayList<Model_Audio> selectedAudioList, AudioListener listener) {
         this.mContext=context;
         this.AudioList = AudioList;
         this.AudioListfiltered=AudioList;
@@ -89,7 +88,8 @@ public class MultiSelectAdapter_Audio extends RecyclerView.Adapter<MultiSelectAd
                  holder.fileMdate.setText(model.getAudiofileMDate());
                  holder.fileSize.setText(model.getAudioFileSize());
                  holder.fileDuration.setText(model.getAudioFileDuration());
-                 holder.FileIcon.setImageDrawable(mContext.getResources().getDrawable(R.mipmap.ic_audio));
+                 holder.FileIcon.setImageDrawable(mContext.getResources().getDrawable(R.drawable.cat_ic_music));
+                 //holder.FileIcon.setImageDrawable(mContext.getResources().getDrawable(R.mipmap.ic_audio));
 
 
 

@@ -1,11 +1,8 @@
 package com.mojodigi.filehunt.Utils;
 
 
-import android.app.Activity;
-import android.app.DialogFragment;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Build;
 
 public class CustomProgressDialog {

@@ -2,12 +2,12 @@ package com.mojodigi.filehunt.AsyncTasks;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.widget.Toast;
 
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Model.Model_Storage;
 import com.mojodigi.filehunt.R;
 import com.mojodigi.filehunt.Utils.CustomProgressDialog;
+import com.mojodigi.filehunt.Utils.Utility;
 import com.mojodigi.filehunt.Utils.UtilityStorage;
 
 import java.util.ArrayList;
@@ -20,8 +20,8 @@ public class copyAsyncTask extends AsyncTask<Integer, Integer, Integer> {
     public ArrayList<String> filesCopied = new ArrayList<String>();
     public ArrayList<String> filesToCopyAsync = new ArrayList<String>();
     private ArrayList<Model_Storage> fileList_root;
-
-
+    int already_Exist_FileCount;
+    boolean isPastinginInternal;
     public interface AsyncResponse {
         void copyFinish();
     }
@@ -29,13 +29,14 @@ public class copyAsyncTask extends AsyncTask<Integer, Integer, Integer> {
     public AsyncResponse delegate = null;
 
 
-    public copyAsyncTask(Context ctx, AsyncResponse delegate, ArrayList<String> filesToCopy, ArrayList<Model_Storage> pFileList_Root, String destpath) {
+    public copyAsyncTask(Context ctx, AsyncResponse delegate, ArrayList<String> filesToCopy, ArrayList<Model_Storage> pFileList_Root, String destpath,boolean isPastinginInternal) {
         filesToCopyAsync = filesToCopy;
         this.mcontext = ctx;
         this.destPath = destpath;
         this.delegate = delegate;
         this.fileList_root = pFileList_Root;  // to  check whether file aleady exsist on the current path;
-
+        already_Exist_FileCount=0;
+        this.isPastinginInternal=isPastinginInternal;
     }
 
     @Override
@@ -51,8 +52,8 @@ public class copyAsyncTask extends AsyncTask<Integer, Integer, Integer> {
         Constants.totalfolderCopied=0;
         try {
             for (int i = 0; i < filesToCopyAsync.size(); i++) {
-                Boolean b = isfileExistonCurrentPath(Constants.filesToCopy.get(i).toString());
-                System.out.print("" + b);
+               // Boolean b = isfileExistonCurrentPath(Constants.filesToCopy.get(i).toString());
+                //System.out.print("" + b);
                 if (isfileExistonCurrentPath(Constants.filesToCopy.get(i).toString())) {
                     filesCopied.add(Constants.filesToCopy.get(i).toString()); // add the file already exist to  list so  that  it can be removed from
                     //copy operation in below for loop;
@@ -61,7 +62,7 @@ public class copyAsyncTask extends AsyncTask<Integer, Integer, Integer> {
                 }
 
 
-                int cnt = UtilityStorage.copyFileOrDirectory(mcontext, Constants.filesToCopy.get(i).toString(), destPath + "/");
+                int cnt = UtilityStorage.copyFileOrDirectory(mcontext, Constants.filesToCopy.get(i).toString(), destPath + "/",isPastinginInternal);
                 if (cnt > 0) {
                     filesCopied.add(Constants.filesToCopy.get(i).toString());
                 }
@@ -97,15 +98,27 @@ public class copyAsyncTask extends AsyncTask<Integer, Integer, Integer> {
 
         try {
             CustomProgressDialog.dismiss();
-            String msg = integer > 1 ? integer + " Items copied" : integer + " Item copied";
-           // Toast.makeText(mcontext, msg, Toast.LENGTH_SHORT).show();    // comments as  incorrect msg is coming;
+           // String msg = integer > 1 ? integer + " Items pasted" : integer + " Item pasted";
+            String msg ="Copied successfully";
+            Utility.dispToast(mcontext , msg );
+
+            // Toast.makeText(mcontext, msg, Toast.LENGTH_SHORT).show();    // comments as  incorrect msg is coming;
+
+            if (already_Exist_FileCount > 0) {
+                String msgexst = already_Exist_FileCount > 1 ? already_Exist_FileCount + " Items already exist" : already_Exist_FileCount + " Item already exist";
+                Utility.dispToast(mcontext, msgexst);
+            }
+
             delegate.copyFinish();
-        }catch (Exception e)
+        }
+        catch (Exception e)
         {
 
         }
-
     }
+
+
+
 
     private boolean isfileExistonCurrentPath(String fPath) {
 
@@ -115,7 +128,10 @@ public class copyAsyncTask extends AsyncTask<Integer, Integer, Integer> {
             System.out.print("" + model.getFilePath());
             boolean b = model.getFilePath().equalsIgnoreCase(fPath);
             System.out.print("" + b);
-            if (b) return true;
+            if (b) {
+                ++already_Exist_FileCount;
+                return true;
+            }
         }
 
         return false;

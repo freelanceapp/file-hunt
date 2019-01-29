@@ -6,192 +6,26 @@
     <string name="avlbl">Available</string>
 
         <!--taken from filemangaer app-->
-    <string name="font_family_button_material">sans-serif-medium</string>
-    <string name="font_family_body_1_material">sans-serif</string>
-    <string name="font_family_body_2_material">sans-serif-medium</string>
-    <string name="font_family_caption_material">sans-serif</string>
-    <string name="font_family_title_material">sans-serif-medium</string>
-    <string name="back_button_label">Back</string>
-    <string name="next_button_label">Next</string>
-    <string name="skip_button_label">Skip</string>
-    <string name="searchview_description_search">Search</string>
-    <string name="searchview_description_clear">Clear query</string>
-    <string name="searchview_description_submit">Submit query</string>
-    <string name="searchview_description_voice">Voice search</string>
-    <string name="capital_on">ON</string>
-    <string name="capital_off">OFF</string>
-
-    <string name="compression">Archives</string>
-    <string name="class_count">%1$s items</string>
-    <string name="mobile_storage">Phone storage</string>
-    <string name="available_size">Available %1$s</string>
-    <string name="total_size">Total %1$s</string>
-    <string name="used_size">Already used %1$s</string>
-    <string name="no_recent_file">No recent files</string>
-    <string name="picture_title">Images</string>
-    <string name="audio_title">Audio</string>
-    <string name="video_title">Video</string>
-    <string name="document_title">Document</string>
-    <string name="apk_title">Apks</string>
-    <string name="compression_title">Compressed package</string>
-    <string name="please_select_file">Select file</string>
-    <string name="selected_files">%1$s items selected</string>
-    <string name="internal_storage">Internal storage</string>
-    <string name="external_storage">External storage</string>
-    <string name="external_otg">USB storage</string>
-    <string name="new_folder_name">New folder %1$s</string>
-    <string name="operation_not_allowed_in_child_directory">
-The destination folder cannot be a subfolder of the source folder.
-</string>
-    <string name="some_data_not_allowed">Parameters not available.</string>
-    <string name="task_is_canceled">Task cancelled</string>
-    <string name="msgs_success">Operation complete</string>
-    <string name="msgs_failure">Operation failed</string>
-    <string name="name_is_empty">Empty</string>
-    <string name="please_select_path">Please select a valid path</string>
-    <string name="name_not_available">This name has already been used</string>
-    <string name="delete_recent_file">Delete</string>
-    <string name="waiting_dialog_deleting_title">Deleting</string>
-    <string name="confirm_delete_file">Are you sure you want to delete these %1$d files?</string>
-    <string name="waiting_dialog_copy_title">Copying</string>
-    <string name="waiting_dialog_crop_title">Cutting</string>
-    <string name="waiting_dialog_rename_title">Renaming</string>
-    <string name="toast_title">Reminder</string>
-    <string name="toast_same_files_exit_message">
-Files with the same name already exist. Do you want to overwrite them?
-</string>
-    <string name="create_copy_regexp">%1$s(%2$d)%3$s</string>
-    <string name="operation_no">No</string>
-    <string name="space_weak_message">Insufficient space. Operation failed</string>
-    <string name="file_name">Name</string>
-    <string name="file_size">Size</string>
-    <string name="file_duration">Duration</string>
-    <string name="file_modified_time">Last modified</string>
-    <string name="file_path">Path</string>
-    <string name="file_count_label">Number of files</string>
-    <string name="file_total_size">Total size</string>
-    <string name="file_count">%1$s</string>
-    <string name="rename_recent_file_close">Close</string>
-    <string name="input_name_dialog_message_invalid_name_length">Maximum number of characters reached</string>
 
 
-    <string name="no_file">Empty</string>
-    <string name="search_toast">Please enter search keywords</string>
-    <string name="today_string">Today</string>
-    <string name="yestoday_string">Yesterday</string>
-    <string name="unknown">Unknown</string>
-    <string name="apk_uninstall">Not installed</string>
-    <string name="size_bytes">B</string>
-    <string name="size_kilobytes">KB</string>
-    <string name="size_megabytes">MB</string>
-    <string name="size_gigabytes">GB</string>
-    <string name="open_mode">Open with...</string>
-    <string name="mime_symlink">Symbolic link</string>
-    <string name="mime_folder">Folders</string>
-    <string name="sort_time">Sort by date</string>
-    <string name="sort_size">Sort by size</string>
-    <string name="sort_type">Sort by type</string>
-    <string name="sort_name">Name</string>
-
-    <string name="unzip_file">Unzip the file</string>
-    <string name="unzip_to_current_directory">Unzip to the current path</string>
-    <string name="unzip_to_other_directory">Unzip to a different path</string>
-    <string name="actions_paster">Paste</string>
-    <string name="actions_select_text">Select all</string>
-    <string name="actions_unselect_text">Deselect all</string>
-    <string name="actions_unzip">Unzip</string>
-    <string name="actions_clean">Clean up</string>
-    <string name="actions_search">Search</string>
-    <string name="actions_sort">Sorting</string>
-    <string name="actions_delete">Delete</string>
-    <string name="actions_new">New folder</string>
-    <string name="actions_show">Show hidden files</string>
-    <string name="actions_hidden">"Don't show hidden files"</string>
-    <string name="actions_unzipok">Confirm</string>
-    <string name="actions_copy">Copy</string>
-    <string name="actions_crop">Cut</string>
-    <string name="actions_share">Share</string>
     <string name="actions_rename">Rename</string>
-    <string name="actions_details">Details</string>
-    <string name="open_directory">Open located path</string>
-    <string name="waiting_dialog_unzip_title">Unzipping</string>
-    <string name="tab_all">PHOTOS</string>
-    <string name="tab_group">ALBUMS</string>
-    <string name="actions_setting">Settings</string>
-    <string name="tab_browse">CATEGORIES</string>
-    <string name="tab_directory">STORAGE</string>
-    <string name="editor_mode">Edit mode</string>
-    <string name="please_select_directory">Choose path</string>
-    <string name="input_passwd">Input the password</string>
-    <string name="camera_group">Camera</string>
-    <string name="hotscreen_group">Screenshot</string>
 
-    <string name="recent">Recent files</string>
-    <string name="available_title">Available</string>
-    <string name="item_count_string">%1$s items</string>
-    <string name="actions_zip">Compress</string>
-    <string name="waiting_dialog_zip_title">Compressing</string>
-    <string name="storage_total_lable">Total</string>
-    <string name="storage_available_lable">Available</string>
-    <string name="storage_size_gigabytes">%1$s GB</string>
-    <string name="show_hidden_files">Show hidden files</string>
-    <string name="filter_small_photos">Filter images smaller than 30KB</string>
-    <string name="copy_percent_bytes" formatted="false">%1dB/%2dB</string>
-    <string name="copy_percent_megas" formatted="false">%1dMB/%2dMB</string>
-    <string name="loading_detail">Loading...</string>
-    <string name="open_picture_title">Image viewer</string>
-    <string name="open_audio_title">Audio player</string>
-    <string name="open_video_title">Video player</string>
-    <string name="open_document_title">Document viewer</string>
-    <string name="favorite">Favorites</string>
-    <string name="actions_favorite">Add to favorites</string>
-    <string name="actions_unfavorite">Remove from favorites</string>
-    <string name="clear_history">Clear history</string>
-    <string name="storage_other">Others:%1$s</string>
-    <string name="storage_picture">Images:%1$s</string>
-    <string name="storage_audio">Audio:%1$s</string>
-    <string name="storage_video">Video:%1$s</string>
-    <string name="storage_compression">Archives:%1$s</string>
-    <string name="storage_apk">Apks:%1$s</string>
-    <string name="storage_document">Documents:%1$s</string>
-    <string name="storage_available">Available:%1$s</string>
-    <string name="rename_no_file">Rename failed, file does not exist</string>
-    <string name="storage_detail_title">Storage information</string>
-    <string name="search_activity_title"/>
-    <string name="drawer_open">Open</string>
-    <string name="drawer_close">Hide</string>
-    <string name="root_title">Open file</string>
-    <string name="other_way">Open with</string>
-    <string name="waiting_dialog_create_title">Creating</string>
-    <string name="actions_select">Select</string>
-    <string name="open_file_failure">Can not open this file</string>
-    <string name="msgs_success_for_google">
-Operation completed. Files will be uploaded in the background
-</string>
     <string name="menu_item_delete">Delete</string>
     <string name="menu_item_move">Move</string>
     <string name="action_search">Search</string>
     <string name="action_sort">Sort</string>
-    <string name="rar_extract_message">Extraction not supported for encrypted RAR files</string>
     <!--taken from filemangaer app-->
 
     <string name="file_provider_authority" translatable="false">com.example.filehunt.provider</string>
 
-    <string name="animation">Animations</string>
-    <string name="picture">Images</string>
-    <string name="audio">Audios</string>
-    <string name="video">Videos</string>
-    <string name="document">Documents</string>
-    <string name="apk">Apks</string>
-    <string name="download">Downloads</string>
-    <string name="recent_file">Recent files</string>
-    <string name="loading_msg">Loading</string>
-    <string name="copying_msg">Copying</string>
-
+    <string name="loading_msg">Loading...</string>
+    <string name="msg_set_wall">Setting wallpaper</string>
+    <string name="copying_msg">Copying...</string>
+    <string name="foldercreatedmsg">folder created successfully</string>
 
     <string name="menu_selectAll">SELECT ALL</string>
     <string name="menu_unselectAll">UNSELECT ALL</string>
-    <string name="menu_paste">PASTE</string>
+    <string name="menu_paste">Paste</string>
 
     <string name="cat_Images">Image</string>
     <string name="cat_Videos">Video</string>
@@ -200,32 +34,31 @@ Operation completed. Files will be uploaded in the background
     <string name="cat_Download">Download</string>
     <string name="cat_Animation">Animation</string>
     <string name="cat_Recent">Recent</string>
-    <string name="cat_Apk">Apk</string>
+    <string name="cat_Apk">Apps</string>
+    <string name="cat_zip_title">Zip</string>
     <string name="createfolder">CREATE</string>
     <string name="save">SAVE</string>
     <string name="cancel">CANCEL</string>
-    <string name="versiontxt">V 1.4</string>
-    <string name="create_folder">Create new folder</string>
+    <string name="create_folder">Create folder</string>
     <string name="encrypt_heading">Encrypt file</string>
     <string name="password">write password</string>
     <string name="encrypt">ENCRYPT</string>
     <string name="rename_success">File renamed successfully</string>
     <string name="rename_failed">Rename failed</string>
-
     <string name="emty_error">can not be empty</string>
+    <string name="foldernamerequire">Folder name required</string>
     <string name="error">Error</string>
+
+    <string name="delfile">file</string>
+    <string name="delfiles">files</string>
+    <string name="delmsg1">Items deleted</string>
+    <string name="delmsg2">Item deleted</string>
 
     <string name="needsaccesssummary">Please choose the root directory of \t</string>
     <string name="needsaccesssummary1">\tto grant write access to operate </string>
     <string name="permission_txt">Read/Write permission is required</string>
     <string name="open">OPEN</string>
     <string name="deleting_file">Deleting files </string>
-
-    <string-array name="sortbyApps">
-        <item>@string/sortName</item>
-        <item>@string/lastModified</item>
-        <item>@string/sortSize</item>
-    </string-array>
 
     <string name="sortName">Name</string>
     <string name="lastModified">Last Modified(Date)</string>
@@ -237,16 +70,16 @@ Operation completed. Files will be uploaded in the background
     <string name="descending">Descending</string>
 
 
-
-
-    <!-- demo add ids -->
-
-      <string name="admob_app_id">ca-app-pub-5603925957932903~3576315291</string>
-      <string name="banner_add_id">ca-app-pub-3940256099942544/6300978111</string>
-      <string name="ad_unit_id">ca-app-pub-3940256099942544/1033173712</string>
-      <string name="ad_unit_id_reward">ca-app-pub-3940256099942544/5224354917</string>
+    <string name="strgdevice">STORAGE DEVICES</string>
 
     <!-- demo add ids -->
+    <!--
+        <string name="admob_app_id">ca-app-pub-5603925957932903~3576315291</string>
+        <string name="banner_add_id">ca-app-pub-3940256099942544/6300978111</string>
+        <string name="ad_unit_id">ca-app-pub-3940256099942544/1033173712</string>
+        <string name="ad_unit_id_reward">ca-app-pub-3940256099942544/5224354917</string>
+     -->
+      <!-- demo add ids -->
 
 
 
@@ -263,14 +96,26 @@ Operation completed. Files will be uploaded in the background
     <!--actualapp id -->
 
 
-    <!--actual  add id for FileHunt -->
-    <!--
+    <!--actual  add id for FileHunt blockedAccount -->
+<!--
      <string name="admob_app_id">ca-app-pub-5603925957932903~3576315291</string>
      <string name="banner_add_id">ca-app-pub-5603925957932903/8134685014</string>
      <string name="ad_unit_id">ca-app-pub-5603925957932903/9183865192</string>
-
      <string name="ad_unit_id_reward">ca-app-pub-5603925957932903/5622774574</string>
   -->
-     <!--actualapp id -->
+    <!--actual  add id for FileHunt blockedAccount -->
+
+
+    <!--actual  add id for FileHunt runningAccount -->
+
+       <string name="admob_app_id">ca-app-pub-4867602581600600~6953664315</string>
+       <string name="banner_add_id">ca-app-pub-4867602581600600/8632210515</string>
+       <string name="ad_unit_id">ca-app-pub-4867602581600600/6512355771</string>
+       <string name="ad_unit_id_reward">ca-app-pub-4867602581600600/6141778543</string>
+
+    <!--actual  add id for FileHunt runningAccount -->
+
+
+
 
 </resources>

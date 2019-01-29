@@ -1,7 +1,5 @@
 package com.mojodigi.filehunt.Model;
 
-import android.graphics.Bitmap;
-
 public class Grid_Model {
 
 

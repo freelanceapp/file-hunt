@@ -16,11 +16,10 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.mojodigi.filehunt.Model.Model_Anim;
-
+import com.mojodigi.filehunt.R;
 import com.mojodigi.filehunt.Utils.Utility;
 
 import java.util.ArrayList;
-import com.mojodigi.filehunt.R;
 
 public class MultiSelectAdapter_Anim extends RecyclerView.Adapter<MultiSelectAdapter_Anim.MyViewHolder>  implements Filterable {
 
@@ -58,7 +57,7 @@ public class MultiSelectAdapter_Anim extends RecyclerView.Adapter<MultiSelectAda
                 public void onClick(View view) {
                     // send selected docs in callback
                     int pos=getAdapterPosition();
-                    if(pos!=RecyclerView.NO_POSITION)
+                    if(pos!= RecyclerView.NO_POSITION)
                     listener.onAnimSelected(AnimListfiltered.get(getAdapterPosition()));
                 }
             });

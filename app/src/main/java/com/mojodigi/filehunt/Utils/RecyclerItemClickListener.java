@@ -7,7 +7,6 @@ import android.view.MotionEvent;
 import android.view.View;
 
 
-
 //for recycleview imagegrid
 public class RecyclerItemClickListener implements RecyclerView.OnItemTouchListener
 {

@@ -12,10 +12,11 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.mojodigi.filehunt.Model.Grid_Model;
-//
+import com.mojodigi.filehunt.R;
 
 import java.util.ArrayList;
-import com.mojodigi.filehunt.R;
+
+//
 
 public class MultiSelectAdapter_Video extends RecyclerView.Adapter<MultiSelectAdapter_Video.MyViewHolder>  implements Filterable {
 
@@ -27,7 +28,7 @@ public class MultiSelectAdapter_Video extends RecyclerView.Adapter<MultiSelectAd
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
         public ImageView iv_image;
-        public CheckBox  itemCheckBox;
+        public CheckBox itemCheckBox;
 
         public MyViewHolder(View view) {
             super(view);
@@ -40,7 +41,7 @@ public class MultiSelectAdapter_Video extends RecyclerView.Adapter<MultiSelectAd
                 public void onClick(View view) {
                     // send selected docs in callback
                     int pos=getAdapterPosition();
-                    if(pos!=RecyclerView.NO_POSITION)
+                    if(pos!= RecyclerView.NO_POSITION)
                     listener.onVdoSelected(VdoListfiltered.get(getAdapterPosition()));
                 }
             });
@@ -48,7 +49,7 @@ public class MultiSelectAdapter_Video extends RecyclerView.Adapter<MultiSelectAd
              }
     }
 
-     public MultiSelectAdapter_Video(Context context, ArrayList<Grid_Model> VdoList, ArrayList<Grid_Model> selectedVdoList,VdoListener listener) {
+     public MultiSelectAdapter_Video(Context context, ArrayList<Grid_Model> VdoList, ArrayList<Grid_Model> selectedVdoList, VdoListener listener) {
         this.mContext=context;
         this.VdoList = VdoList;
         this.VdoListfiltered=VdoList;
@@ -73,9 +74,9 @@ public class MultiSelectAdapter_Video extends RecyclerView.Adapter<MultiSelectAd
                     if(Img.getImgBitmapStr()!=null)
                     {
                              Glide.with(mContext).load("file://" + Img.getImgBitmapStr())
-                                .skipMemoryCache(false).placeholder(R.drawable.vdo_placeholder).error(R.drawable.vdo_placeholder)
+                                .skipMemoryCache(false).placeholder(R.drawable.img_placeholder).error(R.drawable.img_placeholder)
                                 .into(holder.iv_image);
-                    }
+                             }
 
 
                   // holder.iv_image.setImageBitmap(Img.getImgBitmap());

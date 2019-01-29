@@ -3,7 +3,6 @@ package com.mojodigi.filehunt.Model;
 import java.util.ArrayList;
 
 
-
 public class Model_images
 {
     String str_folder;
@@ -46,7 +45,7 @@ public class Model_images
     public void setAl_FileDuration(ArrayList<String> FileDuaration) {
         this.FileDuaration = FileDuaration;
     }
-    public ArrayList<String>  getAl_FileDuration (){
+    public ArrayList<String> getAl_FileDuration (){
       return FileDuaration;
     }
 

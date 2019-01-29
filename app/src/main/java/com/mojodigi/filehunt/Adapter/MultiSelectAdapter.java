@@ -1,25 +1,23 @@
 package com.mojodigi.filehunt.Adapter;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
-import android.widget.Filter;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.mojodigi.filehunt.Model.Grid_Model;
-
+import com.mojodigi.filehunt.R;
 
 
 import java.util.ArrayList;
-
-
-import com.mojodigi.filehunt.R;
 
 public class MultiSelectAdapter extends RecyclerView.Adapter<MultiSelectAdapter.MyViewHolder>  implements Filterable {
 
@@ -28,10 +26,13 @@ public class MultiSelectAdapter extends RecyclerView.Adapter<MultiSelectAdapter.
     public ArrayList<Grid_Model> selected_ImgList=new ArrayList<>();
     private ImgListener listener;
     Context mContext;
+
+
+
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
         public ImageView iv_image;
-        public CheckBox  itemCheckBox;
+        public CheckBox itemCheckBox;
 
         public MyViewHolder(View view) {
             super(view);
@@ -43,8 +44,8 @@ public class MultiSelectAdapter extends RecyclerView.Adapter<MultiSelectAdapter.
                 public void onClick(View view) {
                     // send selected docs in callback
                     int pos=getAdapterPosition();
-                    if(pos!=RecyclerView.NO_POSITION)
-                    listener.onImageSelected(ImgListfiltered.get(getAdapterPosition()));
+                    if(pos!= RecyclerView.NO_POSITION)
+                    listener.onImageSelected(ImgListfiltered.get(getAdapterPosition()),pos);
                 }
             });
 
@@ -52,7 +53,7 @@ public class MultiSelectAdapter extends RecyclerView.Adapter<MultiSelectAdapter.
     }
 
 
-    public MultiSelectAdapter(Context context, ArrayList<Grid_Model> ImgList, ArrayList<Grid_Model> selectedImgList,ImgListener listener ) {
+    public MultiSelectAdapter(Context context, ArrayList<Grid_Model> ImgList, ArrayList<Grid_Model> selectedImgList, ImgListener listener ) {
         this.mContext=context;
         this.ImgList = ImgList;
         this.ImgListfiltered=ImgList;
@@ -83,7 +84,14 @@ public class MultiSelectAdapter extends RecyclerView.Adapter<MultiSelectAdapter.
             holder.itemCheckBox.setVisibility(View.VISIBLE);
         else
             holder.itemCheckBox.setVisibility(View.INVISIBLE);
+
+
+
+
+
         }
+
+
 
 
     @Override
@@ -132,7 +140,7 @@ public class MultiSelectAdapter extends RecyclerView.Adapter<MultiSelectAdapter.
     }
 
     public interface ImgListener {
-        void onImageSelected(Grid_Model imgModel);
+        void onImageSelected(Grid_Model imgModel,int position);
     }
 
 

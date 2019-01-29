@@ -9,30 +9,38 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.SET_WALLPAPER"/>
-
-
     <protected-broadcast android:name="android.intent.action.MEDIA_MOUNTED" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+
 
     <application
         android:name="com.mojodigi.filehunt.Application.MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
+        android:hardwareAccelerated="false"
+        android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
 
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <activity android:name="com.mojodigi.filehunt.SplashActivity"  >
+        android:theme="@style/AppTheme"
+  >
+
+        <activity android:theme="@style/MainActivityTheme" android:name="com.mojodigi.filehunt.MainActivity" android:screenOrientation="portrait"  >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.mojodigi.filehunt.MainActivity" android:screenOrientation="portrait"></activity>
+
+        <!--<activity android:name="com.mojodigi.filehunt.MainActivity" android:screenOrientation="portrait"></activity>-->
+
         <activity android:name="com.mojodigi.filehunt.Category_Explore_Activity" android:screenOrientation="portrait"></activity>
-        <activity android:name="com.mojodigi.filehunt.PhotosActivity" android:screenOrientation="portrait"></activity>
-        <activity android:name="com.mojodigi.filehunt.SingleViewMediaActivity" android:screenOrientation="portrait"></activity>
-        <activity android:name="com.mojodigi.filehunt.PhotosActivityRe" android:screenOrientation="portrait"></activity>
+
+        <activity android:name="com.mojodigi.filehunt.PhotosActivityRe"
+            android:screenOrientation="portrait"></activity>
         <activity android:name="com.mojodigi.filehunt.VideoActivityRe" android:screenOrientation="portrait"></activity>
         <activity android:name="com.mojodigi.filehunt.AudioActivityRe" android:screenOrientation="portrait"></activity>
         <activity android:name="com.mojodigi.filehunt.DocsActivityRe" android:screenOrientation="portrait"></activity>
@@ -40,7 +48,21 @@
         <activity android:name="com.mojodigi.filehunt.ApkActivityRe" android:screenOrientation="portrait"></activity>
         <activity android:name="com.mojodigi.filehunt.DownloadActivityRe" android:screenOrientation="portrait"></activity>
         <activity android:name="com.mojodigi.filehunt.RecentActivityRe" android:screenOrientation="portrait"></activity>
+        <activity android:name="com.mojodigi.filehunt.ZipActivityRe" android:screenOrientation="portrait"></activity>
+        <activity  android:theme="@style/AppTheme.NoActionBar" android:name="com.mojodigi.filehunt.Activity_Stotrage"
+            android:screenOrientation="portrait"></activity>
 
+        <activity android:theme="@style/AppTheme.NoActionBar" android:name="com.mojodigi.filehunt.Media_VdoActivity" android:configChanges="orientation|keyboard|keyboardHidden"></activity>
+        <activity android:theme="@style/AppTheme.NoActionBar" android:name="com.mojodigi.filehunt.Media_AdoActivity" android:screenOrientation="portrait"></activity>
+        <activity android:theme="@style/AppTheme.NoActionBar" android:name="com.mojodigi.filehunt.Media_ImgActivity" android:screenOrientation="portrait"></activity>
+        <activity android:theme="@style/AppTheme.NoActionBar" android:name="com.mojodigi.filehunt.Media_InfoActivity" android:screenOrientation="portrait"></activity>
+
+
+
+        <!--to  show  interesitial adds uisng smaato -->
+        <activity android:name="com.smaato.soma.interstitial.InterstitialActivity"
+            android:resizeableActivity="false" android:configChanges="keyboardHidden|orientation|screenSize">
+        </activity>
 
         <provider
             android:name="android.support.v4.content.FileProvider"

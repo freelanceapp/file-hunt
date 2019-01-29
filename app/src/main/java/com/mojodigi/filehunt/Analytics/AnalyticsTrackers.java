@@ -4,10 +4,10 @@ import android.content.Context;
 
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
+import com.mojodigi.filehunt.R;
 
 import java.util.HashMap;
 import java.util.Map;
-import com.mojodigi.filehunt.R;
 //
 
 /**

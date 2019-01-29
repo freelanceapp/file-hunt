@@ -3,12 +3,13 @@ package com.mojodigi.filehunt.Application;
 import android.app.Application;
 
 import com.google.android.gms.ads.MobileAds;
-import com.mojodigi.filehunt.Analytics.AnalyticsTrackers;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.StandardExceptionParser;
 import com.google.android.gms.analytics.Tracker;
-import com.mojodigi.filehunt.R;
+import com.mojodigi.filehunt.AddsUtility.AddConstants;
+import com.mojodigi.filehunt.AddsUtility.SharedPreferenceUtil;
+import com.mojodigi.filehunt.Analytics.AnalyticsTrackers;
 
 public class MyApplication extends Application {
     public static final String TAG = MyApplication.class
@@ -22,7 +23,13 @@ public class MyApplication extends Application {
         mInstance = this;
 
       // MobileAds.initialize(this, "ca-app-pub-8509384168493764~9766841905"); //demo app id
-       MobileAds.initialize(this, getResources().getString(R.string.admob_app_id)); //actual app id
+      // MobileAds.initialize(this, getResources().getString(R.string.admob_app_id)); //actual app id
+
+        SharedPreferenceUtil addPref=new SharedPreferenceUtil(getApplicationContext());
+        String appId=addPref.getStringValue(AddConstants.APP_ID, AddConstants.NOT_FOUND);
+        if(appId !=null && !appId.equalsIgnoreCase(AddConstants.NOT_FOUND) )
+        MobileAds.initialize(this, appId); //actual app id
+
 
         //
 

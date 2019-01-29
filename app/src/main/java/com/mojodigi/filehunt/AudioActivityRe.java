@@ -30,20 +30,28 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdView;
 import com.mojodigi.filehunt.Adapter.MultiSelectAdapter_Audio;
+import com.mojodigi.filehunt.AddsUtility.AddConstants;
+import com.mojodigi.filehunt.AddsUtility.AddMobUtils;
+import com.mojodigi.filehunt.AddsUtility.SharedPreferenceUtil;
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Model.Model_Audio;
-//
-import com.mojodigi.filehunt.Utils.AddMobUtils;
 import com.mojodigi.filehunt.Utils.AlertDialogHelper;
 import com.mojodigi.filehunt.Utils.CustomProgressDialog;
 import com.mojodigi.filehunt.Utils.RecyclerItemClickListener;
 import com.mojodigi.filehunt.Utils.Utility;
 import com.mojodigi.filehunt.Utils.UtilityStorage;
+import com.smaato.soma.AdDownloaderInterface;
+import com.smaato.soma.AdListenerInterface;
+import com.smaato.soma.BannerView;
+import com.smaato.soma.ErrorCode;
+import com.smaato.soma.ReceivedBannerInterface;
+import com.smaato.soma.interstitial.Interstitial;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,8 +60,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+//
 
-public class AudioActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener,MultiSelectAdapter_Audio.AudioListener {
+
+public class AudioActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener,MultiSelectAdapter_Audio.AudioListener,AdListenerInterface {
 
     ActionMode mActionMode;
     Menu context_menu;
@@ -76,7 +86,7 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
     Context mcontext;
     Model_Audio fileTorename;
     int renamePosition;
-    static  AudioActivityRe instance;
+    static AudioActivityRe instance;
     private boolean isUnseleAllEnabled=false;
 
     private SharedPreferences sharedPrefs;
@@ -84,103 +94,176 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
     private AdView mAdView;
     private int lastCheckedSortOptions;
 
+    SharedPreferenceUtil addprefs;
+    View adContainer;
+    RelativeLayout smaaToAddContainer;
+    //smaatoAddBanerView
+    BannerView smaaTobannerView;
+    Interstitial interstitial;  // smaatoInterestialAdd;
+    private int cnt;
+    private boolean isSearchModeActive;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photos_activity_re);
 
+        Constants.ACTIVITY_TRACKER= Constants.ACTIVITY_ENUM.ACTIVITY_AUDIO;
+
+        mcontext=AudioActivityRe.this;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Utility.setstatusBarColorBelowM(AudioActivityRe.this);
+        }
+
         //  banner add
+        //add netwrk varibales
+
         mAdView = (AdView) findViewById(R.id.adView);
+        adContainer = findViewById(R.id.adMobView);
+        smaaToAddContainer = findViewById(R.id.smaaToAddContainer);
+
+        smaaTobannerView = new BannerView((this).getApplication());
+        smaaTobannerView.addAdListener(this);
+
+        addprefs = new SharedPreferenceUtil(mcontext);
+
         AddMobUtils adutil = new AddMobUtils();
-        adutil.displayBannerAdd(mAdView);
+
+        if(AddConstants.checkIsOnline(mcontext) && adContainer !=null && addprefs !=null)
+        {
+            String AddPrioverId=addprefs.getStringValue(AddConstants.ADD_PROVIDER_ID, AddConstants.NOT_FOUND);
+            if(AddPrioverId.equalsIgnoreCase(AddConstants.Adsense_Admob_GooglePrivideId))
+                adutil.displayServerBannerAdd(addprefs,adContainer , mcontext);
+            else if(AddPrioverId.equalsIgnoreCase(AddConstants.SmaatoProvideId))
+            {
+                try {
+                    int publisherId = Integer.parseInt(addprefs.getStringValue(AddConstants.APP_ID, AddConstants.NOT_FOUND));
+                    int addSpaceId = Integer.parseInt(addprefs.getStringValue(AddConstants.BANNER_ADD_ID, AddConstants.NOT_FOUND));
+                    adutil.displaySmaatoBannerAdd(smaaTobannerView, smaaToAddContainer, publisherId, addSpaceId);
+                }catch (Exception e)
+                {
+                    String string = e.getMessage();
+                    System.out.print(""+string);
+                }
+            }
+
+        }
+        else {
+            adutil.displayLocalBannerAdd(mAdView);
+        }
+
+
+
+
         //  banner add
 
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         blankIndicator=(ImageView) findViewById(R.id.blankIndicator);
-        mcontext=AudioActivityRe.this;
+
         UtilityStorage.InitilaizePrefs(mcontext);
         //sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         Utility.setActivityTitle(mcontext,getResources().getString(R.string.cat_Audio));
-        int_position = getIntent().getIntExtra("value", 0);
-
+        //int_position = getIntent().getIntExtra("value", 0);
+        instance=this;
         try {
-            String tittle = Category_Explore_Activity.al_images.get(int_position).getStr_folder();
-            Utility.setActivityTitle(mcontext, tittle);
 
-            Intent_Audio_List = Category_Explore_Activity.al_images.get(int_position).getAl_imagepath();
-            Intent_duration_List = Category_Explore_Activity.al_images.get(int_position).getAl_FileDuration();
-            data_load();
+            if(Constants.model !=null) {
+                String tittle =Constants.model.getStr_folder();
+                Utility.setActivityTitle(mcontext, tittle);
+                Intent_Audio_List = Constants.model.getAl_imagepath();
+                Intent_duration_List = Constants.model.getAl_FileDuration();
+
+                if(Intent_Audio_List !=null)
+                {
+                    cnt=Intent_Audio_List.size();
+                    new dataLoadAsync().execute();
+                }
+                //data_load();
+            }
         }catch (Exception e)
         {
             e.printStackTrace();
         }
-         instance=this;
-        alertDialogHelper =new AlertDialogHelper(this);
-
-
-        if(audioList.size()!=0) {
-            multiSelectAdapter = new MultiSelectAdapter_Audio(this, audioList, multiselect_list, this);
-            //  AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));
-
-            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-            recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
-            recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
-                    DividerItemDecoration.VERTICAL));
-            // recyclerView.setItemAnimator(new DefaultItemAnimator());
-            recyclerView.setAdapter(multiSelectAdapter);
-        }
-        else
-        {
-            blankIndicator.setVisibility(View.VISIBLE);
-        }
 
 
 
-        recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                if (isMultiSelect) {
-                    int pos = position;
-                     if(pos!=RecyclerView.NO_POSITION)
-                    multi_select(position);
-                }
+//        alertDialogHelper =new AlertDialogHelper(this);
+//
+//
+//        if(audioList.size()!=0) {
+//            multiSelectAdapter = new MultiSelectAdapter_Audio(this, audioList, multiselect_list, this);
+//            //  AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));
+//
+//            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+//            recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
+//            recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
+//                    DividerItemDecoration.VERTICAL));
+//            // recyclerView.setItemAnimator(new DefaultItemAnimator());
+//            recyclerView.setAdapter(multiSelectAdapter);
+//        }
+//        else
+//        {
+//            blankIndicator.setVisibility(View.VISIBLE);
+//        }
+//
+//
+//
+//        recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(View view, int position) {
+//                if (isMultiSelect) {
+//                    int pos = position;
+//                     if(pos!= RecyclerView.NO_POSITION)
+//                    multi_select(position);
+//                }
+//
+//                else {
+//
+//
+//                }
+//            }
+//
+//            @Override
+//            public void onItemLongClick(View view, int position) {
+//                if (!isMultiSelect) {
+//                    multiselect_list = new ArrayList<Model_Audio>();
+//                    isMultiSelect = true;
+//
+//                    if (mActionMode == null) {
+//                        mActionMode = startActionMode(mActionModeCallback);
+//                    }
+//                }
+//
+//                multi_select(position);
+//
+//            }
+//        }));
 
-                else {
-
-
-                }
-            }
-
-            @Override
-            public void onItemLongClick(View view, int position) {
-                if (!isMultiSelect) {
-                    multiselect_list = new ArrayList<Model_Audio>();
-                    isMultiSelect = true;
-
-                    if (mActionMode == null) {
-                        mActionMode = startActionMode(mActionModeCallback);
-                    }
-                }
-
-                multi_select(position);
-
-            }
-        }));
-
-
+        dispInterestialAdds();
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
+
+        if(mActionMode !=null)
+        {
+            mActionMode.finish();
+
+        }
+        // update the  list  if audio file is removed  from media_ado;
+            if(multiSelectAdapter !=null)
+            {
+                multiSelectAdapter.notifyDataSetChanged();
+            }
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-
 
         }
     @Override
@@ -189,35 +272,51 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
 //        AddMobUtils addutil= new AddMobUtils();
 //        addutil.showInterstitial(mcontext);
 
-    }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-       // AddMobUtils addutil= new AddMobUtils();
-        //addutil.showInterstitial(mcontext);
+
 
 
     }
+    private void dispInterestialAdds()
+    {
+        if (addprefs != null && instance != null)
+        {
+            if(AddConstants.checkIsOnline(mcontext) && adContainer !=null && addprefs !=null)
+            {
+                String AddPrioverId=addprefs.getStringValue(AddConstants.ADD_PROVIDER_ID, AddConstants.NOT_FOUND);
+                if(AddPrioverId.equalsIgnoreCase(AddConstants.Adsense_Admob_GooglePrivideId)) {
+                    AddMobUtils addutil= new AddMobUtils();
+                    if(addutil!=null)
+                        addutil.displayServerBannerAdd(addprefs, adContainer, mcontext);
+                }
+                else if(AddPrioverId.equalsIgnoreCase(AddConstants.SmaatoProvideId)) {
+                    AddMobUtils.displaySmaatoInterestialAdd(instance, mcontext, interstitial, addprefs);
+                }
+            }
+        }
+
+    }
+
+
 
     @Override
     protected void onActivityResult(int requestCode, int responseCode, Intent data) {
         super.onActivityResult(requestCode, responseCode, data);
 
 
-        if(requestCode==Constants.FILE_DELETE_REQUEST_CODE) {
+        if(requestCode== Constants.FILE_DELETE_REQUEST_CODE) {
             boolean isPersistUriSet = UtilityStorage.setUriForStorage(requestCode, responseCode, data);
             if (isPersistUriSet && multiselect_list.size() > 0)
                 new DeleteFileTask(multiselect_list).execute();
         }
-        if(requestCode==Constants.FILE_RENAME_REQUEST_CODE)
+        if(requestCode== Constants.FILE_RENAME_REQUEST_CODE)
         {
             boolean isPersistUriSet = UtilityStorage.setUriForStorage(requestCode, responseCode, data);
             if (isPersistUriSet && multiselect_list.size() > 0)
             {
                 // call rename function  here in the case of premission granted first  time;
 
-                Utility.renameFile(mcontext,multiselect_list.get(0).getAudioPath(),Constants.Global_File_Rename_NewName,2);
+                Utility.renameFile(mcontext,multiselect_list.get(0).getAudioPath(), Constants.Global_File_Rename_NewName,2);
             }
 
         }
@@ -240,12 +339,27 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
     public static AudioActivityRe getInstance() {
         return instance;
     }
-    public void refreshAdapterAfterRename(String newPath,String newName)
+    public void refreshAdapterAfterRename(String newPath, String newName)
     {
         fileTorename.setAudioPath(newPath);
         fileTorename.setAudiFileName(newName);
         audioList.set(renamePosition,fileTorename);
         refreshAdapter();
+
+    }
+    public boolean checkForFileExist(String newFPath)
+    {
+
+        for(int i=0;i<audioList.size();i++)
+        {
+            String listFile=audioList.get(i).getAudioPath().toString();
+            boolean status=listFile.equalsIgnoreCase(newFPath);
+            if(status)
+                return true;
+
+        }
+
+        return  false;
 
     }
 
@@ -289,16 +403,28 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
                 MenuItem item= menu.findItem(R.id.action_sort);
                 item.setVisible(true);
                 //invalidateOptionsMenu();
+                searchView.requestFocus(0);
+                searchView.setFocusable(false);
+
+                isSearchModeActive=false;
+                Utility.hideKeyboard(AudioActivityRe.this);
 
                 return false;
             }
         });
+
         searchView.setOnSearchClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 MenuItem item= menu.findItem(R.id.action_sort);
                 item.setVisible(false);
                 //invalidateOptionsMenu();
+                searchView.requestFocus(1);
+                searchView.setFocusable(true);
+
+                isSearchModeActive=true;
+                Utility.showKeyboard(AudioActivityRe.this);
+
             }
         });
 
@@ -357,7 +483,7 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
         if (id == R.id.action_search) {
             return true;
         }
-        if(id==R.id.action_sort)
+        if(id== R.id.action_sort)
         {
 
             sortDialog(mcontext);
@@ -367,7 +493,103 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
         return super.onOptionsItemSelected(item);
     }
 
+    private  class dataLoadAsync extends  AsyncTask<Void,Void,Void>
+    {
 
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            if (cnt> 100) {
+                CustomProgressDialog.show(mcontext, mcontext.getResources().getString(R.string.loading_msg));
+            }
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            data_load();
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            initView();
+
+            //CustomProgressDialog.dismiss();
+            if (cnt > 100) {
+                try {
+                    Thread.sleep(3000);
+                    CustomProgressDialog.dismiss();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+        }
+    }
+
+    private  void initView()
+    {
+        alertDialogHelper =new AlertDialogHelper(this);
+
+
+        if(audioList.size()!=0) {
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+            recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
+            recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
+                    DividerItemDecoration.VERTICAL));
+            // recyclerView.setItemAnimator(new DefaultItemAnimator());
+
+            multiSelectAdapter = new MultiSelectAdapter_Audio(this, audioList, multiselect_list, this);
+            //  AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));
+            recyclerView.setAdapter(multiSelectAdapter);
+        }
+        else
+        {
+            blankIndicator.setVisibility(View.VISIBLE);
+        }
+
+
+
+        recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                if (isMultiSelect) {
+                    int pos = position;
+                    if(pos!= RecyclerView.NO_POSITION)
+                        multi_select(position);
+                }
+
+                else {
+
+
+                }
+            }
+
+            @Override
+            public void onItemLongClick(View view, int position) {
+                if (!isMultiSelect) {
+                    multiselect_list = new ArrayList<Model_Audio>();
+                    isMultiSelect = true;
+
+                    if (mActionMode == null) {
+                        mActionMode = startActionMode(mActionModeCallback);
+                    }
+                }
+
+                multi_select(position);
+
+            }
+        }));
+    }
 
     public void data_load() {
 
@@ -431,6 +653,7 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
 
     }
 
+    private int statusBarColor;
     private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
 
         @Override
@@ -439,6 +662,14 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
             MenuInflater inflater = mode.getMenuInflater();
             inflater.inflate(R.menu.menu_multi_select, menu);
             context_menu = menu;
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                //hold current color of status bar
+                statusBarColor = getWindow().getStatusBarColor();
+                //set your gray color
+                getWindow().setStatusBarColor(getResources().getColor(R.color.onePlusAccentColor_device_default_dark));
+            }
+
             return true;
         }
 
@@ -469,10 +700,11 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
                                 Constants.filesToCopy.add(multiselect_list.get(i).getAudioPath().toString());
                             }
                         }
-                        // redirect to  storage fragment;
-                        Constants.redirectToStorage=true;
+                        if(Constants.filesToCopy.size()>=1) {
+                            Utility.dispLocalStorages(mcontext,1);
+                        }
 
-                        finish();
+
 
 
                     }
@@ -481,12 +713,16 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
                 case R.id.action_rename:
                     if(multiselect_list.size()==1) {
 
-                        Utility.fileRenameDialog(mcontext,multiselect_list.get(0).getAudioPath(),Constants.AUDIO);
+                        Utility.fileRenameDialog(mcontext,multiselect_list.get(0).getAudioPath(), Constants.AUDIO,false);
 
                         }
                     return true;
                 case R.id.action_delete:
-                    alertDialogHelper.showAlertDialog("","Delete Audio","DELETE","CANCEL",1,false);
+                    if(multiselect_list.size()>=1) {
+                        int mFileCount = multiselect_list.size();
+                        String msgDeleteFile = mFileCount > 1 ? mFileCount + " " + getResources().getString(R.string.delfiles) : mFileCount + " " + getResources().getString(R.string.delfile);
+                        alertDialogHelper.showAlertDialog("", "Delete Audio"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, false);
+                    }
                     return true;
                 case R.id.action_select:
                     if(audioList.size()==multiselect_list.size() || isUnseleAllEnabled==true)
@@ -517,6 +753,12 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
             mActionMode = null;
             isMultiSelect = false;
             multiselect_list = new ArrayList<Model_Audio>();
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                //return to "old" color of status bar
+                getWindow().setStatusBarColor(statusBarColor);
+            }
+            
             refreshAdapter();
         }
     };
@@ -542,7 +784,7 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
                 }
                 else
                 {
-                    UtilityStorage.guideDialogForLEXA(mcontext,f.getParent(),Constants.FILE_DELETE_REQUEST_CODE);
+                    UtilityStorage.guideDialogForLEXA(mcontext,f.getParent(), Constants.FILE_DELETE_REQUEST_CODE);
                 }
 
 
@@ -585,6 +827,23 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
     public void onNeutralClick(int from) {
 
     }
+
+    @Override
+    public void onReceiveAd(AdDownloaderInterface adDownloaderInterface, ReceivedBannerInterface receivedBannerInterface) {
+        if(receivedBannerInterface.getErrorCode() != ErrorCode.NO_ERROR){
+            //Toast.makeText(getBaseContext(), receivedBannerInterface.getErrorMessage(), Toast.LENGTH_SHORT).show();
+
+            Log.d("SmaatoErrorMsg", ""+receivedBannerInterface.getErrorMessage());
+
+            if(receivedBannerInterface.getErrorMessage().equalsIgnoreCase(AddConstants.NO_ADDS))
+            {
+                smaaToAddContainer.setVisibility(View.GONE);
+            }
+
+
+        }
+    }
+
     private class DeleteFileTask extends AsyncTask<Void,Void,Integer>
     {
         @Override
@@ -610,8 +869,10 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
             super.onPostExecute(FileCount);
             if(FileCount>0)
             {
-                for (int i = 0; i < multiselect_list.size(); i++)
+                for (int i = 0; i < multiselect_list.size(); i++) {
                     audioList.remove(multiselect_list.get(i));
+                    Utility.removeFileFromCopyList(multiselect_list.get(i).getAudioPath());
+                }
 
                 multiSelectAdapter.notifyDataSetChanged();
 
@@ -619,7 +880,8 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
                     mActionMode.finish();
                 }
             }
-            Toast.makeText(mcontext, FileCount+" file deleted", Toast.LENGTH_SHORT).show();
+            String msg=FileCount>1 ? FileCount+" "+getResources().getString(R.string.delmsg1) : FileCount+" "+getResources().getString(R.string.delmsg2);
+            Utility.dispToast(mcontext, msg);
 
             CustomProgressDialog.dismiss();
         }
@@ -966,7 +1228,18 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
 
          if(mActionMode==null)   // only open file when action mode  is not enabled;
         {
-            Utility.OpenFileWithNoughtAndAll(audioModel.getAudioPath(),mcontext,getResources().getString(R.string.file_provider_authority));
+            // this open  the  audio file in system player
+            //Utility.OpenFileWithNoughtAndAll(audioModel.getAudioPath(),mcontext,getResources().getString(R.string.file_provider_authority));
+
+            // this open in app Audio
+            if(audioModel.getAudioPath() !=null) {
+                addprefs.setIntValue("position", 0);
+                Intent intentAudioGallary = new Intent(mcontext, Media_AdoActivity.class);
+                intentAudioGallary.putExtra(Constants.selectedAdo, audioModel.getAudioPath());
+                intentAudioGallary.putExtra(Constants.MEDIA_DELETE_ACTIVITY_TRACKER, Constants.AUDIO);
+                startActivity(intentAudioGallary);
+            }
+
         }
 
 
@@ -975,14 +1248,14 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
 
 
     }
-    public  String calcSelectFileSize(ArrayList<Model_Audio> fileList)
+    public String calcSelectFileSize(ArrayList<Model_Audio> fileList)
     {
         long totalSize=0;
 
         for(int i=0;i<fileList.size();i++)
         {
             Model_Audio m =  fileList.get(i);
-            File  f= new File(m.getAudioPath());
+            File f= new File(m.getAudioPath());
             totalSize+=f.length();
         }
 
@@ -1180,6 +1453,43 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
         }
     }
 
+    @Override
+    public void onBackPressed() {
+
+        if(isSearchModeActive)
+        {
+            if(searchView !=null)
+            {
+                Utility.hideKeyboard(AudioActivityRe.this);
+                isSearchModeActive=false;
+                resetAdapter();
+                searchView.onActionViewCollapsed();
+            }
+
+            return;
+        }
+        else
+            super.onBackPressed();
+        // AddMobUtils addutil= new AddMobUtils();
+        // addutil.showInterstitial(ctx);
+    }
+
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+
+
+    public void  resetAdapter(){
+
+        multiSelectAdapter = new MultiSelectAdapter_Audio(this, audioList, multiselect_list, this);
+
+        recyclerView.setAdapter(multiSelectAdapter);
+
+    }
 
 
 

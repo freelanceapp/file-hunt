@@ -1,9 +1,11 @@
 package com.mojodigi.filehunt.Adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.media.ThumbnailUtils;
+import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -19,11 +21,12 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.mojodigi.filehunt.Model.Model_Download;
-
+import com.mojodigi.filehunt.R;
 import com.mojodigi.filehunt.Utils.Utility;
 
+import java.io.File;
 import java.util.ArrayList;
-import com.mojodigi.filehunt.R;
+import java.util.logging.Handler;
 
 public class MultiSelectAdapter_Download extends RecyclerView.Adapter<MultiSelectAdapter_Download.MyViewHolder>  implements Filterable {
 
@@ -32,12 +35,14 @@ public class MultiSelectAdapter_Download extends RecyclerView.Adapter<MultiSelec
     public ArrayList<Model_Download> selected_DownloadList=new ArrayList<>();
     private  DownloadListener listener;
     Context mContext;
+    Drawable iconDrawable = null;
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
         public ImageView FileIcon;
         public CheckBox chbx;
         public TextView fileName,fileSize,fileMdate,fileDuration;
         RelativeLayout rellayout;
+
 
         public MyViewHolder(View view) {
             super(view);
@@ -61,7 +66,7 @@ public class MultiSelectAdapter_Download extends RecyclerView.Adapter<MultiSelec
                 public void onClick(View view) {
                     // send selected docs in callback
                     int pos=getAdapterPosition();
-                            if(pos!=RecyclerView.NO_POSITION)
+                            if(pos!= RecyclerView.NO_POSITION)
                     listener.onDownloadSelected(DownloadListfiltered.get(getAdapterPosition()));
                 }
             });
@@ -86,10 +91,10 @@ public class MultiSelectAdapter_Download extends RecyclerView.Adapter<MultiSelec
     }
 
     @Override
-    public void onBindViewHolder(MyViewHolder holder, int position) {
+    public void onBindViewHolder(final MyViewHolder holder, final int position) {
 
-        Drawable iconDrawable = null;
-        Model_Download model = DownloadListfiltered.get(position);
+
+       Model_Download model = DownloadListfiltered.get(position);
 
 
         holder.fileName.setText(model.getFileName());
@@ -103,11 +108,16 @@ public class MultiSelectAdapter_Download extends RecyclerView.Adapter<MultiSelec
                     .skipMemoryCache(false).placeholder(R.drawable.img_placeholder).error(R.drawable.img_placeholder)
                     .into(holder.FileIcon);
         }
-        else if(model.getFiletype().equalsIgnoreCase("mp4"))
+        else if(model.getFiletype().equalsIgnoreCase("mp4") || model.getFiletype().equalsIgnoreCase("mov") ||model.getFiletype().equalsIgnoreCase("webm")   )
         {
-            Bitmap thumb = ThumbnailUtils.createVideoThumbnail(model.getFilePath(),
-                    MediaStore.Images.Thumbnails.MINI_KIND);
-            holder.FileIcon.setImageBitmap(thumb);
+//            Bitmap thumb = ThumbnailUtils.createVideoThumbnail(model.getFilePath(),
+//                    MediaStore.Images.Thumbnails.MINI_KIND);
+//            holder.FileIcon.setImageBitmap(thumb);
+
+            Glide.with(mContext)
+                    .load(Uri.fromFile(new File(model.getFilePath())))
+                    .into(holder.FileIcon);
+
 
         }
         else if(model.getFiletype().equalsIgnoreCase("gif"))
@@ -119,7 +129,7 @@ public class MultiSelectAdapter_Download extends RecyclerView.Adapter<MultiSelec
         }
         else if(model.getFiletype().equalsIgnoreCase("mp3")|| model.getFiletype().equalsIgnoreCase("aac") || model.getFiletype().equalsIgnoreCase("amr"))
         {
-            iconDrawable = mContext.getResources().getDrawable(R.mipmap.ic_audio);
+            iconDrawable = mContext.getResources().getDrawable(R.drawable.cat_ic_music);
             holder.FileIcon.setImageDrawable(iconDrawable);
         }
         else if (model.getFiletype().equalsIgnoreCase("pdf")) {
@@ -153,14 +163,27 @@ public class MultiSelectAdapter_Download extends RecyclerView.Adapter<MultiSelec
         }
         else if(model.getFiletype().equalsIgnoreCase("apk"))
         {
-            iconDrawable = mContext.getResources().getDrawable(R.drawable.ic_apk);
+            iconDrawable = mContext.getResources().getDrawable(R.drawable.cat_ic_apk);
+            holder.FileIcon.setImageDrawable(iconDrawable);
+        }
+        else  if(model.getFiletype().equalsIgnoreCase("webm") || model.getFiletype().equalsIgnoreCase("mp4"))
+        {
+            Glide.with(mContext)
+                    .load(Uri.fromFile(new File(model.getFilePath())))
+                    .into(holder.FileIcon);
+        }
+        else if(model.getFiletype().equalsIgnoreCase("zip"))
+        {
+            iconDrawable = mContext.getResources().getDrawable(R.drawable.cat_ic_zip);
             holder.FileIcon.setImageDrawable(iconDrawable);
         }
         else
         {
-            iconDrawable = mContext.getResources().getDrawable(R.drawable.ic_other);
+            iconDrawable = mContext.getResources().getDrawable(R.mipmap.file_icon);
             holder.FileIcon.setImageDrawable(iconDrawable);
         }
+
+
 
 
 
@@ -171,7 +194,12 @@ public class MultiSelectAdapter_Download extends RecyclerView.Adapter<MultiSelec
             holder.chbx.setVisibility(View.INVISIBLE);
             //holder.rellayout.setBackgroundColor(mContext.getResources().getColor(R.color.white));
         }
+
+
+
+
     }
+
 
     @Override
     public int getItemCount() {

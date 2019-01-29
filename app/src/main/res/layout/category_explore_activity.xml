@@ -11,27 +11,51 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <GridView
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/categoryExploreRecycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/gv_folder"
         android:numColumns="2"
-        android:layout_above="@+id/adView"
-        android:layout_marginTop="@dimen/dp5"
-        android:layout_marginRight="@dimen/dp5"
-        android:layout_marginLeft="@dimen/dp5"
+        android:scrollbars="vertical"
+        android:layout_above="@+id/addhoster"
+        android:layout_marginTop="@dimen/dp1"
+        android:layout_marginRight="@dimen/dp1"
+        android:layout_marginLeft="@dimen/dp1"
+        />
 
-       ></GridView>
 
-    <com.google.android.gms.ads.AdView
-        android:id="@+id/adView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+
+
+
+    <RelativeLayout
+        android:id="@+id/addhoster"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        ads:adSize="SMART_BANNER"
-        android:visibility="gone"
-        ads:adUnitId="@string/banner_add_id"></com.google.android.gms.ads.AdView>
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.google.android.gms.ads.AdView
+            android:id="@+id/adView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            ads:adSize="SMART_BANNER"
+            ads:adUnitId="@string/banner_add_id"></com.google.android.gms.ads.AdView>
+
+        <!--in this  dynamically added  google AdView will be displayed-->
+
+        <RelativeLayout
+
+            android:id="@+id/adMobView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+        </RelativeLayout>
+        <RelativeLayout
+            android:id="@+id/smaaToAddContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+        </RelativeLayout>
+
+    </RelativeLayout>
 
 
 

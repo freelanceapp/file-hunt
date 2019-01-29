@@ -13,9 +13,11 @@ import android.os.Environment;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,29 +27,38 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdView;
 import com.mojodigi.filehunt.Adapter.MultiSelectAdapter_Video;
+import com.mojodigi.filehunt.AddsUtility.AddConstants;
+import com.mojodigi.filehunt.AddsUtility.AddMobUtils;
+import com.mojodigi.filehunt.AddsUtility.SharedPreferenceUtil;
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Model.Grid_Model;
-//
-import com.mojodigi.filehunt.Utils.AddMobUtils;
 import com.mojodigi.filehunt.Utils.AlertDialogHelper;
 import com.mojodigi.filehunt.Utils.AutoFitGridLayoutManager;
 import com.mojodigi.filehunt.Utils.CustomProgressDialog;
 import com.mojodigi.filehunt.Utils.RecyclerItemClickListener;
 import com.mojodigi.filehunt.Utils.Utility;
 import com.mojodigi.filehunt.Utils.UtilityStorage;
+import com.smaato.soma.AdDownloaderInterface;
+import com.smaato.soma.AdListenerInterface;
+import com.smaato.soma.BannerView;
+import com.smaato.soma.ErrorCode;
+import com.smaato.soma.ReceivedBannerInterface;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+//
 
-public class VideoActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener, MultiSelectAdapter_Video.VdoListener {
+
+public class VideoActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener, MultiSelectAdapter_Video.VdoListener,AdListenerInterface {
 
     ActionMode mActionMode;
     Menu context_menu;
@@ -75,15 +86,66 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
     private AdView mAdView;
     private int lastCheckedSortOptions;
 
+    SharedPreferenceUtil addprefs;
+    View adContainer;
+    RelativeLayout smaaToAddContainer;
+    //smaatoAddBanerView
+    BannerView smaaTobannerView;
+    private int cnt;
+
+    private boolean isSearchModeActive;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photos_activity_re);
-
+              Constants.ACTIVITY_TRACKER= Constants.ACTIVITY_ENUM.ACTIVITY_VIDEO;
         //  banner add
+        //add netwrk varibales
+
+        mcontext = VideoActivityRe.this;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Utility.setstatusBarColorBelowM(VideoActivityRe.this);
+        }
+
         mAdView = (AdView) findViewById(R.id.adView);
+        adContainer = findViewById(R.id.adMobView);
+        smaaToAddContainer = findViewById(R.id.smaaToAddContainer);
+
+        smaaTobannerView = new BannerView((this).getApplication());
+        smaaTobannerView.addAdListener(this);
+
+        addprefs = new SharedPreferenceUtil(mcontext);
+
         AddMobUtils adutil = new AddMobUtils();
-        adutil.displayBannerAdd(mAdView);
+
+        if(AddConstants.checkIsOnline(mcontext) && adContainer !=null && addprefs !=null)
+        {
+            String AddPrioverId=addprefs.getStringValue(AddConstants.ADD_PROVIDER_ID, AddConstants.NOT_FOUND);
+            if(AddPrioverId.equalsIgnoreCase(AddConstants.Adsense_Admob_GooglePrivideId))
+                adutil.displayServerBannerAdd(addprefs,adContainer , mcontext);
+            else if(AddPrioverId.equalsIgnoreCase(AddConstants.SmaatoProvideId))
+            {
+                try {
+                    int publisherId = Integer.parseInt(addprefs.getStringValue(AddConstants.APP_ID, AddConstants.NOT_FOUND));
+                    int addSpaceId = Integer.parseInt(addprefs.getStringValue(AddConstants.BANNER_ADD_ID, AddConstants.NOT_FOUND));
+                    adutil.displaySmaatoBannerAdd(smaaTobannerView, smaaToAddContainer, publisherId, addSpaceId);
+                }catch (Exception e)
+                {
+                    String string = e.getMessage();
+                    System.out.print(""+string);
+                }
+            }
+
+        }
+        else {
+            adutil.displayLocalBannerAdd(mAdView);
+        }
+
+
+
+
         // banner add
 
 
@@ -94,76 +156,86 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         UtilityStorage.InitilaizePrefs(mcontext);
 
         try {
-            int_position = getIntent().getIntExtra("value", 0);
-            String tittle = Category_Explore_Activity.al_images.get(int_position).getStr_folder();
-            Utility.setActivityTitle(mcontext, tittle);
-            Intent_Video_List = Category_Explore_Activity.al_images.get(int_position).getAl_imagepath();
-            thumbList = Category_Explore_Activity.al_images.get(int_position).getAl_vdoThumb();// this list  will be part  of  Intent_Video_List using setter getter
-            durationList = Category_Explore_Activity.al_images.get(int_position).getAlVdoDuration();
-            data_load();
+            //int_position = getIntent().getIntExtra("value", 0);
+            if(Constants.model!=null) {
+                String tittle = Constants.model.getStr_folder();
+                Utility.setActivityTitle(mcontext, tittle);
+                Intent_Video_List = Constants.model.getAl_imagepath();
+                thumbList = Constants.model.getAl_vdoThumb();// this list  will be part  of  Intent_Video_List using setter getter
+                durationList = Constants.model.getAlVdoDuration();
+
+                if (Intent_Video_List != null) {
+
+                    cnt=Intent_Video_List.size();
+                    new dataLoadAsync().execute();
+                }
+            }
+            //data_load();
         }catch (Exception e)
         {
             e.printStackTrace();
         }
 
 
-        alertDialogHelper = new AlertDialogHelper(this);
+//        alertDialogHelper = new AlertDialogHelper(this);
+//
+//
+//        if (Intent_Video_List.size() != 0) {
+//
+//            multiSelectAdapter = new MultiSelectAdapter_Video(this, vidioList, multiselect_list, this);
+//            // AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));  // did not work on high resolution phones
+//
+//
+//            //set the width of column 20 %  of width of screen
+//            int columnWidthPercent = (getScreenWidth() * 20) / 100;
+//            AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, columnWidthPercent);
+//            recyclerView.setLayoutManager(layoutManager);
+//            //set the width of column 20 %  of width of screen
+////        //set the number of columns as  per  width of screen
+////         int columnCount=getScreenWidth()/100;
+////        System.out.println(""+columnCount);
+////        recyclerView.setLayoutManager(new GridLayoutManager(this, columnCount));
+////        //set the number of columns as  per  width of screen
+//
+//
+//            recyclerView.setItemAnimator(new DefaultItemAnimator());
+//            recyclerView.setAdapter(multiSelectAdapter);
+//        } else {
+//            blankIndicator.setVisibility(View.VISIBLE);
+//        }
+//
+//
+//        recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(View view, int position) {
+//                if (isMultiSelect && position != RecyclerView.NO_POSITION)
+//                    multi_select(position);
+//
+//                else {
+//                    //send the file to player
+////                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Category_Explore_Activity.al_images.get(int_position).getAl_imagepath().get(position)));
+////                    intent.setDataAndType(Uri.parse(Category_Explore_Activity.al_images.get(int_position).getAl_imagepath().get(position)), "video/*");
+////                    startActivity(intent);
+//                }
+//            }
+//
+//            @Override
+//            public void onItemLongClick(View view, int position) {
+//                if (!isMultiSelect) {
+//                    multiselect_list = new ArrayList<Grid_Model>();
+//                    isMultiSelect = true;
+//
+//                    if (mActionMode == null) {
+//                        mActionMode = startActionMode(mActionModeCallback);
+//                    }
+//                }
+//
+//                multi_select(position);
+//
+//            }
+//        }));
 
 
-        if (Intent_Video_List.size() != 0) {
-
-            multiSelectAdapter = new MultiSelectAdapter_Video(this, vidioList, multiselect_list, this);
-            // AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));  // did not work on high resolution phones
-
-
-            //set the width of column 20 %  of width of screen
-            int columnWidthPercent = (getScreenWidth() * 20) / 100;
-            AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, columnWidthPercent);
-            recyclerView.setLayoutManager(layoutManager);
-            //set the width of column 20 %  of width of screen
-//        //set the number of columns as  per  width of screen
-//         int columnCount=getScreenWidth()/100;
-//        System.out.println(""+columnCount);
-//        recyclerView.setLayoutManager(new GridLayoutManager(this, columnCount));
-//        //set the number of columns as  per  width of screen
-
-
-            recyclerView.setItemAnimator(new DefaultItemAnimator());
-            recyclerView.setAdapter(multiSelectAdapter);
-        } else {
-            blankIndicator.setVisibility(View.VISIBLE);
-        }
-
-
-        recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                if (isMultiSelect && position != RecyclerView.NO_POSITION)
-                    multi_select(position);
-
-                else {
-                    //send the file to player
-//                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Category_Explore_Activity.al_images.get(int_position).getAl_imagepath().get(position)));
-//                    intent.setDataAndType(Uri.parse(Category_Explore_Activity.al_images.get(int_position).getAl_imagepath().get(position)), "video/*");
-//                    startActivity(intent);
-                }
-            }
-
-            @Override
-            public void onItemLongClick(View view, int position) {
-                if (!isMultiSelect) {
-                    multiselect_list = new ArrayList<Grid_Model>();
-                    isMultiSelect = true;
-
-                    if (mActionMode == null) {
-                        mActionMode = startActionMode(mActionModeCallback);
-                    }
-                }
-
-                multi_select(position);
-
-            }
-        }));
 
 
     }
@@ -174,6 +246,7 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
 
     }
 
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -182,12 +255,23 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
 
     }
 
+
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
+    protected void onRestart() {
+        super.onRestart();
 
+
+        if(mActionMode !=null)
+        {
+            mActionMode.finish();
+
+        }
+
+        if(multiSelectAdapter !=null)
+        {
+            multiSelectAdapter.notifyDataSetChanged();
+        }
     }
-
 
 
     @Override
@@ -221,6 +305,21 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         fileTorename.setImgPath(newPath);
         vidioList.set(renamePosition, fileTorename);
         refreshAdapter();
+
+    }
+    public boolean checkForFileExist(String newFPath)
+    {
+
+        for(int i=0;i<vidioList.size();i++)
+        {
+            String listFile=vidioList.get(i).getImgPath().toString();
+            boolean status=listFile.equalsIgnoreCase(newFPath);
+            if(status)
+                return true;
+
+        }
+
+        return  false;
 
     }
 
@@ -265,16 +364,25 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
                 MenuItem item= menu.findItem(R.id.action_sort);
                 item.setVisible(true);
                 //invalidateOptionsMenu();
-
+                searchView.requestFocus(0);
+                searchView.setFocusable(false);
+                isSearchModeActive=false;
+                Utility.hideKeyboard(VideoActivityRe.this);
                 return false;
             }
         });
+
         searchView.setOnSearchClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 MenuItem item= menu.findItem(R.id.action_sort);
                 item.setVisible(false);
                 //invalidateOptionsMenu();
+                searchView.requestFocus(1);
+                searchView.setFocusable(true);
+
+                isSearchModeActive=true;
+                Utility.showKeyboard(VideoActivityRe.this);
             }
         });
 
@@ -300,7 +408,7 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
             return true;
         }
 
-        if(id==R.id.action_sort)
+        if(id== R.id.action_sort)
         {
 
             sortDialog(mcontext);
@@ -310,7 +418,100 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         return super.onOptionsItemSelected(item);
     }
 
+    private  class dataLoadAsync extends  AsyncTask<Void,Void,Void>
+    {
 
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+                CustomProgressDialog.show(mcontext, mcontext.getResources().getString(R.string.loading_msg));
+
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            data_load();
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            initView();
+
+            CustomProgressDialog.dismiss();
+
+
+//            if (cnt > 100) {
+//                try {
+//                    Thread.sleep(3000);
+//                    CustomProgressDialog.dismiss();
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//
+//            }
+
+        }
+    }
+    
+    private  void initView()
+    {
+        alertDialogHelper = new AlertDialogHelper(this);
+
+
+        if (Intent_Video_List.size() != 0) {
+
+            RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(this, 2);
+            recyclerView.setLayoutManager(mLayoutManager);
+            recyclerView.setItemAnimator(new DefaultItemAnimator());
+            multiSelectAdapter = new MultiSelectAdapter_Video(this, vidioList, multiselect_list, this);
+            recyclerView.setAdapter(multiSelectAdapter);
+
+        } else {
+            blankIndicator.setVisibility(View.VISIBLE);
+        }
+
+
+        recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                if (isMultiSelect && position != RecyclerView.NO_POSITION)
+                    multi_select(position);
+
+                else {
+                    //send the file to player
+//                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Category_Explore_Activity.al_images.get(int_position).getAl_imagepath().get(position)));
+//                    intent.setDataAndType(Uri.parse(Category_Explore_Activity.al_images.get(int_position).getAl_imagepath().get(position)), "video/*");
+//                    startActivity(intent);
+                }
+            }
+
+            @Override
+            public void onItemLongClick(View view, int position) {
+                if (!isMultiSelect) {
+                    multiselect_list = new ArrayList<Grid_Model>();
+                    isMultiSelect = true;
+
+                    if (mActionMode == null) {
+                        mActionMode = startActionMode(mActionModeCallback);
+                    }
+                }
+
+                multi_select(position);
+
+            }
+        }));
+
+    }
     public void data_load() {
 
         for (int i = 0; i < Intent_Video_List.size(); i++)
@@ -412,6 +613,7 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         }
     }
 
+    private int statusBarColor;
     private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
 
         @Override
@@ -420,6 +622,14 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
             MenuInflater inflater = mode.getMenuInflater();
             inflater.inflate(R.menu.menu_multi_select, menu);
             context_menu = menu;
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                //hold current color of status bar
+                statusBarColor = getWindow().getStatusBarColor();
+                //set your gray color
+                getWindow().setStatusBarColor(getResources().getColor(R.color.onePlusAccentColor_device_default_dark));
+            }
+
             return true;
         }
 
@@ -451,10 +661,11 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
                                 Constants.filesToCopy.add(multiselect_list.get(i).getImgPath().toString());
                             }
                         }
-                        // redirect to  storage fragment;
-                        Constants.redirectToStorage=true;
+                        if(Constants.filesToCopy.size()>=1) {
+                            Utility.dispLocalStorages(mcontext,1);
+                        }
 
-                        finish();
+
 
 
                     }
@@ -462,10 +673,14 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
 
                 case R.id.action_rename:
                     if (multiselect_list.size() == 1)
-                        Utility.fileRenameDialog(mcontext, multiselect_list.get(0).getImgPath(), Constants.VIDEO);
+                        Utility.fileRenameDialog(mcontext, multiselect_list.get(0).getImgPath(), Constants.VIDEO,false);
                     return true;
                 case R.id.action_delete:
-                    alertDialogHelper.showAlertDialog("", "Delete Video", "DELETE", "CANCEL", 1, false);
+                    if(multiselect_list.size()>=1) {
+                        int mFileCount = multiselect_list.size();
+                        String msgDeleteFile = mFileCount > 1 ? mFileCount + " " + getResources().getString(R.string.delfiles) : mFileCount + " " + getResources().getString(R.string.delfile);
+                        alertDialogHelper.showAlertDialog("", "Delete Video"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, false);
+                    }
                     return true;
                 case R.id.action_select:
                     if (vidioList.size() == multiselect_list.size() || isUnseleAllEnabled == true)
@@ -499,6 +714,11 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
             mActionMode = null;
             isMultiSelect = false;
             multiselect_list = new ArrayList<Grid_Model>();
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                //return to "old" color of status bar
+                getWindow().setStatusBarColor(statusBarColor);
+            }
             refreshAdapter();
         }
     };
@@ -559,6 +779,21 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
 
     }
 
+    @Override
+    public void onReceiveAd(AdDownloaderInterface adDownloaderInterface, ReceivedBannerInterface receivedBannerInterface) {
+        if(receivedBannerInterface.getErrorCode() != ErrorCode.NO_ERROR){
+            //Toast.makeText(getBaseContext(), receivedBannerInterface.getErrorMessage(), Toast.LENGTH_SHORT).show();
+            Log.d("SmaatoErrorMsg", ""+receivedBannerInterface.getErrorMessage());
+
+            if(receivedBannerInterface.getErrorMessage().equalsIgnoreCase(AddConstants.NO_ADDS))
+            {
+                smaaToAddContainer.setVisibility(View.GONE);
+            }
+
+
+        }
+    }
+
     private class DeleteFileTask extends AsyncTask<Void, Void, Integer> {
         @Override
         protected void onPreExecute() {
@@ -583,8 +818,10 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
             super.onPostExecute(FileCount);
 
             if (FileCount > 0) {
-                for (int i = 0; i < multiselect_list.size(); i++)
+                for (int i = 0; i < multiselect_list.size(); i++) {
                     vidioList.remove(multiselect_list.get(i));
+                    Utility.removeFileFromCopyList(multiselect_list.get(i).getImgPath());
+                }
 
                 multiSelectAdapter.notifyDataSetChanged();
 
@@ -592,7 +829,9 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
                     mActionMode.finish();
                 }
             }
-            Toast.makeText(mcontext, FileCount + " file deleted", Toast.LENGTH_SHORT).show();
+
+            String msg=FileCount>1 ? FileCount+" "+getResources().getString(R.string.delmsg1) : FileCount+" "+getResources().getString(R.string.delmsg2);
+            Utility.dispToast(mcontext, msg);
 
             CustomProgressDialog.dismiss();
 
@@ -802,9 +1041,24 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
 
 
         // Utility.OpenFile(mcontext,model_apk.getFilePath()); // open file below  Android N
-        if (mActionMode == null)
-            Utility.OpenFileWithNoughtAndAll(vdoModel.getImgBitmapStr(), mcontext, getResources().getString(R.string.file_provider_authority));
+        if (mActionMode == null) {
+              // this  line used to  open with sstem apps
+            //  Utility.OpenFileWithNoughtAndAll(vdoModel.getImgBitmapStr(), mcontext, getResources().getString(R.string.file_provider_authority));
 
+            // this will  open in app Video;
+
+            if(vdoModel.getImgBitmapStr()!=null) {
+                addprefs.setIntValue("position", 0);
+                Intent intentVideoGallary = new Intent(mcontext, Media_VdoActivity.class);
+                intentVideoGallary.putExtra(Constants.selectedVdo, vdoModel.getImgBitmapStr());
+                intentVideoGallary.putExtra(Constants.MEDIA_DELETE_ACTIVITY_TRACKER, Constants.VIDEO);
+                startActivity(intentVideoGallary);
+            }
+            else {
+                Utility.dispToast(mcontext, "can't play file");
+            }
+
+        }
     }
 
     public String calcSelectFileSize(ArrayList<Grid_Model> fileList) {
@@ -1011,6 +1265,39 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
             this.action=action;
         }
     }
+    @Override
+    public void onBackPressed() {
+
+        if(isSearchModeActive)
+        {
+            if(searchView !=null)
+            {
+                Utility.hideKeyboard(VideoActivityRe.this);
+                isSearchModeActive=false;
+                resetAdapter();
+                searchView.onActionViewCollapsed();
+            }
+
+            return;
+        }
+        else
+            super.onBackPressed();
+        // AddMobUtils addutil= new AddMobUtils();
+        // addutil.showInterstitial(ctx);
+    }
 
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+
+
+    public void  resetAdapter(){
+        multiSelectAdapter = new MultiSelectAdapter_Video(this, vidioList, multiselect_list, this);
+        recyclerView.setAdapter(multiSelectAdapter);
+
+    }
 }

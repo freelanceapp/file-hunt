@@ -18,6 +18,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,21 +29,28 @@ import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdView;
 import com.mojodigi.filehunt.Adapter.MultiSelectAdapter_Docs;
+import com.mojodigi.filehunt.AddsUtility.AddConstants;
+import com.mojodigi.filehunt.AddsUtility.AddMobUtils;
+import com.mojodigi.filehunt.AddsUtility.SharedPreferenceUtil;
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Model.Model_Docs;
-//
-import com.mojodigi.filehunt.Utils.AddMobUtils;
 import com.mojodigi.filehunt.Utils.AlertDialogHelper;
 import com.mojodigi.filehunt.Utils.AsynctaskUtility;
 import com.mojodigi.filehunt.Utils.CustomProgressDialog;
 import com.mojodigi.filehunt.Utils.RecyclerItemClickListener;
 import com.mojodigi.filehunt.Utils.Utility;
 import com.mojodigi.filehunt.Utils.UtilityStorage;
+import com.smaato.soma.AdDownloaderInterface;
+import com.smaato.soma.AdListenerInterface;
+import com.smaato.soma.BannerView;
+import com.smaato.soma.ErrorCode;
+import com.smaato.soma.ReceivedBannerInterface;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -50,8 +58,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
+//
 
-public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener,MultiSelectAdapter_Docs.DocsListener,AsynctaskUtility.AsyncResponse {
+
+public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener,MultiSelectAdapter_Docs.DocsListener,AsynctaskUtility.AsyncResponse,AdListenerInterface {
 
     ActionMode mActionMode;
     Menu context_menu;
@@ -74,23 +84,72 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
     private boolean isUnseleAllEnabled=false;
     private Model_Docs fileTorename;
     private  int renamePosition;
-    public  static  DocsActivityRe instance;
+    public  static DocsActivityRe instance;
     private AdView mAdView;
     private int lastCheckedSortOptions;
+
+    SharedPreferenceUtil addprefs;
+    View adContainer;
+    RelativeLayout smaaToAddContainer;
+    //smaatoAddBanerView
+    BannerView smaaTobannerView;
+
+    private boolean isSearchModeActive;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photos_activity_re);
+
+        Constants.ACTIVITY_TRACKER= Constants.ACTIVITY_ENUM.ACTIVITY_DOCS;
+
+        mcontext=DocsActivityRe.this;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Utility.setstatusBarColorBelowM(DocsActivityRe.this);
+        }
+
         //  banner add
+        //add netwrk varibales
+
         mAdView = (AdView) findViewById(R.id.adView);
+        adContainer = findViewById(R.id.adMobView);
+        smaaToAddContainer = findViewById(R.id.smaaToAddContainer);
+        smaaTobannerView = new BannerView((this).getApplication());
+        smaaTobannerView.addAdListener(this);
+        addprefs = new SharedPreferenceUtil(mcontext);
+
         AddMobUtils adutil = new AddMobUtils();
-        adutil.displayBannerAdd(mAdView);
+
+        if(AddConstants.checkIsOnline(mcontext) && adContainer !=null && addprefs !=null)
+        {
+            String AddPrioverId=addprefs.getStringValue(AddConstants.ADD_PROVIDER_ID, AddConstants.NOT_FOUND);
+            if(AddPrioverId.equalsIgnoreCase(AddConstants.Adsense_Admob_GooglePrivideId))
+                adutil.displayServerBannerAdd(addprefs,adContainer , mcontext);
+            else if(AddPrioverId.equalsIgnoreCase(AddConstants.SmaatoProvideId))
+            {
+                try {
+                    int publisherId = Integer.parseInt(addprefs.getStringValue(AddConstants.APP_ID, AddConstants.NOT_FOUND));
+                    int addSpaceId = Integer.parseInt(addprefs.getStringValue(AddConstants.BANNER_ADD_ID, AddConstants.NOT_FOUND));
+                    adutil.displaySmaatoBannerAdd(smaaTobannerView, smaaToAddContainer, publisherId, addSpaceId);
+                }catch (Exception e)
+                {
+                    String string = e.getMessage();
+                    System.out.print(""+string);
+                }
+            }
+
+        }
+        else {
+            adutil.displayLocalBannerAdd(mAdView);
+        }
+
+
         //  banner add
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         blankIndicator=(ImageView) findViewById(R.id.blankIndicator);
-        mcontext=DocsActivityRe.this;
+
         instance=this;
         UtilityStorage.InitilaizePrefs(mcontext);
         Utility.setActivityTitle(mcontext,getResources().getString(R.string.cat_Documents));
@@ -108,7 +167,7 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
         recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if (isMultiSelect && position!=RecyclerView.NO_POSITION )
+                if (isMultiSelect && position!= RecyclerView.NO_POSITION )
                     multi_select(position);
 
                 else {
@@ -144,7 +203,19 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
         super.onResume();
 
         }
-        @Override
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+
+        if(mActionMode !=null)
+        {
+            mActionMode.finish();
+
+        }
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
        // AddMobUtils addutil= new AddMobUtils();
@@ -155,19 +226,19 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode==Constants.FILE_DELETE_REQUEST_CODE) {
+        if(requestCode== Constants.FILE_DELETE_REQUEST_CODE) {
             boolean isPersistUriSet = UtilityStorage.setUriForStorage(requestCode, resultCode, data);
             if (isPersistUriSet && multiselect_list.size() > 0)
                 new DeleteFileTask(multiselect_list).execute();
         }
-        if(requestCode==Constants.FILE_RENAME_REQUEST_CODE)
+        if(requestCode== Constants.FILE_RENAME_REQUEST_CODE)
         {
             boolean isPersistUriSet = UtilityStorage.setUriForStorage(requestCode, resultCode, data);
             if (isPersistUriSet && multiselect_list.size() > 0)
             {
                 // call rename function  here in the case of premission granted first  time;
 
-                Utility.renameFile(mcontext,multiselect_list.get(0).getFilePath(),Constants.Global_File_Rename_NewName,3);
+                Utility.renameFile(mcontext,multiselect_list.get(0).getFilePath(), Constants.Global_File_Rename_NewName,3);
             }
 
         }
@@ -180,12 +251,27 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
     public static DocsActivityRe getInstance() {
         return instance;
     }
-    public void refreshAdapterAfterRename(String newPath,String newName)
+    public void refreshAdapterAfterRename(String newPath, String newName)
     {
         fileTorename.setFilePath(newPath);
         fileTorename.setFileName(newName);
         docsList.set(renamePosition,fileTorename);
         refreshAdapter();
+
+    }
+    public boolean checkForFileExist(String newFPath)
+    {
+
+        for(int i=0;i<docsList.size();i++)
+        {
+            String listFile=docsList.get(i).getFilePath().toString();
+            boolean status=listFile.equalsIgnoreCase(newFPath);
+            if(status)
+                return true;
+
+        }
+
+        return  false;
 
     }
 
@@ -210,7 +296,7 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
             public boolean onQueryTextSubmit(String query) {
                 // filter recycler view when query submitted
                 if(multiSelectAdapter!=null)
-                multiSelectAdapter.getFilter().filter(query);
+                multiSelectAdapter.getFilter().filter(query.trim());
                 return false;
             }
 
@@ -218,7 +304,7 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
             public boolean onQueryTextChange(String query) {
                 // filter recycler view when text is changed
                 if(multiSelectAdapter!=null)
-                multiSelectAdapter.getFilter().filter(query);
+                multiSelectAdapter.getFilter().filter(query.trim());
                 return false;
             }
         });
@@ -230,7 +316,10 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
                 MenuItem item= menu.findItem(R.id.action_sort);
                 item.setVisible(true);
                 //invalidateOptionsMenu();
-
+                searchView.requestFocus(0);
+                searchView.setFocusable(false);
+                isSearchModeActive=false;
+                Utility.hideKeyboard(DocsActivityRe.this);
                 return false;
             }
         });
@@ -240,6 +329,12 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
                 MenuItem item= menu.findItem(R.id.action_sort);
                 item.setVisible(false);
                 //invalidateOptionsMenu();
+                searchView.requestFocus(1);
+                searchView.setFocusable(true);
+                Utility.showKeyboard(DocsActivityRe.this);
+                isSearchModeActive=true;
+
+
             }
         });
 
@@ -260,7 +355,7 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
         if (id == R.id.action_search) {
             return true;
         }
-        if(id==R.id.action_sort)
+        if(id== R.id.action_sort)
         {
             sortDialog(mcontext);
         }
@@ -364,6 +459,7 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
         }
     }
 
+    private int statusBarColor;
     private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
 
         @Override
@@ -372,6 +468,14 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
             MenuInflater inflater = mode.getMenuInflater();
             inflater.inflate(R.menu.menu_multi_select, menu);
             context_menu = menu;
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                //hold current color of status bar
+                statusBarColor = getWindow().getStatusBarColor();
+                //set your gray color
+                getWindow().setStatusBarColor(getResources().getColor(R.color.onePlusAccentColor_device_default_dark));
+            }
+
             return true;
         }
 
@@ -401,10 +505,11 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
                                 Constants.filesToCopy.add(multiselect_list.get(i).getFilePath().toString());
                             }
                         }
-                        // redirect to  storage fragment;
-                        Constants.redirectToStorage=true;
+                        if(Constants.filesToCopy.size()>=1) {
+                            Utility.dispLocalStorages(mcontext,1);
+                        }
 
-                        finish();
+
 
 
                     }
@@ -412,10 +517,15 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
 
                 case R.id.action_rename:
                     if(multiselect_list.size()==1)
-                        Utility.fileRenameDialog(mcontext,multiselect_list.get(0).getFilePath(),Constants.DOCUMENT);
+                        Utility.fileRenameDialog(mcontext,multiselect_list.get(0).getFilePath(), Constants.DOCUMENT,false);
                     return  true;
                 case R.id.action_delete:
-                    alertDialogHelper.showAlertDialog("","Delete file","DELETE","CANCEL",1,false);
+                    if(multiselect_list.size()>=1) {
+                        int mFileCount = multiselect_list.size();
+                        String msgDeleteFile = mFileCount > 1 ? mFileCount + " " + getResources().getString(R.string.delfiles) : mFileCount + " " + getResources().getString(R.string.delfile);
+                        alertDialogHelper.showAlertDialog("", "Delete file"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, false);
+                    }
+
                     return true;
                 case R.id.action_select:
                     if(docsList.size()==multiselect_list.size() || isUnseleAllEnabled==true)
@@ -446,6 +556,11 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
             mActionMode = null;
             isMultiSelect = false;
             multiselect_list = new ArrayList<Model_Docs>();
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                //return to "old" color of status bar
+                getWindow().setStatusBarColor(statusBarColor);
+            }
             refreshAdapter();
         }
     };
@@ -472,7 +587,7 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
                 }
                 else
                 {
-                    UtilityStorage.guideDialogForLEXA(mcontext,f.getParent(),Constants.FILE_DELETE_REQUEST_CODE);
+                    UtilityStorage.guideDialogForLEXA(mcontext,f.getParent(), Constants.FILE_DELETE_REQUEST_CODE);
                 }
 
 
@@ -540,6 +655,20 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
 
     }
 
+    @Override
+    public void onReceiveAd(AdDownloaderInterface adDownloaderInterface, ReceivedBannerInterface receivedBannerInterface) {
+        if(receivedBannerInterface.getErrorCode() != ErrorCode.NO_ERROR){
+            //Toast.makeText(getBaseContext(), receivedBannerInterface.getErrorMessage(), Toast.LENGTH_SHORT).show();
+
+            Log.d("SmaatoErrorMsg", ""+receivedBannerInterface.getErrorMessage());
+
+            if(receivedBannerInterface.getErrorMessage().equalsIgnoreCase(AddConstants.NO_ADDS))
+            {
+                smaaToAddContainer.setVisibility(View.GONE);
+            }
+        }
+    }
+
     private class DeleteFileTask extends AsyncTask<Void,Void,Integer>
     {
         @Override
@@ -569,8 +698,10 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
 
             if(FileCount>0)
             {
-                for (int i = 0; i < multiselect_list.size(); i++)
+                for (int i = 0; i < multiselect_list.size(); i++) {
                     docsList.remove(multiselect_list.get(i));
+                    Utility.removeFileFromCopyList(multiselect_list.get(i).getFilePath());
+                }
 
                 multiSelectAdapter.notifyDataSetChanged();
 
@@ -578,7 +709,10 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
                     mActionMode.finish();
                 }
             }
-            Toast.makeText(mcontext, FileCount+" file deleted", Toast.LENGTH_SHORT).show();
+
+            String msg=FileCount>1 ? FileCount+" "+getResources().getString(R.string.delmsg1) : FileCount+" "+getResources().getString(R.string.delmsg2);
+            Utility.dispToast(mcontext, msg);
+
             CustomProgressDialog.dismiss();
 
 
@@ -799,7 +933,7 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
         String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension("pdf");
         String selectionMimeType = MediaStore.Files.FileColumns.MIME_TYPE + "="+mimeType;
 
-        final String[] projection = {MediaStore.Files.FileColumns.DATA,MediaStore.Files.FileColumns.DISPLAY_NAME,MediaStore.Files.FileColumns.SIZE,MediaStore.Files.FileColumns.DATE_MODIFIED, MediaStore.Files.FileColumns.MEDIA_TYPE};
+        final String[] projection = {MediaStore.Files.FileColumns.DATA, MediaStore.Files.FileColumns.DISPLAY_NAME, MediaStore.Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_MODIFIED, MediaStore.Files.FileColumns.MEDIA_TYPE};
         Cursor cursor = mcontext.getContentResolver().query(MediaStore.Files.getContentUri("external"),
                 projection, null, null, null);
 
@@ -878,8 +1012,6 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
 
     @Override
     public void onDocsSelected(Model_Docs docs) {
-
-
         // Utility.OpenFile(mcontext,model_apk.getFilePath()); // open file below  Android N
         if(mActionMode==null)
         Utility.OpenFileWithNoughtAndAll(docs.getFilePath() ,mcontext,getResources().getString(R.string.file_provider_authority));
@@ -901,14 +1033,14 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
         // custom message for the intent
         startActivity(Intent.createChooser(intent, "Choose an Application:"));
     }
-    public  String calcSelectFileSize(ArrayList<Model_Docs> fileList)
+    public String calcSelectFileSize(ArrayList<Model_Docs> fileList)
     {
         long totalSize=0;
 
         for(int i=0;i<fileList.size();i++)
         {
             Model_Docs m =  fileList.get(i);
-            File  f= new File(m.getFilePath());
+            File f= new File(m.getFilePath());
             totalSize+=f.length();
         }
 
@@ -956,8 +1088,7 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
                         case R.id.sort_name:
                             action="Name";
                             break;
-
-                        case R.id.sort_last_modified:
+                            case R.id.sort_last_modified:
                             action="Last";
                             break;
                         case R.id.sort_size:
@@ -1107,4 +1238,36 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
         }
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        if(isSearchModeActive)
+        {
+            if(searchView !=null)
+            {
+                Utility.hideKeyboard(DocsActivityRe.this);
+                isSearchModeActive=false;
+                resetAdapter();
+                searchView.onActionViewCollapsed();
+            }
+
+            return;
+        }
+        else
+            super.onBackPressed();
+        // AddMobUtils addutil= new AddMobUtils();
+        // addutil.showInterstitial(ctx);
+    }
+
+    public void  resetAdapter(){
+        multiSelectAdapter = new MultiSelectAdapter_Docs(this, docsList, multiselect_list, this);
+        recyclerView.setAdapter(multiSelectAdapter);
+
+    }
 }

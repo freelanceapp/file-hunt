@@ -9,15 +9,18 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
+import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Model.Model_Anim;
 import com.mojodigi.filehunt.Model.Model_Apk;
 import com.mojodigi.filehunt.Model.Model_Docs;
 import com.mojodigi.filehunt.Model.Model_Download;
 import com.mojodigi.filehunt.Model.Model_Recent;
+import com.mojodigi.filehunt.Model.Model_Zip;
 import com.mojodigi.filehunt.Model.Model_images;
-//
+import com.mojodigi.filehunt.R;
 
 import java.io.File;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +30,9 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
-import com.mojodigi.filehunt.R;
+
+//
+
 public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
 
     private Context mcontext;
@@ -36,7 +41,7 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
     int fileStorageType;
 
 
-    public  AsynctaskUtility(Context mcontext,AsyncResponse delegate,int fileStorageType)
+    public  AsynctaskUtility(Context mcontext, AsyncResponse delegate, int fileStorageType)
     {
         this.mcontext=mcontext;
         this.delegate=delegate;
@@ -80,7 +85,8 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
             case 1:
                 return  (ArrayList<T>) Load_Images();
 
-
+            case 10:
+                return  (ArrayList<T>) listZipFiles();
 
         }
         return null;
@@ -105,8 +111,62 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
 
 
     }
+    private  ArrayList<Model_Zip> listZipFiles()
+    {
 
-    public ArrayList<Model_images>  Load_Images()
+        ArrayList<Model_Zip> ZipList = new ArrayList<>();
+
+        try {
+
+
+            final String[] projection = {MediaStore.Files.FileColumns.DATA, MediaStore.Files.FileColumns.TITLE, MediaStore.Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_ADDED, MediaStore.Files.FileColumns.MIME_TYPE};
+            final String orderBy = MediaStore.Files.FileColumns.DATE_ADDED;
+            String selectionMimeType = MediaStore.Files.FileColumns.MIME_TYPE + "='application/zip'";
+            Cursor cursor = mcontext.getContentResolver().query(MediaStore.Files.getContentUri("external"),
+                    projection, selectionMimeType, null, orderBy + " desc");
+            if (cursor == null)
+                return ZipList;
+            else if (cursor.getCount() > 0 && cursor.moveToFirst()) {
+                do {
+                    String type=cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.MIME_TYPE));
+                    String path = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA));
+                    String fileName = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.TITLE));
+                    //long fileDateModified=cursor.getLong(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATE_MODIFIED));
+                    String fileDateModified = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATE_ADDED));
+                    long fileSize = cursor.getLong(cursor.getColumnIndex(MediaStore.Files.FileColumns.SIZE));
+
+                       // now if (path != null && (path.endsWith(".zip") || path.endsWith(".rar")))
+                       // is not needed bacause we are querying only zip  files using selectionMimetype;
+
+
+                   // if (path != null && (path.endsWith(".zip") || path.endsWith(".rar"))) {
+                        Model_Zip model = new Model_Zip();
+                        model.setFileName(fileName);
+                        model.setFilePath(path);
+                        model.setFileSize(Utility.humanReadableByteCount(fileSize, true));
+                        model.setFileSizeCmpr(fileSize);
+                        model.setFileMDate(Utility.LongToDate(fileDateModified));
+                        model.setDateCmpr(Long.parseLong(fileDateModified));
+                        System.out.print(""+type);
+                        ZipList.add(model);
+
+                    //}
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+
+        }
+
+        return  ZipList;
+
+
+    }
+
+    public ArrayList<Model_images> Load_Images()
     {
         ArrayList<Model_images> al_images = new ArrayList<>();
 
@@ -117,8 +177,8 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
 
         String absolutePathOfImage = null;
 
-        Uri  uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-        String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME,MediaStore.MediaColumns.DATE_MODIFIED};
+        Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME, MediaStore.MediaColumns.DATE_MODIFIED};
 
         final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
         cursor = mcontext.getContentResolver().query( uri, projection, null, null, orderBy + " DESC");
@@ -169,7 +229,7 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
 
         return al_images;
     }
-    private  ArrayList<Model_images>   FetchVideos()
+    private ArrayList<Model_images> FetchVideos()
     {
         ArrayList<Model_images> al_images = new ArrayList<>();
         int int_position = 0;
@@ -178,7 +238,7 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
         String absolutePathOfImage = null;
         Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
 
-        String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME,MediaStore.MediaColumns.DATE_MODIFIED,MediaStore.Video.Thumbnails.DATA,MediaStore.Video.VideoColumns.DURATION};
+        String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME, MediaStore.MediaColumns.DATE_MODIFIED, MediaStore.Video.Thumbnails.DATA, MediaStore.Video.VideoColumns.DURATION};
 
         final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
         cursor = mcontext.getContentResolver().query( uri, projection, null, null, orderBy + " DESC");
@@ -254,7 +314,7 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
         return al_images;
     }
 
-    private ArrayList<Model_images>  FetchAudio()
+    private ArrayList<Model_images> FetchAudio()
     {
         ArrayList<Model_images> al_images = new ArrayList<>();
         int int_position = 0;
@@ -264,7 +324,7 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
         String absolutePathOfImage = null;
         String fileDuration=null;
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        String[] projection = { MediaStore.Audio.Media.DATA,MediaStore.Audio.Media.ALBUM,MediaStore.Audio.Media.DATE_MODIFIED,MediaStore.Audio.Media.DURATION};
+        String[] projection = { MediaStore.Audio.Media.DATA, MediaStore.Audio.Media.ALBUM, MediaStore.Audio.Media.DATE_MODIFIED, MediaStore.Audio.Media.DURATION};
 
         final String orderBy = MediaStore.Audio.Media.DATE_MODIFIED;
         cursor = mcontext.getContentResolver().query( uri, projection, selection, null, orderBy + " DESC");
@@ -334,7 +394,7 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
     }
     private String LongToDate(String longV)
     {
-        long input=Long.parseLong(longV);
+        long input= Long.parseLong(longV);
         Date date = new Date(input*1000); // *1000 gives accurate date otherwise returns 1970
         Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
@@ -344,10 +404,10 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
 
     }
 
-    private ArrayList<Model_Apk>  fetchApks() {
+    private ArrayList<Model_Apk> fetchApks() {
         ArrayList<Model_Apk> ApkList = new ArrayList<>();
 
-        final String[] projection = {MediaStore.Files.FileColumns.DATA,MediaStore.Files.FileColumns.TITLE,MediaStore.Files.FileColumns.SIZE,MediaStore.Files.FileColumns.DATE_ADDED, MediaStore.Files.FileColumns.MEDIA_TYPE};
+        final String[] projection = {MediaStore.Files.FileColumns.DATA, MediaStore.Files.FileColumns.TITLE, MediaStore.Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_ADDED, MediaStore.Files.FileColumns.MIME_TYPE};
         final String orderBy = MediaStore.Files.FileColumns.DATE_ADDED;
         Cursor cursor = mcontext.getContentResolver().query(MediaStore.Files.getContentUri("external"),
                 projection, null, null, orderBy+" desc");
@@ -355,6 +415,7 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
             return  ApkList;
         else if (cursor.getCount() > 0 && cursor.moveToFirst()) {
             do {
+
                 String path = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA));
                 String fileName=cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.TITLE));
                 //long fileDateModified=cursor.getLong(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATE_MODIFIED));
@@ -365,7 +426,8 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
                 if (path != null && path.endsWith(".apk"))
                 {
                     Model_Apk model=new Model_Apk();
-                    model.setFileName(fileName);
+                    //appended the string bacause MediaStore.Files.FileColumns.TITLE does not return name with extension;
+                    model.setFileName(fileName+"."+Utility.getFileExtensionfromPath(path));
                     model.setFilePath(path);
                     model.setFileSize(Utility.humanReadableByteCount(fileSize,true));
                     model.setFileSizeCmpr(fileSize);
@@ -380,23 +442,47 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
         cursor.close();
         return  ApkList;
     }
+public long dd(Date d)
+{
 
-    private  ArrayList<Model_Recent> listRecentFiles()
+
+    SimpleDateFormat f = new SimpleDateFormat("dd-MMM-yyyy");
+    try {
+
+        long milliseconds = d.getTime();
+        return milliseconds;
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return  0;
+}
+    private ArrayList<Model_Recent> listRecentFiles()
     {
         //MediaStore.Files.FileColumns.DISPLYA_NAME returns null on some devices
         ArrayList<Model_Recent> RecentListLocal = new ArrayList<>();
-        final String[] projection = {MediaStore.Files.FileColumns.DATA,MediaStore.Files.FileColumns.TITLE, MediaStore.Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_ADDED, MediaStore.Files.FileColumns.MIME_TYPE};
+        final String[] projection = {MediaStore.Files.FileColumns.DATA, MediaStore.Files.FileColumns.TITLE, MediaStore.Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_ADDED, MediaStore.Files.FileColumns.MIME_TYPE};
+
         Calendar c = Calendar.getInstance();
         c.set(Calendar.DAY_OF_YEAR, c.get(Calendar.DAY_OF_YEAR) - 7);
         Date d = c.getTime();
         final String orderBy = MediaStore.Files.FileColumns.DATE_ADDED;
+
+        //long DAY_IN_MS = 1000*60 * 60 * 24*7;   // seven days in milliseconds
+        long dateInLong=dd(d);
+        dateInLong=dateInLong/1000;
+
+        String selection1 = MediaStore.Files.FileColumns.DATE_ADDED + ">"+dateInLong;
         Cursor cursor = mcontext.getContentResolver().query(MediaStore.Files
                         .getContentUri("external"), projection,
-                null,
+                selection1,
                 null, orderBy+" desc");
         String FileType="";
         if (cursor == null)
             return RecentListLocal;
+
+
+        int cnt = cursor.getCount();
+        System.out.print(""+cnt);
 
         if (cursor.getCount() > 0 && cursor.moveToFirst()) {
             do {
@@ -433,11 +519,14 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
 
                 Log.d("recent files mimeType",""+FileType);
                 File f = new File(path);
-                if (d.compareTo(new Date(f.lastModified())) != 1 && !f.isDirectory()  && Arrays.asList(types).contains(FileType)) {
+
+                //if (d.compareTo(new Date(f.lastModified())) != 1 && !f.isDirectory()  && Arrays.asList(types).contains(FileType)) {
+                if (!f.isDirectory()  && Arrays.asList(types).contains(FileType)) {
                     Model_Recent model=new Model_Recent();
 
                     model.setFileSize(Utility.humanReadableByteCount(fileSize,true));
-                    model.setFileName(fileName);
+                    //appended the string bacause MediaStore.Files.FileColumns.TITLE does not return name with extension;
+                    model.setFileName(fileName+"."+Utility.getFileExtensionfromPath(path));
                     model.setFileMdate(Utility.LongToDate(String.valueOf(mDate)));
                     model.setDateToSort(mDate);
                     model.setFileSizeCmpr(fileSize);
@@ -462,16 +551,17 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
 
 
     }
-    private  ArrayList<Model_Docs> FetchDocuments()
+    private ArrayList<Model_Docs> FetchDocuments()
     {
         ArrayList<Model_Docs> docsList = new ArrayList<>();
-        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension("pdf");
-        String selectionMimeType = MediaStore.Files.FileColumns.MIME_TYPE + "="+mimeType;
+        String colName=MediaStore.Files.FileColumns.MIME_TYPE;
+        String selectionMimeType = colName + "='text/plain' or "+colName+"='application/vnd.openxmlformats-officedocument.wordprocessingml.document' or "+colName+"= 'application/pdf'" ;
+        //String selectionMimeType = colName + "="+ Constants.mimeType_NotePad+" or "+colName+"='application/vnd.openxmlformats-officedocument.wordprocessingml.document' or "+colName+"= 'application/pdf'" ;
 
-        final String[] projection = {MediaStore.Files.FileColumns.DATA,MediaStore.Files.FileColumns.TITLE,MediaStore.Files.FileColumns.SIZE,MediaStore.Files.FileColumns.DATE_ADDED, MediaStore.Files.FileColumns.MEDIA_TYPE};
+        final String[] projection = {MediaStore.Files.FileColumns.DATA, MediaStore.Files.FileColumns.TITLE, MediaStore.Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_ADDED, MediaStore.Files.FileColumns.MEDIA_TYPE,MediaStore.Files.FileColumns.MIME_TYPE};
         String orderby= MediaStore.Files.FileColumns.DATE_ADDED;
         Cursor cursor = mcontext.getContentResolver().query(MediaStore.Files.getContentUri("external"),
-                projection, null, null, orderby+" desc");
+                projection, selectionMimeType, null, orderby+" desc");
 
         String[] types = new String[]{"pdf","doc", "docx", "txt", "wpd", "wps","xls","xlsx","ppt",
                 "pptx"
@@ -498,17 +588,22 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
                     FileType=s1[1];
 
                 String MediaType=cursor.getString(cursor.getColumnIndex( MediaStore.Files.FileColumns.MEDIA_TYPE));
-                System.out.println("MediaType"+MediaType);
-                System.out.println("ArrayLength-> "+s1.length);
-                if (path != null && Arrays.asList(types).contains(FileType))
+
+               // System.out.println("MediaType"+MediaType);
+                //System.out.println("ArrayLength-> "+s1.length);
+                //if (path != null && Arrays.asList(types).contains(FileType))
+                if (path != null)
                 {
+                   // String mimeType=cursor.getString(cursor.getColumnIndex( MediaStore.Files.FileColumns.MIME_TYPE));
+                  // System.out.println("MediaType"+MediaType+""+mimeType);
+
                     String fileName=cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.TITLE));
                     //long fileDateModified=cursor.getLong(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATE_MODIFIED));
                     String fileDateModified=cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATE_ADDED));
                     long fileSize=cursor.getLong(cursor.getColumnIndex(MediaStore.Files.FileColumns.SIZE));
 
                     Model_Docs model=new Model_Docs();
-                    model.setFileName(fileName);
+                    model.setFileName(fileName+"."+Utility.getFileExtensionfromPath(path));
                     model.setFilePath(path);
                     model.setFileSize(Utility.humanReadableByteCount(fileSize,true));
                     model.setFileMDate(Utility.LongToDate(fileDateModified));
@@ -531,10 +626,10 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
     }
     private ArrayList<Model_Download> getDownLoads(File dir)
     {
-        ArrayList<Model_Download>downLoadListLocal=new ArrayList<>();
+        ArrayList<Model_Download> downLoadListLocal=new ArrayList<>();
         File[] listFile;
         listFile = dir.listFiles();
-        System.out.print(""+listFile.toString());
+      //  System.out.print(""+listFile.toString());
 
         if (listFile != null) {
             for (int i = 0; i < listFile.length; i++) {
@@ -568,37 +663,42 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
 
     }
 
-    private  ArrayList<Model_Anim> fetchAnimationFiles() {
+    private ArrayList<Model_Anim> fetchAnimationFiles() {
 
         ArrayList<Model_Anim> animList = new ArrayList<>();
-        final String[] projection = {MediaStore.Files.FileColumns.DATA,MediaStore.Files.FileColumns.TITLE,MediaStore.Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_ADDED, MediaStore.Files.FileColumns.MEDIA_TYPE};
+        final String[] projection = {MediaStore.Files.FileColumns.DATA, MediaStore.Files.FileColumns.TITLE, MediaStore.Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_ADDED, MediaStore.Files.FileColumns.MIME_TYPE};
         final String orderBy = MediaStore.Files.FileColumns.DATE_ADDED;
+        String selectionMimeType = MediaStore.Files.FileColumns.MIME_TYPE + "='image/gif'";
         Cursor cursor = mcontext.getContentResolver().query(MediaStore.Files.getContentUri("external"),
-                projection, null, null, orderBy+" desc");
+                projection, selectionMimeType, null, orderBy+" desc");
 
         if (cursor == null)
             return animList;
         else if (cursor.getCount() > 0 && cursor.moveToFirst()) {
             do {
+               String type=cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.MIME_TYPE));
                 String path = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA));
                 String fileName=cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.TITLE));
                 //long fileDateModified=cursor.getLong(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATE_MODIFIED));
                 String fileDateModified=cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATE_ADDED));
                 long fileSize=cursor.getLong(cursor.getColumnIndex(MediaStore.Files.FileColumns.SIZE));
 
+              // now  if (path != null && path.endsWith(".gif") ||  path.endsWith(".swf")|| path.endsWith(".ani"))
+                //is  not required bacuse we are querying only gif files to make it faster;
+               // if (path != null && path.endsWith(".gif") ||  path.endsWith(".swf")|| path.endsWith(".ani")) {
 
-                if (path != null && path.endsWith(".gif") ||  path.endsWith(".swf")|| path.endsWith(".ani")) {
                     Model_Anim model=new Model_Anim();
-                    model.setFileName(fileName);
+                //appended the string bacause MediaStore.Files.FileColumns.TITLE does not return name with extension;
+                    model.setFileName(fileName+"."+Utility.getFileExtensionfromPath(path));
                     model.setFilePath(path);
                     model.setFileSize(Utility.humanReadableByteCount(fileSize,true));
                     model.setFileMDate(Utility.LongToDate(fileDateModified));
                     model.setFileSizeCmpr(fileSize);
                     model.setDateToSort(Long.parseLong(fileDateModified));
                     // model.setFileType(FileType);
-
+                   System.out.print(""+type);
                     animList.add(model);
-                }
+                //}
             } while (cursor.moveToNext());
         }
         cursor.close();

@@ -1,58 +1,75 @@
 package com.mojodigi.filehunt;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.PorterDuffColorFilter;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.Settings;
+import android.support.annotation.RequiresApi;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.mojodigi.filehunt.Adapter.MultiSelectAdapter_Apk;
+import com.mojodigi.filehunt.AddsUtility.AddConstants;
+import com.mojodigi.filehunt.AddsUtility.AddMobUtils;
+import com.mojodigi.filehunt.AddsUtility.SharedPreferenceUtil;
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Model.Model_Apk;
 import com.mojodigi.filehunt.Model.Model_Recent;
-//
-import com.mojodigi.filehunt.Utils.AddMobUtils;
 import com.mojodigi.filehunt.Utils.AlertDialogHelper;
 import com.mojodigi.filehunt.Utils.AsynctaskUtility;
 import com.mojodigi.filehunt.Utils.CustomProgressDialog;
 import com.mojodigi.filehunt.Utils.RecyclerItemClickListener;
 import com.mojodigi.filehunt.Utils.Utility;
 import com.mojodigi.filehunt.Utils.UtilityStorage;
-
+import com.smaato.soma.AdDownloaderInterface;
+import com.smaato.soma.AdListenerInterface;
+import com.smaato.soma.BannerView;
+import com.smaato.soma.ErrorCode;
+import com.smaato.soma.ReceivedBannerInterface;
+import com.smaato.soma.interstitial.Interstitial;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+//
 
-public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener,MultiSelectAdapter_Apk.ApkListener,AsynctaskUtility.AsyncResponse {
+
+public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener,MultiSelectAdapter_Apk.ApkListener,AsynctaskUtility.AsyncResponse,AdListenerInterface {
 
     ActionMode mActionMode;
     Menu context_menu;
@@ -82,24 +99,77 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
     private AdView mAdView;
     private RewardedVideoAd mRewardedVideoAd;
     private int lastCheckedSortOptions;
+    SharedPreferenceUtil addprefs;
+    View adContainer;
+    RelativeLayout smaaToAddContainer;
+
+    //smaatoAddBanerView
+    Interstitial interstitial;  // smaatoInterestialAdd;
+    BannerView smaaTobannerView;
+    private Model_Apk glob_model;
+    private boolean isSearchModeActive;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photos_activity_re);
 
+
+        Constants.ACTIVITY_TRACKER= Constants.ACTIVITY_ENUM.ACTIVITY_APK;
+        instance=this;
+        mcontext=ApkActivityRe.this;
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Utility.setstatusBarColorBelowM(ApkActivityRe.this);
+        }
+
         //  banner add
+        //add netwrk varibales
+
         mAdView = (AdView) findViewById(R.id.adView);
+        adContainer = findViewById(R.id.adMobView);
+        smaaToAddContainer = findViewById(R.id.smaaToAddContainer);
+
+        //smaaTobannerView =  findViewById(R.id.smaaTobannerView);
+
+        smaaTobannerView = new BannerView((this).getApplication());
+        smaaTobannerView.addAdListener(this);
+
+        addprefs = new SharedPreferenceUtil(mcontext);
+
         AddMobUtils adutil = new AddMobUtils();
-        adutil.displayBannerAdd(mAdView);
+
+        if(AddConstants.checkIsOnline(mcontext) && adContainer !=null && addprefs !=null)
+        {
+            String AddPrioverId=addprefs.getStringValue(AddConstants.ADD_PROVIDER_ID, AddConstants.NOT_FOUND);
+            if(AddPrioverId.equalsIgnoreCase(AddConstants.Adsense_Admob_GooglePrivideId))
+            adutil.displayServerBannerAdd(addprefs,adContainer , mcontext);
+            else if(AddPrioverId.equalsIgnoreCase(AddConstants.SmaatoProvideId))
+            {
+                try {
+                    int publisherId = Integer.parseInt(addprefs.getStringValue(AddConstants.APP_ID, AddConstants.NOT_FOUND));
+                    int addSpaceId = Integer.parseInt(addprefs.getStringValue(AddConstants.BANNER_ADD_ID, AddConstants.NOT_FOUND));
+                    adutil.displaySmaatoBannerAdd(smaaTobannerView, smaaToAddContainer, publisherId, addSpaceId);
+                }catch (Exception e)
+                {
+                    String string = e.getMessage();
+                    System.out.print(""+string);
+                }
+            }
+
+        }
+        else {
+            adutil.displayLocalBannerAdd(mAdView);
+        }
+
 
         //  banner add
 
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         blankIndicator=(ImageView) findViewById(R.id.blankIndicator);
-        instance=this;
-        mcontext=ApkActivityRe.this;
+
         UtilityStorage.InitilaizePrefs(mcontext);
         Constants.DELETED_APK_FILES=0;
 
@@ -113,7 +183,7 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
             @Override
             public void onItemClick(View view, int position) {
                 if (isMultiSelect) {
-                    if(position!=RecyclerView.NO_POSITION)
+                    if(position!= RecyclerView.NO_POSITION)
                     multi_select(position);
                 }
 
@@ -142,29 +212,39 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
             }
         }));
 
-
+        dispInterestialAdds();
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode==Constants.FILE_DELETE_REQUEST_CODE) {
+        if(requestCode== Constants.FILE_DELETE_REQUEST_CODE) {
             boolean isPersistUriSet = UtilityStorage.setUriForStorage(requestCode, resultCode, data);
             if (isPersistUriSet && multiselect_list.size() > 0)
                 new DeleteFileTask(multiselect_list).execute();
         }
-        if(requestCode==Constants.FILE_RENAME_REQUEST_CODE)
+        if(requestCode== Constants.FILE_RENAME_REQUEST_CODE)
         {
             boolean isPersistUriSet = UtilityStorage.setUriForStorage(requestCode, resultCode, data);
             if (isPersistUriSet && multiselect_list.size() > 0)
             {
                 // call rename function  here in the case of premission granted first  time;
 
-                Utility.renameFile(mcontext,multiselect_list.get(0).getFilePath(),Constants.Global_File_Rename_NewName,7);
+                Utility.renameFile(mcontext,multiselect_list.get(0).getFilePath(), Constants.Global_File_Rename_NewName,7);
             }
 
+        }
+
+        if (requestCode == Constants.APK_INSTALL_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            if (getPackageManager().canRequestPackageInstalls()) {
+                if(glob_model !=null)
+                Utility.OpenFileWithNoughtAndAll(glob_model.getFilePath(), mcontext, getResources().getString(R.string.file_provider_authority));
+            }
+        } else {
+            //give the error
         }
 
 
@@ -174,12 +254,27 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
     public static ApkActivityRe getInstance() {
         return instance;
     }
-    public void refreshAdapterAfterRename(String newPath,String newName)
+    public void refreshAdapterAfterRename(String newPath, String newName)
     {
         fileTorename.setFilePath(newPath);
         fileTorename.setFileName(newName);
         ApkList.set(renamePosition,fileTorename);
         refreshAdapter();
+
+    }
+    public boolean checkForFileExist(String newFPath)
+    {
+
+        for(int i=0;i<ApkList.size();i++)
+        {
+            String listFile=ApkList.get(i).getFilePath().toString();
+            boolean status=listFile.equalsIgnoreCase(newFPath);
+            if(status)
+                return true;
+
+        }
+
+        return  false;
 
     }
 
@@ -195,13 +290,43 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
     }
 
     @Override
+    protected void onRestart() {
+        super.onRestart();
+
+        if(mActionMode !=null)
+        {
+            mActionMode.finish();
+
+        }
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
 
+
+
+    }
+    private void dispInterestialAdds()
+    {
         AddMobUtils addutil= new AddMobUtils();
         //        addutil.showInterstitial(mcontext);
         // addutil.displayRewaredVideoAdd(mcontext,mRewardedVideoAd);
-         addutil.showInterstitial(mcontext);
+        if(AddConstants.checkIsOnline(mcontext) && addprefs!=null  )
+        {
+
+            String interestialAddId=addprefs.getStringValue(AddConstants.INTERESTIAL_ADD_ID, AddConstants.NOT_FOUND);
+            String addPrioverId=addprefs.getStringValue(AddConstants.ADD_PROVIDER_ID, AddConstants.NOT_FOUND);
+            if(!interestialAddId.equalsIgnoreCase(AddConstants.NOT_FOUND)  && addPrioverId.equalsIgnoreCase(AddConstants.Adsense_Admob_GooglePrivideId) )
+                addutil.showInterstitial(addprefs,mcontext,interestialAddId);
+            else  if(!interestialAddId.equalsIgnoreCase(AddConstants.NOT_FOUND)  && addPrioverId.equalsIgnoreCase(AddConstants.SmaatoProvideId) )
+            {
+                if(instance !=null )
+                    AddMobUtils.displaySmaatoInterestialAdd(instance, mcontext, interstitial, addprefs);
+            }
+        }
+        else
+            addutil.showInterstitial(addprefs,mcontext,null);
     }
 
 
@@ -243,7 +368,7 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
             public boolean onQueryTextSubmit(String query) {
                 // filter recycler view when query submitted
                 if(multiSelectAdapter!=null)
-                multiSelectAdapter.getFilter().filter(query);
+                multiSelectAdapter.getFilter().filter(query.trim());
                 return false;
             }
 
@@ -251,7 +376,7 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
             public boolean onQueryTextChange(String query) {
                 // filter recycler view when text is changed
                 if(multiSelectAdapter!=null)
-                multiSelectAdapter.getFilter().filter(query);
+                multiSelectAdapter.getFilter().filter(query.trim());
                 return false;
             }
         });
@@ -263,16 +388,26 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
                 MenuItem item= menu.findItem(R.id.action_sort);
                 item.setVisible(true);
                 //invalidateOptionsMenu();
+                searchView.requestFocus(0);
+                searchView.setFocusable(false);
+                isSearchModeActive=false;
+                Utility.hideKeyboard(ApkActivityRe.this);
 
                 return false;
             }
         });
+
         searchView.setOnSearchClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 MenuItem item= menu.findItem(R.id.action_sort);
                 item.setVisible(false);
                 //invalidateOptionsMenu();
+                searchView.requestFocus(1);
+                searchView.setFocusable(true);
+                isSearchModeActive=true;
+                Utility.showKeyboard(ApkActivityRe.this);
+
             }
         });
 
@@ -293,7 +428,7 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
         if (id == R.id.action_search) {
             return true;
         }
-        if(id==R.id.action_sort)
+        if(id== R.id.action_sort)
         {
 
             sortDialog(mcontext);
@@ -385,6 +520,8 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
             dialog.show();
         }
     }
+
+    private int statusBarColor;
     private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
 
         @Override
@@ -393,6 +530,18 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
             MenuInflater inflater = mode.getMenuInflater();
             inflater.inflate(R.menu.menu_multi_select, menu);
             context_menu = menu;
+
+           // menu.getItem(0).setIcon(ContextCompat.getDrawable(mcontext, R.drawable.ic_option_menu_white));
+
+
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                //hold current color of status bar
+                statusBarColor = getWindow().getStatusBarColor();
+                //set your gray color
+                getWindow().setStatusBarColor(getResources().getColor(R.color.onePlusAccentColor_device_default_dark));
+            }
+
 
             return true;
         }
@@ -427,20 +576,25 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
                                 Constants.filesToCopy.add(multiselect_list.get(i).getFilePath().toString());
                             }
                         }
-                        // redirect to  storage fragment;
-                        Constants.redirectToStorage=true;
+                        if(Constants.filesToCopy.size()>=1) {
+                            Utility.dispLocalStorages(mcontext,1);
+                        }
 
-                        finish();
+
 
 
                     }
                     return true ;
                 case R.id.action_rename:
                     if(multiselect_list.size()==1)
-                    Utility.fileRenameDialog(mcontext,multiselect_list.get(0).getFilePath(),Constants.APK);
+                    Utility.fileRenameDialog(mcontext,multiselect_list.get(0).getFilePath(), Constants.APK,false);
                     return  true;
                 case R.id.action_delete:
-                    alertDialogHelper.showAlertDialog("","Delete Apk","DELETE","CANCEL",1,false);
+                    if(multiselect_list.size()>=1) {
+                        int mFileCount = multiselect_list.size();
+                        String msgDeleteFile = mFileCount > 1 ? mFileCount + " " + getResources().getString(R.string.delfiles) : mFileCount + " " + getResources().getString(R.string.delfile);
+                        alertDialogHelper.showAlertDialog("", "Delete Apk"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, false);
+                    }
                     return true;
                 case R.id.action_select:
                     if(ApkList.size()==multiselect_list.size() || isUnseleAllEnabled==true)
@@ -473,6 +627,12 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
             mActionMode = null;
             isMultiSelect = false;
             multiselect_list = new ArrayList<Model_Apk>();
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                //return to "old" color of status bar
+                getWindow().setStatusBarColor(statusBarColor);
+            }
+
             refreshAdapter();
         }
     };
@@ -498,7 +658,7 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
                 }
                 else
                 {
-                    UtilityStorage.guideDialogForLEXA(mcontext,f.getParent(),Constants.FILE_DELETE_REQUEST_CODE);
+                    UtilityStorage.guideDialogForLEXA(mcontext,f.getParent(), Constants.FILE_DELETE_REQUEST_CODE);
                 }
 
                 //
@@ -565,6 +725,20 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
 
     }
 
+    @Override
+    public void onReceiveAd(AdDownloaderInterface adDownloaderInterface, ReceivedBannerInterface receivedBannerInterface) {
+        if(receivedBannerInterface.getErrorCode() != ErrorCode.NO_ERROR){
+            //Toast.makeText(getBaseContext(), receivedBannerInterface.getErrorMessage(), Toast.LENGTH_SHORT).show();
+
+            Log.d("SmaatoErrorMsg", ""+receivedBannerInterface.getErrorMessage());
+            if(receivedBannerInterface.getErrorMessage().equalsIgnoreCase(AddConstants.NO_ADDS))
+            {
+                smaaToAddContainer.setVisibility(View.GONE);
+            }
+
+        }
+    }
+
     private class DeleteFileTask extends AsyncTask<Void,Void,Integer>
     {
         @Override
@@ -595,8 +769,10 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
 
             if(FileCount>0)
             {
-                for (int i = 0; i < multiselect_list.size(); i++)
+                for (int i = 0; i < multiselect_list.size(); i++) {
                     ApkList.remove(multiselect_list.get(i));
+                    Utility.removeFileFromCopyList(multiselect_list.get(i).getFilePath());
+                }
 
                 multiSelectAdapter.notifyDataSetChanged();
 
@@ -607,7 +783,8 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
 
 
 
-            Toast.makeText(mcontext, FileCount+" file deleted", Toast.LENGTH_SHORT).show();
+            String msg=FileCount>1 ? FileCount+" "+getResources().getString(R.string.delmsg1) : FileCount+" "+getResources().getString(R.string.delmsg2);
+            Utility.dispToast(mcontext, msg);
 
             CustomProgressDialog.dismiss();
         }
@@ -739,7 +916,7 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
                     }
 
         }
-        Constants.DELETED_APK_FILES=count;
+        //Constants.DELETED_APK_FILES=count;   // now not in use the the  apk count operation runs every time we ruturn to  apk from  mainactivity
         return count;
     }
     private void sendBroadcast(File outputFile)
@@ -829,7 +1006,7 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
     private void fetchApks() {
 
 
-        final String[] projection = {MediaStore.Files.FileColumns.DATA,MediaStore.Files.FileColumns.TITLE,MediaStore.Files.FileColumns.SIZE,MediaStore.Files.FileColumns.DATE_MODIFIED, MediaStore.Files.FileColumns.MEDIA_TYPE};
+        final String[] projection = {MediaStore.Files.FileColumns.DATA, MediaStore.Files.FileColumns.TITLE, MediaStore.Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_MODIFIED, MediaStore.Files.FileColumns.MEDIA_TYPE};
         Cursor cursor = mcontext.getContentResolver().query(MediaStore.Files.getContentUri("external"),
                 projection, null, null, null);
         if (cursor == null)
@@ -865,17 +1042,28 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
     public void onApkSelected (Model_Apk model_apk) {
 
         // Utility.OpenFile(mcontext,model_apk.getFilePath()); // open file below  Android N
-        if(mActionMode==null)
-        Utility.OpenFileWithNoughtAndAll(model_apk.getFilePath(),mcontext,getResources().getString(R.string.file_provider_authority));
+        if(mActionMode==null) {
+                glob_model=model_apk;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (!getPackageManager().canRequestPackageInstalls()) {
+                    startActivityForResult(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).setData(Uri.parse(String.format("package:%s", getPackageName()))), Constants.APK_INSTALL_REQUEST_CODE);
+                } else {
+                    Utility.OpenFileWithNoughtAndAll(model_apk.getFilePath(), mcontext, getResources().getString(R.string.file_provider_authority));
+                }
+            } else {
+                Utility.OpenFileWithNoughtAndAll(model_apk.getFilePath(), mcontext, getResources().getString(R.string.file_provider_authority));
+            }
+
+        }
     }
-    public  String calcSelectFileSize(ArrayList<Model_Apk> fileList)
+    public String calcSelectFileSize(ArrayList<Model_Apk> fileList)
     {
         long totalSize=0;
 
         for(int i=0;i<fileList.size();i++)
         {
             Model_Apk m =  fileList.get(i);
-            File  f= new File(m.getFilePath());
+            File f= new File(m.getFilePath());
             totalSize+=f.length();
         }
 
@@ -1084,7 +1272,42 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
 
 
 
+    @Override
+    public void onBackPressed() {
 
+        if(isSearchModeActive)
+        {
+            if(searchView !=null)
+            {
+                Utility.hideKeyboard(ApkActivityRe.this);
+                isSearchModeActive=false;
+                resetAdapter();
+                searchView.onActionViewCollapsed();
+            }
+
+            return;
+        }
+        else
+            super.onBackPressed();
+        // AddMobUtils addutil= new AddMobUtils();
+        // addutil.showInterstitial(ctx);
+    }
+
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+
+
+    public void  resetAdapter(){
+
+        multiSelectAdapter = new MultiSelectAdapter_Apk(this, ApkList, multiselect_list, this);
+        recyclerView.setAdapter(multiSelectAdapter);
+
+    }
 
 
 

@@ -1,7 +1,5 @@
 package com.mojodigi.filehunt.Model;
 
-import java.util.ArrayList;
-
 public class Model_Audio {
 
     public String getAudioPath() {

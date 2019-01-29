@@ -52,7 +52,16 @@
      <screenName name="com.mojodigi.filehunt.AnimationActivityRe">Animation</screenName>
      <screenName name="com.mojodigi.filehunt.ApkActivityRe">Apk</screenName>
      <screenName name="com.mojodigi.filehunt.AudioActivityRe">Audio</screenName>
+     <screenName name="com.mojodigi.filehunt.ZipActivityRe">ZipActivity</screenName>
      <screenName name="com.mojodigi.filehunt.Category_Explore_Activity">CategoryFolders</screenName>
+     <screenName name="com.mojodigi.filehunt.Media_InfoActivity">MediaInfoActivity</screenName>
+     <screenName name="com.mojodigi.filehunt.Media_VdoActivity">MediaVdoPlayActivity</screenName>
+     <screenName name="com.mojodigi.filehunt.Media_AdoActivity">MediaAudioPlayActivity</screenName>
+     <screenName name="com.mojodigi.filehunt.Media_ImgActivity">MediaImgActivity</screenName>
+     <screenName name="com.mojodigi.filehunt.Activity_Stotrage">StorageActivity</screenName>
+
+
+
 
      <!--
        See Project Structure -> Analytics -> Google Analytics -> Learn More

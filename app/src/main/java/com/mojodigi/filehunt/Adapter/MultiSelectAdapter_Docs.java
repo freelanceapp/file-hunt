@@ -8,20 +8,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.Filter;
-
-
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-
 import com.mojodigi.filehunt.Model.Model_Docs;
-
+import com.mojodigi.filehunt.R;
 import com.mojodigi.filehunt.Utils.Utility;
 
 import java.util.ArrayList;
-import com.mojodigi.filehunt.R;
 
 public class MultiSelectAdapter_Docs extends RecyclerView.Adapter<MultiSelectAdapter_Docs.MyViewHolder>  implements Filterable {
 
@@ -59,7 +55,7 @@ public class MultiSelectAdapter_Docs extends RecyclerView.Adapter<MultiSelectAda
                 public void onClick(View view) {
                     // send selected docs in callback
                     int pos=getAdapterPosition();
-                    if(pos!=RecyclerView.NO_POSITION)
+                    if(pos!= RecyclerView.NO_POSITION)
                     listener.onDocsSelected(DocsListfiltered.get(getAdapterPosition()));
                 }
             });
@@ -69,7 +65,7 @@ public class MultiSelectAdapter_Docs extends RecyclerView.Adapter<MultiSelectAda
              }
     }
 
-     public MultiSelectAdapter_Docs(Context context, ArrayList<Model_Docs> DocsList, ArrayList<Model_Docs> selectedDocsList ,DocsListener listener) {
+     public MultiSelectAdapter_Docs(Context context, ArrayList<Model_Docs> DocsList, ArrayList<Model_Docs> selectedDocsList , DocsListener listener) {
         this.mContext=context;
         this.DocsList = DocsList;
         this.DocsListfiltered=DocsList;

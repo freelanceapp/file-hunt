@@ -1,9 +1,5 @@
 package com.mojodigi.filehunt.Model;
 
-import android.support.annotation.NonNull;
-
-import java.util.Date;
-
 public class Model_Download
 {
     public String FilePath;
