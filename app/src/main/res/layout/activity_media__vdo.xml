@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Media_VdoActivity"
+    android:background="@color/black"
+    android:orientation="vertical">
+
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+
+        >
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+<!-- android:layout_above="@id/idBottomLayout"-->
+<!-- android:background="@android:color/black"-->
+            <RelativeLayout
+                android:id="@+id/mVdoViewRLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_centerInParent="true"
+                android:clickable="true"
+                android:focusable="true"
+                >
+
+                <VideoView
+                    android:id="@+id/mVdoVideoView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_centerInParent="true"
+
+                    android:clickable="true"
+                    android:focusable="true"
+                    />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/mVdoBackArrowImageRLayout"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_alignParentTop="true"
+
+                >
+
+                <ImageView
+                    android:id="@+id/mVdoBackArrowImage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:src="@mipmap/ic_back"
+                    android:paddingTop="11dp"
+                    android:paddingBottom="11dp"
+                    android:paddingRight="20dp"
+                    android:background="@drawable/custom_ripple"
+                    />
+            </RelativeLayout>
+
+            <!-- android:background="@android:color/black"-->
+            <LinearLayout
+                android:layout_alignParentBottom="true"
+                android:id="@+id/idBottomLayout"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:orientation="horizontal"
+                android:weightSum="3"
+                android:layout_gravity="bottom"
+                 >
+
+                <ImageView
+                    android:id="@+id/mVideoShareImgView"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:padding="10dp"
+                    android:background="@drawable/custom_ripple"
+                    android:src="@mipmap/ic_share" />
+
+                <ImageView
+                    android:id="@+id/mVideoInfoImgView"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/custom_ripple"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_info_details" />
+
+                <ImageView
+                    android:id="@+id/mVideoDeleteImgView"
+                    android:layout_width="0dp"
+                    android:background="@drawable/custom_ripple"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:padding="10dp"
+                    android:src="@mipmap/ic_delete" />
+            </LinearLayout>
+        </RelativeLayout>
+
+    </FrameLayout>
+
+</LinearLayout>
+

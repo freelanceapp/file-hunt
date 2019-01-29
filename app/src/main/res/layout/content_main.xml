@@ -1,0 +1,299 @@
+<android.support.v4.widget.NestedScrollView
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+    <LinearLayout
+        android:background="@drawable/bckimg"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:layout_marginTop="1.5dp"
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:scrollbars="vertical" />
+
+        <RelativeLayout
+            android:layout_gravity="bottom"
+            android:paddingLeft="@dimen/dp20"
+            android:paddingTop="@dimen/dp20"
+            android:paddingRight="@dimen/dp10"
+            android:paddingBottom="@dimen/dp10"
+            android:visibility="gone"
+            android:id="@+id/storage_section"
+            android:background="@color/white"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/strgTxt"
+                android:paddingBottom="@dimen/dp15"
+                android:paddingTop="@dimen/dp15"
+                android:textSize="@dimen/sp16"
+                android:text="@string/strgdevice"
+                android:textColor="@color/strgtextclr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <LinearLayout
+
+                android:id="@+id/internalLLayout"
+                android:background="@drawable/custom_ripple"
+                android:layout_below="@+id/strgTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="20">
+
+                <LinearLayout
+
+                    android:id="@+id/internalImageLLayout"
+                    android:layout_weight="2.50"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="@dimen/dp10">
+
+                    <ImageView
+                        android:id="@+id/cat_Icon"
+                        android:layout_width="@dimen/dp45"
+                        android:layout_height="@dimen/dp45"
+                        android:src="@drawable/cat_ic_internal"
+                        />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_weight="17.50"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content">
+
+                    <RelativeLayout
+                        android:layout_marginLeft="@dimen/dp25"
+                        android:id="@+id/int_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:id="@+id/internalTxt"
+                            android:layout_alignParentLeft="true"
+                            android:textSize="@dimen/sp18"
+                            android:textColor="@color/strgtextclr"
+                            android:layout_alignParentTop="true"
+                            android:text="@string/internalstorage"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            />
+
+                        <TextView
+                            android:id="@+id/avlbTxt"
+                            android:layout_below="@+id/internalTxt"
+                            android:layout_alignParentLeft="true"
+                            android:textSize="@dimen/sp12"
+                            android:layout_alignParentTop="true"
+                            android:text="@string/avlbl"
+                            android:textColor="@color/strgtextclr"
+                            android:layout_alignBaseline="@+id/avlbMemory"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:id="@+id/avlbMemory"
+                            android:layout_marginTop="@dimen/dp30"
+                            android:layout_toRightOf="@+id/avlbTxt"
+                            android:layout_marginLeft="@dimen/dp5"
+                            android:textSize="@dimen/sp12"
+                            android:textColor="@color/strgtextclr"
+                            android:layout_alignParentTop="true"
+                            android:text=""
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:id="@+id/totalMemmory"
+                            android:layout_marginTop="@dimen/dp20"
+                            android:layout_below="@+id/internalTxt"
+                            android:layout_alignParentRight="true"
+                            android:textSize="@dimen/sp12"
+                            android:layout_alignParentTop="true"
+                            android:text=""
+                            android:textColor="@color/strgtextclr"
+                            android:layout_alignBaseline="@+id/avlbMemory"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <ProgressBar
+                            android:layout_marginTop="5dp"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/dp15"
+                            android:layout_below="@+id/totalMemmory"
+                            android:layout_centerHorizontal="true"
+                            android:id="@+id/progressBar" />
+
+                        <View
+                            android:layout_marginTop="@dimen/dp10"
+                            android:layout_below="@+id/progressBar"
+                            android:layout_alignParentBottom="true"
+                            style="@style/Divider"/>
+
+                    </RelativeLayout>
+
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+
+
+
+            <!-- external storage layout-->
+
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/ext_layout"
+                android:background="@drawable/custom_ripple"
+                android:layout_below="@+id/internalLLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="20"
+                android:layout_marginTop="@dimen/dp10">
+
+                <LinearLayout
+                    android:id="@+id/ExternalImageLLayout"
+                    android:layout_weight="2.50"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="@dimen/dp10">
+
+                    <ImageView
+                        android:id="@+id/mExternal_Icon"
+                        android:layout_width="@dimen/dp45"
+                        android:layout_height="@dimen/dp45"
+                        android:src="@drawable/cat_ic_external"
+                        />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_weight="17.50"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content">
+
+                    <RelativeLayout
+                        android:layout_marginLeft="@dimen/dp25"
+                        android:visibility="visible"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                         >
+
+                        <TextView
+                            android:id="@+id/externalTxt"
+                            android:layout_alignParentLeft="true"
+                            android:textSize="@dimen/sp18"
+                            android:layout_alignParentTop="true"
+                            android:text="@string/externalstorage"
+                            android:textColor="@color/strgtextclr"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+
+
+                            />
+                        <TextView
+                            android:id="@+id/avlbTxt_ext"
+                            android:layout_marginTop="@dimen/dp30"
+                            android:layout_below="@+id/externalTxt"
+                            android:layout_alignParentLeft="true"
+                            android:textSize="@dimen/sp12"
+                            android:layout_alignParentTop="true"
+                            android:text="@string/avlbl"
+                            android:textColor="@color/strgtextclr"
+                            android:layout_alignBaseline="@+id/avlbMemory_ext"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:id="@+id/avlbMemory_ext"
+                            android:layout_marginTop="@dimen/dp30"
+                            android:layout_toRightOf="@+id/avlbTxt_ext"
+                            android:layout_marginLeft="@dimen/dp5"
+                            android:textSize="@dimen/sp12"
+                            android:textColor="@color/strgtextclr"
+                            android:layout_alignParentTop="true"
+                            android:text=""
+
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:id="@+id/totalMemmory_ext"
+                            android:layout_marginTop="@dimen/dp20"
+                            android:layout_below="@+id/externalTxt"
+                            android:layout_alignParentRight="true"
+                            android:textSize="@dimen/sp12"
+                            android:layout_alignParentTop="true"
+                            android:text=""
+
+                            android:textColor="@color/strgtextclr"
+                            android:layout_alignBaseline="@+id/avlbMemory_ext"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <ProgressBar
+                            android:layout_marginTop="5dp"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/dp15"
+                            android:layout_below="@+id/totalMemmory_ext"
+                            android:textColor="@color/grey_ebebeb"
+                            android:layout_centerHorizontal="true"
+                            android:id="@+id/progressBar_ext" />
+                    </RelativeLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </RelativeLayout>
+        <!--adds layout-->
+        <!--
+        <RelativeLayout
+            android:id="@+id/addhoster"
+            android:layout_alignParentBottom="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <com.google.android.gms.ads.AdView
+                android:id="@+id/adView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                ads:adSize="SMART_BANNER"
+                ads:adUnitId="@string/banner_add_id"></com.google.android.gms.ads.AdView>
+
+
+
+            <RelativeLayout
+
+                android:id="@+id/adMobView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+            </RelativeLayout>
+            <RelativeLayout
+                android:id="@+id/smaaToAddContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+            </RelativeLayout>
+
+        </RelativeLayout>
+    -->
+        <!--adds layout-->
+    </LinearLayout>
+
+
+</android.support.v4.widget.NestedScrollView>

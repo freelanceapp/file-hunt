@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@android:color/black"
+    tools:context=".Media_ImgActivity"
+    android:orientation="vertical">
+
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+
+            <RelativeLayout
+                android:id="@+id/mImageViewRLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_centerInParent="true"
+
+
+                >
+                <android.support.v4.view.ViewPager
+                    android:id="@+id/idMediaImgViewPager"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_centerInParent="true"
+                     android:clickable="true"
+                    android:focusable="true" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/mImageBackArrowRLayout"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp50"
+                android:layout_alignParentTop="true"
+                android:background="@color/transparent"
+                android:paddingLeft="5dp"
+                android:paddingRight="10dp"
+                >
+
+                <ImageView
+                    android:id="@+id/mImageBackArrow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:src="@mipmap/ic_back"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="11dp"
+                    android:paddingRight="20dp"
+                    android:background="@drawable/custom_ripple"
+                    android:visibility="visible"
+                    />
+
+
+
+                <android.support.v7.widget.Toolbar
+                    android:id="@+id/mediaImgToolbar"
+                    android:layout_width="@dimen/dp40"
+                    android:layout_height="match_parent"
+
+                    style="@style/HeaderBar"
+                    app:theme="@style/WallpaperTheme"
+                    app:popupTheme="@style/WallpaperTheme"
+                    android:layout_alignRight="@+id/mImageBackArrow"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignBaseline="@+id/mImageBackArrow"
+                    android:background="@drawable/custom_ripple">
+                 </android.support.v7.widget.Toolbar>
+
+
+
+              <!--  <TextView
+                    android:visibility="gone"
+                    android:id="@+id/mImageSetWallpaperText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignRight="@+id/mImageBackArrow"
+                    android:layout_alignParentRight="true"
+                    android:textSize="@dimen/sp15"
+                    android:layout_alignParentTop="true"
+                    android:text="Set as Wallpaper"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:layout_alignBaseline="@+id/mImageBackArrow"
+                    android:gravity="center"
+                    android:textAllCaps="false"
+                    android:layout_marginRight="@dimen/dp30"
+                    android:background="@drawable/custom_ripple"/>-->
+
+            </RelativeLayout>
+
+
+            <LinearLayout
+                android:id="@+id/mImageBottomLayout"
+                android:layout_alignParentBottom="true"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:orientation="horizontal"
+                android:weightSum="3"
+                android:layout_gravity="bottom">
+
+                <ImageView
+                    android:id="@+id/mImageShareView"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:padding="10dp"
+                    android:src="@mipmap/ic_share"
+                    android:background="@drawable/custom_ripple"/>
+
+                <ImageView
+                    android:id="@+id/mImageInfoImgView"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_info_details"
+                    android:background="@drawable/custom_ripple"/>
+
+                <ImageView
+                    android:id="@+id/idImageDeleteImgView"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:padding="10dp"
+                    android:src="@mipmap/ic_delete"
+                    android:background="@drawable/custom_ripple"/>
+
+                <!-- <ImageView
+                     android:id="@+id/mImageSetWallpaperView"
+                     android:layout_width="0dp"
+                     android:layout_height="match_parent"
+                     android:layout_weight="1"
+                     android:padding="10dp"
+                     android:src="@mipmap/ic_image_info_white"
+                     android:background="@drawable/custom_ripple"/>-->
+            </LinearLayout>
+        </RelativeLayout>
+
+    </FrameLayout>
+
+</LinearLayout>
+
+
+

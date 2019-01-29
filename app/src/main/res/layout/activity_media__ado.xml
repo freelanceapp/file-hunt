@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:weightSum="20"
+    tools:context=".Media_VdoActivity">
+
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1.65"
+        android:gravity="left"
+        android:background="@android:color/black">
+
+        <ImageView
+            android:id="@+id/idInfoBackArrowImage"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@mipmap/ic_back"
+            android:paddingTop="11dp"
+            android:background="@drawable/custom_ripple"
+            android:paddingBottom="11dp"
+            android:paddingRight="20dp"
+            />
+    </RelativeLayout>
+
+
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="16.7"
+        >
+
+        <VideoView
+            android:id="@+id/idAdoAudioView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:focusable="true"
+            />
+
+        <TextView
+            android:id="@+id/idSongNameImageText"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"
+            android:gravity="center"
+            android:layout_marginLeft="@dimen/dp35"
+            android:layout_marginTop="@dimen/dp35"
+            android:layout_marginRight="@dimen/dp35"
+            android:layout_marginBottom="150dp"
+            android:maxLines="1"
+            android:textColor="@android:color/white"
+            android:background="@drawable/ic_mp3_bg"
+            />
+
+        <TextView
+            android:id="@+id/idSongNameText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:text="@string/app_name"
+            android:gravity="center"
+            android:textColor="@android:color/white"
+            android:textSize="15dp"
+            android:layout_marginBottom="100dp"
+            android:background="@color/black"
+            />
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/idBottomLayout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="bottom"
+        android:layout_weight="1.65"
+        android:orientation="horizontal"
+        android:background="@android:color/black"
+        android:weightSum="3">
+
+            <ImageView
+                android:id="@+id/idAudioShareImgView"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:padding="10dp"
+                android:background="@drawable/custom_ripple"
+                android:src="@mipmap/ic_share" />
+
+            <ImageView
+                android:id="@+id/idAudioInfoImgView"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:padding="10dp"
+                android:background="@drawable/custom_ripple"
+                android:src="@drawable/ic_info_details" />
+
+            <ImageView
+                android:id="@+id/idAudioDeleteImgView"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:padding="10dp"
+                android:background="@drawable/custom_ripple"
+                android:src="@mipmap/ic_delete" />
+
+    </LinearLayout>
+
+
+
+</LinearLayout>

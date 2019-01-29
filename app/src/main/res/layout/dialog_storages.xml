@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardElevation="@dimen/dp5"
+    app:cardCornerRadius="@dimen/dp5"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:id="@+id/internaLayout"
+            android:background="@drawable/custom_ripple"
+            android:padding="@dimen/dp10"
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:contentDescription="@string/internalstorage"
+                android:layout_gravity="center"
+                android:src="@drawable/cat_ic_internal"
+                android:layout_width="@dimen/dp35"
+                android:layout_height="@dimen/dp35" />
+
+            <TextView
+                style="@style/TextViewStyle1"
+                android:id="@+id/internal_txt"
+                android:layout_gravity="center"
+                android:padding="@dimen/dp10"
+                android:text="@string/internalstorage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+        <View
+            android:id="@+id/divider"
+            android:layout_marginLeft="@dimen/dp10"
+            android:layout_marginRight="@dimen/dp10"
+            style="@style/Divider"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp1"></View>
+
+        <LinearLayout
+            android:id="@+id/externLayout"
+            android:background="@drawable/custom_ripple"
+            android:padding="@dimen/dp10"
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:contentDescription="@string/externalstorage"
+                android:layout_gravity="center"
+                android:src="@drawable/cat_ic_external"
+                android:layout_width="@dimen/dp35"
+                android:layout_height="@dimen/dp35" />
+
+            <TextView
+                style="@style/TextViewStyle1"
+                android:id="@+id/external_txt"
+                android:layout_gravity="center"
+                android:padding="@dimen/dp10"
+                android:text="@string/externalstorage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+
+</android.support.v7.widget.CardView>
