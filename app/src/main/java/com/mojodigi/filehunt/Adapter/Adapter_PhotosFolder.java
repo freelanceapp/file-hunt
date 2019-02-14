@@ -110,8 +110,10 @@ public class Adapter_PhotosFolder extends RecyclerView.Adapter<Adapter_PhotosFol
                 viewHolder.iv_image.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_music));
                 break;
                 default:
+                    String string = folderListfiltered.get(position).getAl_imagepath().get(0);
+                    System.out.print("pathFile"+string);
                     Glide.with(context).load("file://" + folderListfiltered.get(position).getAl_imagepath().get(0))
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .skipMemoryCache(false)
                     .into(viewHolder.iv_image);
                     break;

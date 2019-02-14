@@ -126,6 +126,7 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
             mAdView = (AdView) findViewById(R.id.adView);
             adContainer = findViewById(R.id.adMobView);
             smaaToAddContainer = findViewById(R.id.smaaToAddContainer);
+            smaaToAddContainer.setVisibility(View.GONE);
 
             //smaaTobannerView =  findViewById(R.id.smaaTobannerView);
 
@@ -213,11 +214,17 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
                 System.out.print(""+string);
             }
         }
+        else if(AddPrioverId.equalsIgnoreCase(AddConstants.FaceBookAddProividerId))
+        {
+              adutil.dispFacebookBannerAdd(mContext,addprefs , MainActivity.this);
+        }
 
     }
     else {
         adutil.displayLocalBannerAdd(mAdView);
     }
+
+
 
     //  banner add
     // displat add from preferences
@@ -500,7 +507,8 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
         long per = AvailableMemory_Ext / (TotalMemory_Ext / 100);
         System.out.print("Memory Stats--> Total " + TotalMemory_Ext + " Avaailable" + AvailableMemory_Ext + "" + per);
 
-        avlbMemory_Ext.setText(Utility.humanReadableByteCount(AvailableMemory_Ext, true) + "(" + per + "%)");
+       // avlbMemory_Ext.setText(Utility.humanReadableByteCount(AvailableMemory_Ext, true) + "(" + per + "%)");   // old code
+        avlbMemory_Ext.setText(Utility.humanReadableByteCount(AvailableMemory_Ext, true) + "(" + Utility.setdecimalPoints(String.valueOf(per), 2) + "%)");
 
         totalMemmory_Ext.setText("Total " + Utility.humanReadableByteCount(TotalMemory_Ext, true));
         int progress = 100 - (int) per;
@@ -605,6 +613,7 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
     @Override
     public void onReceiveAd(AdDownloaderInterface adDownloaderInterface, ReceivedBannerInterface receivedBanner) {
 
+        Log.d("SmaatoErrorMsg","ErrorCode-->"+receivedBanner.getErrorCode());
         if(receivedBanner.getErrorCode() != ErrorCode.NO_ERROR){
             // Toast.makeText(getBaseContext(), receivedBanner.getErrorMessage(), Toast.LENGTH_SHORT).show();
             Log.d("SmaatoErrorMsg", ""+receivedBanner.getErrorMessage());
@@ -613,6 +622,11 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
             {
                 smaaToAddContainer.setVisibility(View.GONE);
             }
+
+        }
+        else if(receivedBanner.getErrorCode() == ErrorCode.NO_ERROR)
+        {
+            smaaToAddContainer.setVisibility(View.VISIBLE);
         }
 
 
@@ -810,22 +824,22 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
                                 if (adShow.equalsIgnoreCase("true")) {
                                     if (mainJson.has("data")) {
                                         JSONObject dataJson = mainJson.getJSONObject("data");
-
+                                        AddMobUtils util = new AddMobUtils();
                                         String show_Add = JsonParser.getkeyValue_Str(mainJson, "AdShow");
 
                                         String adProviderId =JsonParser.getkeyValue_Str(dataJson, "adProviderId");
                                         String adProviderName = JsonParser.getkeyValue_Str(dataJson, "adProviderName");
 
-//                                         String appId_PublisherId = JsonParser.getkeyValue_Str(dataJson, "appId_PublisherId");
-//                                        String bannerAdId = JsonParser.getkeyValue_Str(dataJson, "bannerAdId");
-//                                        String interstitialAdId = JsonParser.getkeyValue_Str(dataJson, "interstitialAdId");
-//                                       String videoAdId = JsonParser.getkeyValue_Str(dataJson, "videoAdId");
+                                         String appId_PublisherId = JsonParser.getkeyValue_Str(dataJson, "appId_PublisherId");
+                                         String bannerAdId = JsonParser.getkeyValue_Str(dataJson, "bannerAdId");
+                                         String interstitialAdId = JsonParser.getkeyValue_Str(dataJson, "interstitialAdId");
+                                         String videoAdId = JsonParser.getkeyValue_Str(dataJson, "videoAdId");
 
 
-                                        String appId_PublisherId = "ca-app-pub-3940256099942544~3347511713";//testID
-                                        String bannerAdId = "ca-app-pub-3940256099942544/6300978111"; //testId
-                                        String interstitialAdId = "ca-app-pub-3940256099942544/1033173712";//testId
-                                        String videoAdId = "ca-app-pub-3940256099942544/5224354917";//testId
+//                                        String appId_PublisherId = "ca-app-pub-3940256099942544~3347511713";//testID
+//                                        String bannerAdId = "ca-app-pub-3940256099942544/6300978111"; //testId
+//                                        String interstitialAdId = "ca-app-pub-3940256099942544/1033173712";//testId
+//                                        String videoAdId = "ca-app-pub-3940256099942544/5224354917";//testId
 
 
                                         Log.d("AddiDs", adProviderName + " ==" + appId_PublisherId + "==" + bannerAdId + "==" + interstitialAdId + "==" + videoAdId);
@@ -850,7 +864,7 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
 
                                         {
                                             // requst googleAdd
-                                            AddMobUtils util = new AddMobUtils();
+
                                             util.displayServerBannerAdd(addprefs, adContainer, mContext);
                                             // util.showInterstitial(addprefs,HomeActivity.this, interstitialAdId);
                                             //util.displayRewaredVideoAdd(addprefs,mContext, videoAdId);
@@ -864,15 +878,20 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
                                             // inmobi adds not being implemented in this version
 
                                         }
+                                        else  if(adProviderId.equalsIgnoreCase(AddConstants.FaceBookAddProividerId))
+                                        {
+                                            //util.dispFacebookBannerAdd(mContext, addprefs,MainActivity.this);
+                                        }
                                         else if( smaaTobannerView !=null && adProviderId.equalsIgnoreCase(AddConstants.SmaatoProvideId))
                                         {
                                             //requestSmaatoBanerAdds
 
-                                            AddMobUtils util=new AddMobUtils();
+
                                             try {
                                                 int publisherId = Integer.parseInt(addprefs.getStringValue(AddConstants.APP_ID, AddConstants.NOT_FOUND));
                                                 int addSpaceId = Integer.parseInt(addprefs.getStringValue(AddConstants.BANNER_ADD_ID, AddConstants.NOT_FOUND));
                                                 util.displaySmaatoBannerAdd(smaaTobannerView, smaaToAddContainer, publisherId, addSpaceId);
+
                                             }catch (Exception e)
                                             {
                                                 String string = e.getMessage();
@@ -933,6 +952,11 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
     protected void onDestroy() {
         super.onDestroy();
 
+        // clear any  copied data on app  close just  like filego  app;
+        if(Constants.filesToCopy.size()>=1)
+        {
+            Constants.filesToCopy.clear();
+        }
         if(internetChangerReceiver !=null)
             unregisterReceiver(internetChangerReceiver);
 

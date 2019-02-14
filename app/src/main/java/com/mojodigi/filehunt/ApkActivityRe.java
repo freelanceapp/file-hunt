@@ -109,6 +109,8 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
     private Model_Apk glob_model;
     private boolean isSearchModeActive;
 
+    MenuItem sortView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -130,6 +132,7 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
         mAdView = (AdView) findViewById(R.id.adView);
         adContainer = findViewById(R.id.adMobView);
         smaaToAddContainer = findViewById(R.id.smaaToAddContainer);
+        smaaToAddContainer.setVisibility(View.GONE);
 
         //smaaTobannerView =  findViewById(R.id.smaaTobannerView);
 
@@ -156,6 +159,10 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
                     String string = e.getMessage();
                     System.out.print(""+string);
                 }
+            }
+            else if(AddPrioverId.equalsIgnoreCase(AddConstants.FaceBookAddProividerId))
+            {
+                adutil.dispFacebookBannerAdd(mcontext,addprefs , ApkActivityRe.this);
             }
 
         }
@@ -204,6 +211,12 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
 
                     if (mActionMode == null) {
                         mActionMode = startActionMode(mActionModeCallback);
+
+                        Utility.hideKeyboard(ApkActivityRe.this);
+                        isSearchModeActive = false;
+                        searchView.onActionViewCollapsed();
+
+                        sortView.setVisible(true);
                     }
                 }
 
@@ -241,7 +254,7 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
         if (requestCode == Constants.APK_INSTALL_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             if (getPackageManager().canRequestPackageInstalls()) {
                 if(glob_model !=null)
-                Utility.OpenFileWithNoughtAndAll(glob_model.getFilePath(), mcontext, getResources().getString(R.string.file_provider_authority));
+                Utility.OpenFileWithNoughtAndAll_Apk(glob_model.getFilePath(), mcontext, getResources().getString(R.string.file_provider_authority));
             }
         } else {
             //give the error
@@ -256,6 +269,11 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
     }
     public void refreshAdapterAfterRename(String newPath, String newName)
     {
+
+        // finish  acrtion mode aftr  rename  file is  done
+        if(mActionMode!=null) {
+            mActionMode.finish();
+        }
         fileTorename.setFilePath(newPath);
         fileTorename.setFileName(newName);
         ApkList.set(renamePosition,fileTorename);
@@ -324,6 +342,11 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
                 if(instance !=null )
                     AddMobUtils.displaySmaatoInterestialAdd(instance, mcontext, interstitial, addprefs);
             }
+            else if(addPrioverId.equalsIgnoreCase(AddConstants.FaceBookAddProividerId))
+            {
+                addutil.dispFacebookInterestialAdds(mcontext,addprefs);
+            }
+
         }
         else
             addutil.showInterstitial(addprefs,mcontext,null);
@@ -351,6 +374,8 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
     public boolean onCreateOptionsMenu(final Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
        getMenuInflater().inflate(R.menu.menu_common_activity, menu);
+
+        sortView = menu.findItem(R.id.action_sort);
 
         // Associate searchable configuration with the SearchView
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
@@ -389,7 +414,7 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
                 item.setVisible(true);
                 //invalidateOptionsMenu();
                 searchView.requestFocus(0);
-                searchView.setFocusable(false);
+                //searchView.setFocusable(false);
                 isSearchModeActive=false;
                 Utility.hideKeyboard(ApkActivityRe.this);
 
@@ -452,8 +477,15 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
                 }
             }
 
-            if (multiselect_list.size() > 0)
+            if (multiselect_list.size() > 0) {
                 mActionMode.setTitle("" + multiselect_list.size());
+                //keep  the reference of file to  be renamed
+                if (ApkList.contains(multiselect_list.get(0))) {
+                    renamePosition = ApkList.indexOf(multiselect_list.get(0));
+                    fileTorename = multiselect_list.get(0);
+                }
+                //keep  the reference of file to  be renamed
+            }
             else
                 mActionMode.setTitle("");
 
@@ -465,19 +497,20 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
 
     public void refreshAdapter()
     {
-        multiSelectAdapter.selected_ApkList=multiselect_list;
-        multiSelectAdapter.ApkList=ApkList;
-        multiSelectAdapter.notifyDataSetChanged();
+        if(multiSelectAdapter !=null) {
+            multiSelectAdapter.selected_ApkList = multiselect_list;
+            multiSelectAdapter.ApkList = ApkList;
+            multiSelectAdapter.notifyDataSetChanged();
 
-        selectMenuChnage();
+            selectMenuChnage();
 
-        //finish action mode when user deselect files one by one ;
-        if(multiselect_list.size()==0) {
-            if (mActionMode != null) {
-                mActionMode.finish();
+            //finish action mode when user deselect files one by one ;
+            if (multiselect_list.size() == 0) {
+                if (mActionMode != null) {
+                    mActionMode.finish();
+                }
             }
         }
-
 
     }
     private void DispDetailsDialog( Model_Apk fileProperty )
@@ -593,7 +626,7 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
                     if(multiselect_list.size()>=1) {
                         int mFileCount = multiselect_list.size();
                         String msgDeleteFile = mFileCount > 1 ? mFileCount + " " + getResources().getString(R.string.delfiles) : mFileCount + " " + getResources().getString(R.string.delfile);
-                        alertDialogHelper.showAlertDialog("", "Delete Apk"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, false);
+                        alertDialogHelper.showAlertDialog("", "Delete Apk"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, true);
                     }
                     return true;
                 case R.id.action_select:
@@ -736,6 +769,11 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
                 smaaToAddContainer.setVisibility(View.GONE);
             }
 
+
+        }
+        else if(receivedBannerInterface.getErrorCode() == ErrorCode.NO_ERROR)
+        {
+            smaaToAddContainer.setVisibility(View.VISIBLE);
         }
     }
 
@@ -1048,10 +1086,10 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
                 if (!getPackageManager().canRequestPackageInstalls()) {
                     startActivityForResult(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).setData(Uri.parse(String.format("package:%s", getPackageName()))), Constants.APK_INSTALL_REQUEST_CODE);
                 } else {
-                    Utility.OpenFileWithNoughtAndAll(model_apk.getFilePath(), mcontext, getResources().getString(R.string.file_provider_authority));
+                    Utility.OpenFileWithNoughtAndAll_Apk(model_apk.getFilePath(), mcontext, getResources().getString(R.string.file_provider_authority));
                 }
             } else {
-                Utility.OpenFileWithNoughtAndAll(model_apk.getFilePath(), mcontext, getResources().getString(R.string.file_provider_authority));
+                Utility.OpenFileWithNoughtAndAll_Apk(model_apk.getFilePath(), mcontext, getResources().getString(R.string.file_provider_authority));
             }
 
         }
@@ -1283,6 +1321,8 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
                 isSearchModeActive=false;
                 resetAdapter();
                 searchView.onActionViewCollapsed();
+
+                sortView.setVisible(true);
             }
 
             return;

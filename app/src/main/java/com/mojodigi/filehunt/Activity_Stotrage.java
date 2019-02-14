@@ -97,6 +97,7 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
     Adapter_Storage multiSelectAdapter;
     TextView currentPath;
     private String sdCardPath;
+
     TextView internal_txt,sdcard_txt;
     RelativeLayout sdcard_change,internal_change;
     CardView storage_Layout;
@@ -120,24 +121,19 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
     // rename  vars
     int TYPE_STORAGE=8;
     private int renamePosition;
-    private Model_Storage fileTorename;
+    private static Model_Storage fileTorename;
     private boolean isPastingInInterNal=true;
     private String storageType;
     private File folderPath;
 
     Toolbar toolbarStorage;
     static Activity_Stotrage instance;
-    //rename vars
-   // private SharedPreferenceUtil addprefs;
-
-
-    //rename vars
 
     // addvars
     private AdView mAdView;
     private RewardedVideoAd mRewardedVideoAd;
     private int lastCheckedSortOptions;
-    SharedPreferenceUtil addprefs;
+    private SharedPreferenceUtil addprefs;
     View adContainer;
     RelativeLayout smaaToAddContainer;
     BannerView smaaTobannerView;
@@ -175,6 +171,7 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
         mAdView = (AdView) findViewById(R.id.adView);
         adContainer = findViewById(R.id.adMobView);
         smaaToAddContainer = findViewById(R.id.smaaToAddContainer);
+        smaaToAddContainer.setVisibility(View.GONE);
 
         //smaaTobannerView =  findViewById(R.id.smaaTobannerView);
 
@@ -201,6 +198,10 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
                     String string = e.getMessage();
                     System.out.print(""+string);
                 }
+            }
+            else if(AddPrioverId.equalsIgnoreCase(AddConstants.FaceBookAddProividerId))
+            {
+                 adutil.dispFacebookBannerAdd(mContext,addprefs , Activity_Stotrage.this);
             }
 
         }
@@ -509,7 +510,7 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
                     if(multiselect_list.size()>=1) {
                         int mFileCount = multiselect_list.size();
                         String msgDeleteFile = mFileCount > 1 ? mFileCount + " " + getResources().getString(R.string.delfiles) : mFileCount + " " + getResources().getString(R.string.delfile);
-                        alertDialogHelper.showAlertDialog("", "Delete file"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, false);
+                        alertDialogHelper.showAlertDialog("", "Delete file"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, true);
                     }
                     return true;
                 case R.id.action_select:
@@ -544,6 +545,7 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
         public void onDestroyActionMode(ActionMode mode) {
             mActionMode = null;
             isMultiSelect = false;
+            isUnseleAllEnabled=false;
             multiselect_list = new ArrayList<Model_Storage>();
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -579,8 +581,11 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
             refreshAdapter_ActionMode();
         }catch (Exception e)
         {
-
+            String  string=e.getMessage();
+              Log.d("AdapterAfterRename", ""+string);
         }
+
+        //Utility.RunMediaScan(mContext, new File(fileTorename.getFilePath()));
 
 
     }
@@ -1239,6 +1244,11 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
                 smaaToAddContainer.setVisibility(View.GONE);
             }
 
+
+        }
+        else if(receivedBannerInterface.getErrorCode() == ErrorCode.NO_ERROR)
+        {
+            smaaToAddContainer.setVisibility(View.VISIBLE);
         }
     }
 
@@ -1466,10 +1476,10 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
                              if (!getPackageManager().canRequestPackageInstalls()) {
                                  startActivityForResult(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).setData(Uri.parse(String.format("package:%s", getPackageName()))), Constants.APK_INSTALL_REQUEST_CODE);
                              } else {
-                                 Utility.OpenFileWithNoughtAndAll(modelStorage_model.getFilePath(), mContext, getResources().getString(R.string.file_provider_authority));
+                                 Utility.OpenFileWithNoughtAndAll_Apk(modelStorage_model.getFilePath(), mContext, getResources().getString(R.string.file_provider_authority));
                              }
                          } else {
-                             Utility.OpenFileWithNoughtAndAll(modelStorage_model.getFilePath(), mContext, getResources().getString(R.string.file_provider_authority));
+                             Utility.OpenFileWithNoughtAndAll_Apk(modelStorage_model.getFilePath(), mContext, getResources().getString(R.string.file_provider_authority));
                          }
                      }
                      else
@@ -1527,6 +1537,9 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
 
     @Override
     public void onBackPressed() {
+
+
+
         int flag=  changePathOnBackPress();
         if(flag==0)
             super.onBackPressed();
@@ -1670,6 +1683,9 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
             else
                 Utility.dispToast(mContext, "" + Utility.humanReadableByteCount(Utility.listFileSize(Constants.filesToCopy) - Utility.getAvailableExternalMemorySize(UtilityStorage.getExternalStoragePath(mContext, true)), true) + " additional space is required on sdcard");
 
+            // if paste operations does not take place remove  the data from list  to avoid user confusion if he/she select  other files to copy
+            //as per project requirenments
+             Constants.filesToCopy.clear();
 
         }
     }

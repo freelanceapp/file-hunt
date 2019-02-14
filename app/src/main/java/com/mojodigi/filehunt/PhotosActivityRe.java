@@ -101,6 +101,7 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
     BannerView smaaTobannerView;
     private int cnt;
     private boolean isSearchModeActive;
+    MenuItem sortView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,6 +119,7 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         mAdView = (AdView) findViewById(R.id.adView);
         adContainer = findViewById(R.id.adMobView);
         smaaToAddContainer = findViewById(R.id.smaaToAddContainer);
+        smaaToAddContainer.setVisibility(View.GONE);
 
         smaaTobannerView = new BannerView((this).getApplication());
         smaaTobannerView.addAdListener(this);
@@ -142,6 +144,11 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
                     String string = e.getMessage();
                     System.out.print(""+string);
                 }
+            }
+            else if(AddPrioverId.equalsIgnoreCase(AddConstants.FaceBookAddProividerId))
+            {
+                adutil.dispFacebookBannerAdd(mcontext,addprefs , PhotosActivityRe.this);
+
             }
 
         }
@@ -235,6 +242,10 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
     }
     public void refreshAdapterAfterRename(String newPath, String newName)
     {
+        // finish  acrtion mode aftr  rename  file is  done
+        if(mActionMode!=null) {
+            mActionMode.finish();
+        }
         fileTorename.setImgPath(newPath);
         img_ImgList.set(renamePosition,fileTorename);
         refreshAdapter();
@@ -259,6 +270,8 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
     public boolean onCreateOptionsMenu(final Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_common_activity, menu);
+
+        sortView = menu.findItem(R.id.action_sort);
 
         // Associate searchable configuration with the SearchView
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
@@ -298,12 +311,14 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
                 item.setVisible(true);
                 //invalidateOptionsMenu();
                 searchView.requestFocus(0);
-                searchView.setFocusable(false);
+                //searchView.setFocusable(false);
+
                 isSearchModeActive=false;
                 Utility.hideKeyboard(PhotosActivityRe.this);
                 return false;
             }
         });
+
         searchView.setOnSearchClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -386,6 +401,11 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
 
                             if (mActionMode == null) {
                                 mActionMode = startActionMode(mActionModeCallback);
+
+                                Utility.hideKeyboard(PhotosActivityRe.this);
+                                isSearchModeActive = false;
+                                searchView.onActionViewCollapsed();
+                                sortView.setVisible(true);
                             }
                         }
 
@@ -405,10 +425,7 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-
-
                 CustomProgressDialog.show(mcontext, mcontext.getResources().getString(R.string.loading_msg));
-
         }
 
         @Override
@@ -429,9 +446,7 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
             initView();
             super.onPostExecute(aVoid);
 
-
             CustomProgressDialog.dismiss();
-
 
 //            new Handler().postDelayed(new Runnable() {
 //                @Override
@@ -440,10 +455,6 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
 //                    CustomProgressDialog.dismiss();
 //                }
 //            }, 3000);
-
-
-
-
 
         }
     }
@@ -462,10 +473,6 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
             catch (Exception e){}
             gridImg.setImgPath(Intent_Images_List.get(i));
             img_ImgList.add(gridImg);
-
-
-
-
 
         }
     }
@@ -487,8 +494,15 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
                 // to  rename file contain old file;
             }
 
-            if (multiselect_list.size() > 0)
+            if (multiselect_list.size() > 0) {
                 mActionMode.setTitle("" + multiselect_list.size());
+                //new put the code in all activity
+                if (img_ImgList.contains(multiselect_list.get(0))) {
+                    renamePosition = img_ImgList.indexOf(multiselect_list.get(0));
+                    fileTorename = multiselect_list.get(0);
+                }
+                // new put the code in all activity
+            }
 
             else
                 mActionMode.setTitle("");
@@ -501,15 +515,19 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
 
     public void refreshAdapter()
     {
-        multiSelectAdapter.selected_ImgList=multiselect_list;
-        multiSelectAdapter.ImgList=img_ImgList;
-        multiSelectAdapter.notifyDataSetChanged();
-        selectMenuChnage();
 
-        //finish action mode when user deselect files one by one ;
-        if(multiselect_list.size()==0) {
-            if (mActionMode != null) {
-                mActionMode.finish();
+        if(multiSelectAdapter !=null) {
+
+            multiSelectAdapter.selected_ImgList = multiselect_list;
+            multiSelectAdapter.ImgList = img_ImgList;
+            multiSelectAdapter.notifyDataSetChanged();
+            selectMenuChnage();
+
+            //finish action mode when user deselect files one by one ;
+            if (multiselect_list.size() == 0) {
+                if (mActionMode != null) {
+                    mActionMode.finish();
+                }
             }
         }
     }
@@ -578,7 +596,7 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
                     if(multiselect_list.size()>=1) {
                         int mFileCount = multiselect_list.size();
                         String msgDeleteFile = mFileCount > 1 ? mFileCount + " " + getResources().getString(R.string.delfiles) : mFileCount + " " + getResources().getString(R.string.delfile);
-                        alertDialogHelper.showAlertDialog("", "Delete Image"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, false);
+                        alertDialogHelper.showAlertDialog("", "Delete Image"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, true);
                     }
 
                     return true;
@@ -736,6 +754,10 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
             {
                 smaaToAddContainer.setVisibility(View.GONE);
             }
+        }
+        else if(receivedBannerInterface.getErrorCode() == ErrorCode.NO_ERROR)
+        {
+            smaaToAddContainer.setVisibility(View.VISIBLE);
         }
     }
 
@@ -1171,8 +1193,6 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
                 else if(action.equalsIgnoreCase("Type"))
                 {
 
-
-
                 }
 
                 System.out.print(""+img_ImgList);
@@ -1183,65 +1203,44 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         dialog.setNegativeButton(ctx.getResources().getString(R.string.ascending), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
                 dialog.dismiss();
-
                 setLastSelectedCheckBoxFlag(action);
-
                 if(action.equalsIgnoreCase("Name"))
                 {
                     Collections.sort(img_ImgList, new Comparator<Grid_Model>() {
                         public int compare(Grid_Model o1, Grid_Model o2) {
                             return o1.getFileName().compareToIgnoreCase(o2.getFileName());
-
                         }
                     });
-
-
                 }
                 else if(action.equalsIgnoreCase("Last"))
                 {
                     Collections.sort(img_ImgList, new Comparator<Grid_Model>() {
                         public int compare(Grid_Model o1, Grid_Model o2) {
                             return Utility.longToDate(o1.getDateToSort()).compareTo(Utility.longToDate(o2.getDateToSort()));
-
                         }
                     });
                 }
                 else if(action.equalsIgnoreCase("Size"))
                 {
-
-
                     Collections.sort(img_ImgList, new Comparator<Grid_Model>()
                     {
                         public int compare(Grid_Model o1, Grid_Model o2) {
-
                             return (int) (o1.getFileSizeCmpr() - o2.getFileSizeCmpr());
-
                         }
                     });
-
-
                 }
                 else if(action.equalsIgnoreCase("Type"))
                 {
-
                 }
-
-
                 System.out.print(""+img_ImgList);
                 refreshAdapter();
-
-
             }
         });
-
-
         dialog.show();
-
-
-
     }
+
+
     private void setLastSelectedCheckBoxFlag(String action) {
 
         if(action.equalsIgnoreCase("Name"))
@@ -1290,6 +1289,8 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
                 isSearchModeActive=false;
                 resetAdapter();
                 searchView.onActionViewCollapsed();
+
+                sortView.setVisible(true);
             }
 
             return;

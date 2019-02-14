@@ -101,6 +101,7 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
     private Model_Download glob_model;
     private boolean isSearchModeActive;
 
+    MenuItem sortView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,6 +144,10 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
                     String string = e.getMessage();
                     System.out.print(""+string);
                 }
+            }
+            else if(AddPrioverId.equalsIgnoreCase(AddConstants.FaceBookAddProividerId))
+            {
+                adutil.dispFacebookBannerAdd(mcontext,addprefs , DownloadActivityRe.this);
             }
 
         }
@@ -190,6 +195,12 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
 
                     if (mActionMode == null) {
                         mActionMode = startActionMode(mActionModeCallback);
+
+                        Utility.hideKeyboard(DownloadActivityRe.this);
+                        isSearchModeActive = false;
+                        searchView.onActionViewCollapsed();
+
+                        sortView.setVisible(true);
                     }
                 }
 
@@ -244,7 +255,7 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
         if (requestCode == Constants.APK_INSTALL_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             if (getPackageManager().canRequestPackageInstalls()) {
                 if(glob_model !=null)
-                    Utility.OpenFileWithNoughtAndAll(glob_model.getFilePath(), mcontext, getResources().getString(R.string.file_provider_authority));
+                    Utility.OpenFileWithNoughtAndAll_Apk(glob_model.getFilePath(), mcontext, getResources().getString(R.string.file_provider_authority));
             }
         } else {
             //give the error
@@ -275,6 +286,11 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
     }
     public void refreshAdapterAfterRename(String newPath, String newName)
     {
+
+        // finish  acrtion mode aftr  rename  file is  done
+        if(mActionMode!=null) {
+            mActionMode.finish();
+        }
         fileTorename.setFilePath(newPath);
         fileTorename.setFileName(newName);
         DownloadList.set(renamePosition,fileTorename);
@@ -301,6 +317,8 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
     public boolean onCreateOptionsMenu(final Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
        getMenuInflater().inflate(R.menu.menu_common_activity, menu);
+
+        sortView = menu.findItem(R.id.action_sort);
 
         // Associate searchable configuration with the SearchView
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
@@ -341,7 +359,7 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
                 item.setVisible(true);
                 //invalidateOptionsMenu();
                 searchView.requestFocus(0);
-                searchView.setFocusable(false);
+                //searchView.setFocusable(false);
                 isSearchModeActive=false;
                 Utility.hideKeyboard(DownloadActivityRe.this);
                 return false;
@@ -405,8 +423,16 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
 
             }
 
-            if (multiselect_list.size() > 0)
+            if (multiselect_list.size() > 0) {
                 mActionMode.setTitle("" + multiselect_list.size());
+
+                //keep  the reference of file to  be renamed
+                if (DownloadList.contains(multiselect_list.get(0))) {
+                    renamePosition = DownloadList.indexOf(multiselect_list.get(0));
+                    fileTorename = multiselect_list.get(0);
+                }
+                //keep  the reference of file to  be renamed
+            }
             else
                 mActionMode.setTitle("");
 
@@ -418,14 +444,16 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
 
     public void refreshAdapter()
     {
-        multiSelectAdapter.selected_DownloadList=multiselect_list;
-        multiSelectAdapter.DownloadList=DownloadList;
-        multiSelectAdapter.notifyDataSetChanged();
-        selectMenuChnage();
-        //finish action mode when user deselect files one by one ;
-        if(multiselect_list.size()==0) {
-            if (mActionMode != null) {
-                mActionMode.finish();
+        if(multiSelectAdapter !=null) {
+            multiSelectAdapter.selected_DownloadList = multiselect_list;
+            multiSelectAdapter.DownloadList = DownloadList;
+            multiSelectAdapter.notifyDataSetChanged();
+            selectMenuChnage();
+            //finish action mode when user deselect files one by one ;
+            if (multiselect_list.size() == 0) {
+                if (mActionMode != null) {
+                    mActionMode.finish();
+                }
             }
         }
     }
@@ -534,7 +562,7 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
                     if(multiselect_list.size()>=1) {
                         int mFileCount = multiselect_list.size();
                         String msgDeleteFile = mFileCount > 1 ? mFileCount + " " + getResources().getString(R.string.delfiles) : mFileCount + " " + getResources().getString(R.string.delfile);
-                        alertDialogHelper.showAlertDialog("", "Delete file"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, false);
+                        alertDialogHelper.showAlertDialog("", "Delete file"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, true);
                     }
 
                     return true;
@@ -678,6 +706,10 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
             {
                 smaaToAddContainer.setVisibility(View.GONE);
             }
+        }
+        else if(receivedBannerInterface.getErrorCode() == ErrorCode.NO_ERROR)
+        {
+            smaaToAddContainer.setVisibility(View.VISIBLE);
         }
     }
 
@@ -1009,10 +1041,10 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
                         if (!getPackageManager().canRequestPackageInstalls()) {
                             startActivityForResult(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).setData(Uri.parse(String.format("package:%s", getPackageName()))), Constants.APK_INSTALL_REQUEST_CODE);
                         } else {
-                            Utility.OpenFileWithNoughtAndAll(download_model.getFilePath(), mcontext, getResources().getString(R.string.file_provider_authority));
+                            Utility.OpenFileWithNoughtAndAll_Apk(download_model.getFilePath(), mcontext, getResources().getString(R.string.file_provider_authority));
                         }
                     } else {
-                        Utility.OpenFileWithNoughtAndAll(download_model.getFilePath(), mcontext, getResources().getString(R.string.file_provider_authority));
+                        Utility.OpenFileWithNoughtAndAll_Apk(download_model.getFilePath(), mcontext, getResources().getString(R.string.file_provider_authority));
                     }
                 }
                 else
@@ -1269,6 +1301,9 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
                 isSearchModeActive=false;
                 resetAdapter();
                 searchView.onActionViewCollapsed();
+
+                sortView.setVisible(true);
+
             }
 
             return;

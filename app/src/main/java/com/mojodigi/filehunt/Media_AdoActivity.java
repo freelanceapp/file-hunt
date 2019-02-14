@@ -2,6 +2,7 @@ package com.mojodigi.filehunt;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -34,14 +35,16 @@ public class Media_AdoActivity extends AppCompatActivity implements View.OnClick
     private MediaController mediaController;
     private Context mContex;
     private ImageView idInfoBackArrowImage,idAudioShareImgView,idAudioInfoImgView,idAudioDeleteImgView;
-    TextView idSongNameText;
-    File file =null;
+    private TextView idSongNameText;
+    private File file =null;
 
-    ArrayList<File> delete_list=new ArrayList<>();
+    private ArrayList<File> delete_list=new ArrayList<>();
     private int stopPosition;
     private SharedPreferenceUtil addprefs;
-    int activity_Tracker;
-    AlertDialogHelper alertDialogHelper;
+    private int activity_Tracker;
+    private AlertDialogHelper alertDialogHelper;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,15 +85,10 @@ public class Media_AdoActivity extends AppCompatActivity implements View.OnClick
         idAudioDeleteImgView.setOnClickListener(this);
 
 
-
-
-
-
-
         mediaController = new MediaController(this);
         mAdoVideoView.setMediaController(mediaController);
         mediaController.setAnchorView(mAdoVideoView);
-        mediaController.setPadding(0, 0, 0, 0);
+        mediaController.setPadding(0, 0, 0, 10);
         //mediaController.show((stopPosition / 1000));
 
 
@@ -99,7 +97,7 @@ public class Media_AdoActivity extends AppCompatActivity implements View.OnClick
 
 
         String selectedAudioPath = null;
-        Uri selectedVideoUri=null;
+        Uri selectedVideoUri = null;
 
         Intent extrasIntent = getIntent();
         if (extrasIntent != null) {
@@ -124,6 +122,23 @@ public class Media_AdoActivity extends AppCompatActivity implements View.OnClick
             mAdoVideoView.requestFocus();
             mAdoVideoView.start();
 
+
+            mAdoVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    mAdoVideoView.start();
+                    mediaController.show(900000000);
+                }
+            });
+
+            //finish after playing
+            mAdoVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mediaPlayer) {
+                    finish();
+                }
+            });
+
         }
     }
 
@@ -133,6 +148,7 @@ public class Media_AdoActivity extends AppCompatActivity implements View.OnClick
         stopPosition = mAdoVideoView.getCurrentPosition();
         addprefs.setIntValue("position", stopPosition);
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -168,7 +184,7 @@ public class Media_AdoActivity extends AppCompatActivity implements View.OnClick
                     delete_list.add(file);
                     if(alertDialogHelper !=null && delete_list.size()>0)
                     {
-                        alertDialogHelper.showAlertDialog("", "Delete Audio", "DELETE", "CANCEL", 1, false);
+                        alertDialogHelper.showAlertDialog("", "Delete Audio", "DELETE", "CANCEL", 1, true);
                     }
                 }
                 break;

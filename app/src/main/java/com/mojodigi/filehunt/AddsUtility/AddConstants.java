@@ -1,13 +1,18 @@
 package com.mojodigi.filehunt.AddsUtility;
 
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.provider.Settings;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import static com.smaato.soma.SOMA.getPackageName;
 
 public class AddConstants
 {
@@ -17,10 +22,20 @@ public class AddConstants
     public static final String API_RESPONSE_CODE="apiResponseCode";
 
 
-    public static final String APP_NAME_POSTFIX= "_JMM";  // will  identify the client like  lava ,carbon etc ;
-    public static final String VENDOR_ID="JMMFH001";
-   // public static final String APP_NAME_POSTFIX= "_KAB";
-   //public static final String VENDOR_ID="KABFH001";
+    public static final String APP_NAME_POSTFIX= "_KARBONN";  // will  identify the client like  lava ,carbon etc ;
+    public static final String VENDOR_ID="KARBONNFH002";
+
+//        public static final String APP_NAME_POSTFIX= "_GIONEE";  // will  identify the client like  lava ,carbon etc ;
+//        public static final String VENDOR_ID="GIONEEFH002";
+
+//    public static final String APP_NAME_POSTFIX= "_LAVA";  // will  identify the client like  lava ,carbon etc ;
+//    public static final String VENDOR_ID="LAVAFH002";
+
+//    public static final String APP_NAME_POSTFIX= "_SAMSUNG";  // will  identify the client like  lava ,carbon etc ;
+//    public static final String VENDOR_ID="SAMSUNGFH002";
+
+    // public static final String APP_NAME_POSTFIX= "_KAB";
+    //public static final String VENDOR_ID="KABFH001";
 
 
 
@@ -70,12 +85,14 @@ public class AddConstants
 
     //JsonRequestkeys
 
-    public static final String appName="appName";
-    public static final String packageName="packageName";
-    public static final String appVendorId="appVendorId";
-    public static final String appManufacturer="appManufacturer";
-    public static final String deviceModelKey="deviceModel";
-    public  static final String deviceIdkey="deviceId";
+    public static final String key_appName="appName";
+    public static final String key_packageName="packageName";
+    public static final String key_appVendorId="appVendorId";
+    public static final String key_appManufacturer="appManufacturer";
+    public static final String key_deviceModel="deviceModel";
+    public static final String key_deviceId="deviceId";
+    public static final String key_AppVersioName="versionName";
+    public static final String key_AppversionCode="versionCode";
 
 
   //AddProviderskeys    will  decide  which type of adds  need to  be displayed in mobile app;
@@ -85,6 +102,7 @@ public class AddConstants
     public static final String Adsense_Admob_GooglePrivideId="1";
     public static final String InMobiProvideId="2";
     public static final String SmaatoProvideId="3";
+    public static final String  FaceBookAddProividerId="4";
 
 
 
@@ -95,33 +113,57 @@ public class AddConstants
         String deviceModel="";
         String deviceManufacturer="";
         String deviceId="";
+        String versionName="";
+        int versionCode=0;
         try
         {
+
+
+            //get device information
             deviceModel = android.os.Build.MODEL;
             deviceManufacturer = android.os.Build.MANUFACTURER;
             deviceId= Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
             System.out.print(""+deviceId);
 
-        }
-        catch (Exception e)
-        {
+            //get device information
 
         }
+        catch (Exception e) {
+           String str=e.getMessage();
+            Log.d("Exception",""+str);
+        }
+
+
+
+        try {
+             PackageInfo pInfo = mContext.getPackageManager().getPackageInfo(getPackageName(), 0);
+             versionName = pInfo.versionName;
+             versionCode=pInfo.versionCode;
+
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        catch (Exception e){}
+
         JSONObject object  =  new JSONObject();
         try {
 
-            object.put(appName, mContext.getString(com.mojodigi.filehunt.R.string.app_name)+APP_NAME_POSTFIX);
-            object.put(packageName,mContext.getPackageName());
-            object.put(appVendorId,valueVendorId );
-            object.put(appManufacturer, deviceManufacturer);
-            object.put(deviceModelKey, deviceModel);
-            object.put(deviceIdkey, deviceId);
+            object.put(key_appName, mContext.getString(com.mojodigi.filehunt.R.string.app_name)+APP_NAME_POSTFIX);
+            object.put(key_packageName,mContext.getPackageName());
+            object.put(key_appVendorId,valueVendorId );
+            //device manufacturer;
+            object.put(key_appManufacturer, deviceManufacturer);
+            object.put(key_deviceModel, deviceModel);
+            object.put(key_deviceId, deviceId);
+            object.put(key_AppVersioName, versionName);
+            object.put(key_AppversionCode, versionCode);
+
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-
+           Log.d("JsonRequest",object.toString() );
         return object;
     }
 

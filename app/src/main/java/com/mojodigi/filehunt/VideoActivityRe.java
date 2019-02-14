@@ -95,6 +95,9 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
 
     private boolean isSearchModeActive;
 
+
+    MenuItem sortView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,6 +115,7 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         mAdView = (AdView) findViewById(R.id.adView);
         adContainer = findViewById(R.id.adMobView);
         smaaToAddContainer = findViewById(R.id.smaaToAddContainer);
+        smaaToAddContainer.setVisibility(View.GONE);
 
         smaaTobannerView = new BannerView((this).getApplication());
         smaaTobannerView.addAdListener(this);
@@ -136,6 +140,10 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
                     String string = e.getMessage();
                     System.out.print(""+string);
                 }
+            }
+            else if(AddPrioverId.equalsIgnoreCase(AddConstants.FaceBookAddProividerId))
+            {
+                adutil.dispFacebookBannerAdd(mcontext,addprefs , VideoActivityRe.this);
             }
 
         }
@@ -302,7 +310,15 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
     }
 
     public void refreshAdapterAfterRename(String newPath, String newName) {
+
+        // finish  acrtion mode aftr  rename  file is  done
+        if(mActionMode!=null) {
+            mActionMode.finish();
+        }
+
         fileTorename.setImgPath(newPath);
+        fileTorename.setImgBitmap(newPath);
+        fileTorename.setFileName(newName);
         vidioList.set(renamePosition, fileTorename);
         refreshAdapter();
 
@@ -327,6 +343,8 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
     public boolean onCreateOptionsMenu(final Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_common_activity, menu);
+
+        sortView = menu.findItem(R.id.action_sort);
 
         // Associate searchable configuration with the SearchView
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
@@ -365,7 +383,9 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
                 item.setVisible(true);
                 //invalidateOptionsMenu();
                 searchView.requestFocus(0);
-                searchView.setFocusable(false);
+
+                //searchView.setFocusable(false);
+
                 isSearchModeActive=false;
                 Utility.hideKeyboard(VideoActivityRe.this);
                 return false;
@@ -503,6 +523,12 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
 
                     if (mActionMode == null) {
                         mActionMode = startActionMode(mActionModeCallback);
+
+                        Utility.hideKeyboard(VideoActivityRe.this);
+                        isSearchModeActive = false;
+                        searchView.onActionViewCollapsed();
+
+                        sortView.setVisible(true);
                     }
                 }
 
@@ -551,8 +577,15 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
 
             }
 
-            if (multiselect_list.size() > 0)
+            if (multiselect_list.size() > 0) {
                 mActionMode.setTitle("" + multiselect_list.size());
+                //keep  the reference of file to  be renamed
+                if (vidioList.contains(multiselect_list.get(0))) {
+                    renamePosition = vidioList.indexOf(multiselect_list.get(0));
+                    fileTorename = multiselect_list.get(0);
+                }
+                //keep  the reference of file to  be renamed
+            }
             else
                 mActionMode.setTitle("");
 
@@ -563,15 +596,19 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
 
 
     public void refreshAdapter() {
-        multiSelectAdapter.selected_VdoList = multiselect_list;
-        multiSelectAdapter.VdoList = vidioList;
-        multiSelectAdapter.notifyDataSetChanged();
-        selectMenuChnage();
 
-        //finish action mode when user deselect files one by one ;
-        if (multiselect_list.size() == 0) {
-            if (mActionMode != null) {
-                mActionMode.finish();
+        if(multiSelectAdapter !=null) {
+
+            multiSelectAdapter.selected_VdoList = multiselect_list;
+            multiSelectAdapter.VdoList = vidioList;
+            multiSelectAdapter.notifyDataSetChanged();
+            selectMenuChnage();
+
+            //finish action mode when user deselect files one by one ;
+            if (multiselect_list.size() == 0) {
+                if (mActionMode != null) {
+                    mActionMode.finish();
+                }
             }
         }
     }
@@ -679,7 +716,7 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
                     if(multiselect_list.size()>=1) {
                         int mFileCount = multiselect_list.size();
                         String msgDeleteFile = mFileCount > 1 ? mFileCount + " " + getResources().getString(R.string.delfiles) : mFileCount + " " + getResources().getString(R.string.delfile);
-                        alertDialogHelper.showAlertDialog("", "Delete Video"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, false);
+                        alertDialogHelper.showAlertDialog("", "Delete Video"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, true);
                     }
                     return true;
                 case R.id.action_select:
@@ -791,6 +828,10 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
             }
 
 
+        }
+        else if(receivedBannerInterface.getErrorCode() == ErrorCode.NO_ERROR)
+        {
+            smaaToAddContainer.setVisibility(View.VISIBLE);
         }
     }
 
@@ -1276,6 +1317,8 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
                 isSearchModeActive=false;
                 resetAdapter();
                 searchView.onActionViewCollapsed();
+
+                sortView.setVisible(true);
             }
 
             return;

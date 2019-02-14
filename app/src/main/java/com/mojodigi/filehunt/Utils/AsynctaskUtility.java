@@ -141,7 +141,8 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
 
                    // if (path != null && (path.endsWith(".zip") || path.endsWith(".rar"))) {
                         Model_Zip model = new Model_Zip();
-                        model.setFileName(fileName);
+                       //model.setFileName(fileName);
+                        model.setFileName(fileName+"."+Utility.getFileExtensionfromPath(path));
                         model.setFilePath(path);
                         model.setFileSize(Utility.humanReadableByteCount(fileSize, true));
                         model.setFileSizeCmpr(fileSize);
@@ -394,13 +395,18 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
     }
     private String LongToDate(String longV)
     {
-        long input= Long.parseLong(longV);
-        Date date = new Date(input*1000); // *1000 gives accurate date otherwise returns 1970
-        Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        sdf.setCalendar(cal);
-        cal.setTime(date);
-        return sdf.format(date);
+        try {
+            long input = Long.parseLong(longV);
+            Date date = new Date(input * 1000); // *1000 gives accurate date otherwise returns 1970
+            Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            sdf.setCalendar(cal);
+            cal.setTime(date);
+            return sdf.format(date);
+        }catch (Exception e)
+        {
+            return  "";
+        }
 
     }
 

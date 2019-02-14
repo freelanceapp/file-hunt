@@ -63,6 +63,7 @@ import com.mojodigi.filehunt.PhotosActivityRe;
 import com.mojodigi.filehunt.R;
 import com.mojodigi.filehunt.RecentActivityRe;
 import com.mojodigi.filehunt.VideoActivityRe;
+import com.mojodigi.filehunt.ZipActivityRe;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -319,13 +320,19 @@ public class Utility extends Activity
     }
 
     public static String LongToDate(String longV) {
-        long input = Long.parseLong(longV.trim());
-        Date date = new Date(input * 1000); // *1000 gives accurate date otherwise returns 1970
-        Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        sdf.setCalendar(cal);
-        cal.setTime(date);
-        return sdf.format(date);
+
+        try {
+            long input = Long.parseLong(longV.trim());
+            Date date = new Date(input * 1000); // *1000 gives accurate date otherwise returns 1970
+            Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            sdf.setCalendar(cal);
+            cal.setTime(date);
+            return sdf.format(date);
+        }catch (Exception e)
+        {
+            return "";
+        }
     }
 
     public static String LongToDate(Long date) {
@@ -557,6 +564,46 @@ public class Utility extends Activity
         }
 
 
+    }
+
+    public static void OpenFileWithNoughtAndAll_Apk(String name, Context ctx, String authority) {
+        try {
+            File file = new File(name.toLowerCase());
+            String extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
+            String mimetype = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                Uri uri = FileProvider.getUriForFile(ctx, authority, file);
+                if (uri != null) {
+                    Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+                    if (extension.trim().isEmpty() || mimetype == null) {
+                        intent.setDataAndType(uri, "text/*");
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    } else {
+                        intent.setData(uri);
+                        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    }
+                    ctx.startActivity(intent);
+                }
+            } else {
+                Uri uri = Uri.fromFile(file);
+                if (uri != null) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    if (extension.trim().isEmpty() || mimetype == null) {
+                        intent.setDataAndType(uri, "text/*");
+                    } else {
+                        intent.setDataAndType(uri, mimetype);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    }
+                    ctx.startActivity(intent);
+                }
+            }
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(ctx, "Application Not Found ", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            String str = e.getMessage();
+            System.out.println("" + str);
+        }
     }
 
     public static void OpenFileWithNoughtAndAll(String name, Context ctx, String authority) {
@@ -986,7 +1033,16 @@ public class Utility extends Activity
         View_save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Utility.IsNotEmpty(Edit_Rename)) {
+
+                if(isWhitespace(Edit_Rename.getText().toString()))
+                {
+                    Edit_Rename.setError(ctx.getResources().getString(R.string.namerequired));
+
+                    return;
+                }
+
+                if (Utility.IsNotEmpty(Edit_Rename))
+                {
                     // will  be used on activityresult  function of every activity in case of filerename first time when write permission is granted
                     Constants.Global_File_Rename_NewName = Edit_Rename.getText().toString();
                     fileStatus = renameFile(ctx, fPath, Edit_Rename.getText().toString(), MediaType);
@@ -1084,14 +1140,24 @@ public class Utility extends Activity
                     Activity_Stotrage storage = Activity_Stotrage.getInstance();
                     if (storage != null)
                         storage.refreshAdapterAfterRename(pathstr + "/" + newName, newName);
-
                     break;
+
+                case 9:
+
+                    ZipActivityRe zip = ZipActivityRe.getInstance();
+                    zip.refreshAdapterAfterRename(pathstr + "/" + newName, newName);
+                    break;
+
+
             }
 
 
             //
             Utility.RunMediaScan(pctx, latestname);
             Utility.RunMediaScan(pctx, oldFile);
+
+
+
 
         } else {
             Toast.makeText(pctx, pctx.getResources().getString(R.string.rename_failed), Toast.LENGTH_SHORT).show();
@@ -1401,5 +1467,8 @@ public class Utility extends Activity
 
 
     }
+
+
+
 
 }

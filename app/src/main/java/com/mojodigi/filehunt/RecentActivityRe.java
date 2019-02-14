@@ -104,6 +104,7 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
     private Model_Recent glob_model;
     private boolean isSearchModeActive;
 
+    MenuItem sortView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,6 +124,7 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
         mAdView = (AdView) findViewById(R.id.adView);
         adContainer = findViewById(R.id.adMobView);
         smaaToAddContainer = findViewById(R.id.smaaToAddContainer);
+        smaaToAddContainer.setVisibility(View.GONE);
 
         smaaTobannerView = new BannerView((this).getApplication());
         smaaTobannerView.addAdListener(this);
@@ -148,6 +150,10 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
                     System.out.print(""+string);
                 }
             }
+            else if(AddPrioverId.equalsIgnoreCase(AddConstants.FaceBookAddProividerId))
+            {
+                adutil.dispFacebookBannerAdd(mcontext,addprefs , RecentActivityRe.this);
+            }
 
         }
         else {
@@ -168,7 +174,7 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
         UtilityStorage.InitilaizePrefs(mcontext);
         Utility.setActivityTitle(mcontext,getResources().getString(R.string.cat_Recent));
         //execute the async task
-        new AsynctaskUtility<Model_Recent>(mcontext,this,RECENTFILES).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new AsynctaskUtility<Model_Recent>(mcontext,this, RECENTFILES).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         alertDialogHelper =new AlertDialogHelper(this);
         recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
             @Override
@@ -193,6 +199,12 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
 
                     if (mActionMode == null) {
                         mActionMode = startActionMode(mActionModeCallback);
+
+                        Utility.hideKeyboard(RecentActivityRe.this);
+                        isSearchModeActive = false;
+                        searchView.onActionViewCollapsed();
+
+                        sortView.setVisible(true);
                     }
                 }
 
@@ -214,7 +226,7 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
         if (requestCode == Constants.APK_INSTALL_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             if (getPackageManager().canRequestPackageInstalls()) {
                 if(glob_model !=null)
-                    Utility.OpenFileWithNoughtAndAll(glob_model.getFilePath(), mcontext, getResources().getString(R.string.file_provider_authority));
+                    Utility.OpenFileWithNoughtAndAll_Apk(glob_model.getFilePath(), mcontext, getResources().getString(R.string.file_provider_authority));
             }
         } else {
             //give the error
@@ -246,6 +258,11 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
     }
     public void refreshAdapterAfterRename(String newPath, String newName)
     {
+
+        // finish  acrtion mode aftr  rename  file is  done
+        if(mActionMode!=null) {
+            mActionMode.finish();
+        }
         fileTorename.setFilePath(newPath);
         fileTorename.setFileName(newName);
         RecentList.set(renamePosition,fileTorename);
@@ -315,6 +332,7 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
         // Inflate the menu; this adds items to the action bar if it is present.
        getMenuInflater().inflate(R.menu.menu_common_activity, menu);
 
+        sortView = menu.findItem(R.id.action_sort);
         // Associate searchable configuration with the SearchView
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView = (SearchView) menu.findItem(R.id.action_search)
@@ -354,7 +372,8 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
                 item.setVisible(true);
                 //invalidateOptionsMenu();
                 searchView.requestFocus(0);
-                searchView.setFocusable(false);
+                //searchView.setFocusable(false);
+
                 isSearchModeActive=false;
                 Utility.hideKeyboard(RecentActivityRe.this);
 
@@ -374,9 +393,6 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
             }
         });
 
-
-
-
         return true;
     }
 
@@ -394,8 +410,8 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
 
         if(id== R.id.action_sort)
         {
-
             sortDialog(mcontext);
+
         }
 
         return super.onOptionsItemSelected(item);
@@ -418,8 +434,15 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
                 // to  rename file contain old file;
             }
 
-            if (multiselect_list.size() > 0)
+            if (multiselect_list.size() > 0) {
                 mActionMode.setTitle("" + multiselect_list.size());
+                //keep  the reference of file to  be renamed
+                if (RecentList.contains(multiselect_list.get(0))) {
+                    renamePosition = RecentList.indexOf(multiselect_list.get(0));
+                    fileTorename = multiselect_list.get(0);
+                }
+                //keep  the reference of file to  be renamed
+            }
             else
                 mActionMode.setTitle("");
 
@@ -551,7 +574,7 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
                     if(multiselect_list.size()>=1) {
                         int mFileCount = multiselect_list.size();
                         String msgDeleteFile = mFileCount > 1 ? mFileCount + " " + getResources().getString(R.string.delfiles) : mFileCount + " " + getResources().getString(R.string.delfile);
-                        alertDialogHelper.showAlertDialog("", "Delete file"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, false);
+                        alertDialogHelper.showAlertDialog("", "Delete file"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, true);
                     }
                     return true;
                 case R.id.action_select:
@@ -693,6 +716,10 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
             {
                 smaaToAddContainer.setVisibility(View.GONE);
             }
+        }
+        else if(receivedBannerInterface.getErrorCode() == ErrorCode.NO_ERROR)
+        {
+            smaaToAddContainer.setVisibility(View.VISIBLE);
         }
     }
 
@@ -1049,10 +1076,10 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
                         if (!getPackageManager().canRequestPackageInstalls()) {
                             startActivityForResult(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).setData(Uri.parse(String.format("package:%s", getPackageName()))), Constants.APK_INSTALL_REQUEST_CODE);
                         } else {
-                            Utility.OpenFileWithNoughtAndAll(recent_Model.getFilePath(), mcontext, getResources().getString(R.string.file_provider_authority));
+                            Utility.OpenFileWithNoughtAndAll_Apk(recent_Model.getFilePath(), mcontext, getResources().getString(R.string.file_provider_authority));
                         }
                     } else {
-                        Utility.OpenFileWithNoughtAndAll(recent_Model.getFilePath(), mcontext, getResources().getString(R.string.file_provider_authority));
+                        Utility.OpenFileWithNoughtAndAll_Apk(recent_Model.getFilePath(), mcontext, getResources().getString(R.string.file_provider_authority));
                     }
                 }
                 else
@@ -1067,6 +1094,7 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
 
 
     }
+
     public String calcSelectFileSize(ArrayList<Model_Recent> fileList)
     {
         long totalSize=0;
@@ -1237,22 +1265,12 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
                 }
                 else if(action.equalsIgnoreCase("Type"))
                 {
-
                 }
-
-
                 System.out.print(""+RecentList);
                 refreshAdapter();
-
-
             }
         });
-
-
         dialog.show();
-
-
-
     }
     private void setLastSelectedCheckBoxFlag(String action) {
 
@@ -1288,6 +1306,8 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
                 isSearchModeActive=false;
                 resetAdapter();
                 searchView.onActionViewCollapsed();
+
+                sortView.setVisible(true);
             }
 
             return;

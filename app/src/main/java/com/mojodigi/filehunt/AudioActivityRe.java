@@ -102,6 +102,7 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
     Interstitial interstitial;  // smaatoInterestialAdd;
     private int cnt;
     private boolean isSearchModeActive;
+    MenuItem sortView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,6 +123,7 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
         mAdView = (AdView) findViewById(R.id.adView);
         adContainer = findViewById(R.id.adMobView);
         smaaToAddContainer = findViewById(R.id.smaaToAddContainer);
+        smaaToAddContainer.setVisibility(View.GONE);
 
         smaaTobannerView = new BannerView((this).getApplication());
         smaaTobannerView.addAdListener(this);
@@ -146,6 +148,10 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
                     String string = e.getMessage();
                     System.out.print(""+string);
                 }
+            }
+            else if(AddPrioverId.equalsIgnoreCase(AddConstants.FaceBookAddProividerId))
+            {
+                adutil.dispFacebookBannerAdd(mcontext,addprefs , AudioActivityRe.this);
             }
 
         }
@@ -281,17 +287,24 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
     {
         if (addprefs != null && instance != null)
         {
+            AddMobUtils addutil= new AddMobUtils();
             if(AddConstants.checkIsOnline(mcontext) && adContainer !=null && addprefs !=null)
             {
                 String AddPrioverId=addprefs.getStringValue(AddConstants.ADD_PROVIDER_ID, AddConstants.NOT_FOUND);
                 if(AddPrioverId.equalsIgnoreCase(AddConstants.Adsense_Admob_GooglePrivideId)) {
-                    AddMobUtils addutil= new AddMobUtils();
+
                     if(addutil!=null)
                         addutil.displayServerBannerAdd(addprefs, adContainer, mcontext);
                 }
                 else if(AddPrioverId.equalsIgnoreCase(AddConstants.SmaatoProvideId)) {
                     AddMobUtils.displaySmaatoInterestialAdd(instance, mcontext, interstitial, addprefs);
                 }
+                else if(AddPrioverId.equalsIgnoreCase(AddConstants.FaceBookAddProividerId))
+                {
+                    addutil.dispFacebookInterestialAdds(mcontext,addprefs);
+                }
+
+
             }
         }
 
@@ -341,6 +354,12 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
     }
     public void refreshAdapterAfterRename(String newPath, String newName)
     {
+
+        // finish  acrtion mode aftr  rename  file is  done
+        if(mActionMode!=null) {
+            mActionMode.finish();
+        }
+
         fileTorename.setAudioPath(newPath);
         fileTorename.setAudiFileName(newName);
         audioList.set(renamePosition,fileTorename);
@@ -368,6 +387,7 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_common_activity, menu);
 
+        sortView = menu.findItem(R.id.action_sort);
         // Associate searchable configuration with the SearchView
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView = (SearchView) menu.findItem(R.id.action_search)
@@ -404,7 +424,8 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
                 item.setVisible(true);
                 //invalidateOptionsMenu();
                 searchView.requestFocus(0);
-                searchView.setFocusable(false);
+
+                //searchView.setFocusable(false);
 
                 isSearchModeActive=false;
                 Utility.hideKeyboard(AudioActivityRe.this);
@@ -582,6 +603,15 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
 
                     if (mActionMode == null) {
                         mActionMode = startActionMode(mActionModeCallback);
+
+
+                        Utility.hideKeyboard(AudioActivityRe.this);
+                        isSearchModeActive = false;
+                        searchView.onActionViewCollapsed();
+
+                        sortView.setVisible(true);
+
+
                     }
                 }
 
@@ -626,8 +656,16 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
 
             }
 
-            if (multiselect_list.size() > 0)
+            if (multiselect_list.size() > 0) {
                 mActionMode.setTitle("" + multiselect_list.size());
+
+                //keep  the reference of file to  be renamed
+                if (audioList.contains(multiselect_list.get(0))) {
+                    renamePosition = audioList.indexOf(multiselect_list.get(0));
+                    fileTorename = multiselect_list.get(0);
+                }
+            }
+            //keep  the reference of file to  be renamed
             else
                 mActionMode.setTitle("");
 
@@ -639,18 +677,19 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
 
     public void refreshAdapter()
     {
-        multiSelectAdapter.selected_AudioList=multiselect_list;
-        multiSelectAdapter.AudioList=audioList;
-        multiSelectAdapter.notifyDataSetChanged();
-        selectMenuChnage();
+        if(multiSelectAdapter !=null) {
+            multiSelectAdapter.selected_AudioList = multiselect_list;
+            multiSelectAdapter.AudioList = audioList;
+            multiSelectAdapter.notifyDataSetChanged();
+            selectMenuChnage();
 
-       //finish action mode when user deselect files one by one ;
-        if(multiselect_list.size()==0) {
-            if (mActionMode != null) {
-                mActionMode.finish();
+            //finish action mode when user deselect files one by one ;
+            if (multiselect_list.size() == 0) {
+                if (mActionMode != null) {
+                    mActionMode.finish();
+                }
             }
         }
-
     }
 
     private int statusBarColor;
@@ -721,7 +760,7 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
                     if(multiselect_list.size()>=1) {
                         int mFileCount = multiselect_list.size();
                         String msgDeleteFile = mFileCount > 1 ? mFileCount + " " + getResources().getString(R.string.delfiles) : mFileCount + " " + getResources().getString(R.string.delfile);
-                        alertDialogHelper.showAlertDialog("", "Delete Audio"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, false);
+                        alertDialogHelper.showAlertDialog("", "Delete Audio"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, true);
                     }
                     return true;
                 case R.id.action_select:
@@ -841,6 +880,11 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
             }
 
 
+
+        }
+        else if(receivedBannerInterface.getErrorCode() == ErrorCode.NO_ERROR)
+        {
+            smaaToAddContainer.setVisibility(View.VISIBLE);
         }
     }
 
@@ -1464,6 +1508,9 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
                 isSearchModeActive=false;
                 resetAdapter();
                 searchView.onActionViewCollapsed();
+
+                sortView.setVisible(true);
+
             }
 
             return;

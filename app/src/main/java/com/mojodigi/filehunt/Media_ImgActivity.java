@@ -69,6 +69,12 @@ public class Media_ImgActivity extends AppCompatActivity implements View.OnClick
     int activity_Tracker;
 
     AlertDialogHelper alertDialogHelper;
+
+    private long AvailableInternalMemory;
+    private long Size100Mb= 1024*1024*100;
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,6 +102,8 @@ public class Media_ImgActivity extends AppCompatActivity implements View.OnClick
         isUp = true;
 
         UtilityStorage.InitilaizePrefs(mContext);
+        AvailableInternalMemory = Utility.getAvailableInternalMemorySize();
+
         mImageBottomLayout =  findViewById(R.id.mImageBottomLayout);
         mImageBottomLayout.setVisibility(View.INVISIBLE);
         slideUp(mImageBottomLayout);
@@ -133,7 +141,7 @@ public class Media_ImgActivity extends AppCompatActivity implements View.OnClick
 
         mPager = (ViewPager) findViewById(R.id.idMediaImgViewPager);
       //  mPager.setAdapter(new MediaImageAdapter(this,ImagesArrayList ,  mOnClickImage));
-        adapter=new MediaImageAdapter(this,ImagesArrayList ,  mOnClickImage);
+        adapter=new MediaImageAdapter(this, ImagesArrayList ,  mOnClickImage);
         mPager.setAdapter(adapter);
         mPager.setOffscreenPageLimit(2);
 
@@ -148,7 +156,7 @@ public class Media_ImgActivity extends AppCompatActivity implements View.OnClick
             @Override
             public void onPageSelected(int i) {
 
-                wallPath=ImagesArrayList.get(i);
+                wallPath = ImagesArrayList.get(i);
                 delete_ImgList_Tracker.clear();
                 delete_ImgList_Tracker.add(Constants.img_ArrayImgList.get(i));
                 // Utility.dispToast(mContext, wallPath);
@@ -179,7 +187,12 @@ public class Media_ImgActivity extends AppCompatActivity implements View.OnClick
         if (id == R.id.ic_setwallpaper) {
             //Toast.makeText(this, "Action clicked", Toast.LENGTH_LONG).show();
             if(wallPath!=null)
-                new setwallPaperAsync().execute();
+
+                if(AvailableInternalMemory>Size100Mb){
+                    new setwallPaperAsync().execute();
+                }else {
+                    Utility.dispToast(mContext, "No space available.");
+                }
 
             return true;
         }
@@ -226,7 +239,7 @@ public class Media_ImgActivity extends AppCompatActivity implements View.OnClick
                         delete_list.add(file);
                         if(alertDialogHelper !=null && delete_list.size()>0)
                         {
-                            alertDialogHelper.showAlertDialog("", "Delete Image", "DELETE", "CANCEL", 1, false);
+                            alertDialogHelper.showAlertDialog("", "Delete Image", "DELETE", "CANCEL", 1, true);
                         }
                     }
 
@@ -301,10 +314,10 @@ public class Media_ImgActivity extends AppCompatActivity implements View.OnClick
             super.onPostExecute(flag);
             if(flag==1)
             {
-                Utility.dispToast(mContext, "Wallpaper set successfully");
+                Utility.dispToast(mContext, "Wallpaper set successfully.");
             }
             else {
-                Utility.dispToast(mContext, "Could not set wallpaper");
+                Utility.dispToast(mContext, "Could not set wallpaper.");
             }
             CustomProgressDialog.dismiss();
         }
@@ -321,6 +334,7 @@ public class Media_ImgActivity extends AppCompatActivity implements View.OnClick
             {
                 File image= new File(wallPath);
                 BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+                bmOptions.inPreferredConfig = Bitmap.Config.RGB_565;
                 Bitmap bitmap = BitmapFactory.decodeFile(image.getAbsolutePath(),bmOptions);
                 bitmap = Bitmap.createScaledBitmap(bitmap,500,500,true);
                 if(bitmap!=null) {
@@ -330,7 +344,7 @@ public class Media_ImgActivity extends AppCompatActivity implements View.OnClick
                 }
             }
         } catch (Exception e) {
-            // TODO Auto-generated catch block
+            Utility.dispToast(mContext,"Image size too large.");
         }
         return 0;
     }

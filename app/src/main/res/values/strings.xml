@@ -1,119 +1,120 @@
 <resources>
-    <string name="app_name">FileHunt</string>
+ <string name="app_name">FileHunt</string>
 
-    <string name="internalstorage">Internal Storage</string>
-    <string name="externalstorage">External Storage</string>
-    <string name="avlbl">Available</string>
+ <string name="internalstorage">Internal Storage</string>
+ <string name="externalstorage">External Storage</string>
+ <string name="avlbl">Available</string>
 
-        <!--taken from filemangaer app-->
-
-
-    <string name="actions_rename">Rename</string>
-
-    <string name="menu_item_delete">Delete</string>
-    <string name="menu_item_move">Move</string>
-    <string name="action_search">Search</string>
-    <string name="action_sort">Sort</string>
-    <!--taken from filemangaer app-->
-
-    <string name="file_provider_authority" translatable="false">com.example.filehunt.provider</string>
-
-    <string name="loading_msg">Loading...</string>
-    <string name="msg_set_wall">Setting wallpaper</string>
-    <string name="copying_msg">Copying...</string>
-    <string name="foldercreatedmsg">folder created successfully</string>
-
-    <string name="menu_selectAll">SELECT ALL</string>
-    <string name="menu_unselectAll">UNSELECT ALL</string>
-    <string name="menu_paste">Paste</string>
-
-    <string name="cat_Images">Image</string>
-    <string name="cat_Videos">Video</string>
-    <string name="cat_Audio">Audio</string>
-    <string name="cat_Documents">Document</string>
-    <string name="cat_Download">Download</string>
-    <string name="cat_Animation">Animation</string>
-    <string name="cat_Recent">Recent</string>
-    <string name="cat_Apk">Apps</string>
-    <string name="cat_zip_title">Zip</string>
-    <string name="createfolder">CREATE</string>
-    <string name="save">SAVE</string>
-    <string name="cancel">CANCEL</string>
-    <string name="create_folder">Create folder</string>
-    <string name="encrypt_heading">Encrypt file</string>
-    <string name="password">write password</string>
-    <string name="encrypt">ENCRYPT</string>
-    <string name="rename_success">File renamed successfully</string>
-    <string name="rename_failed">Rename failed</string>
-    <string name="emty_error">can not be empty</string>
-    <string name="foldernamerequire">Folder name required</string>
-    <string name="error">Error</string>
-
-    <string name="delfile">file</string>
-    <string name="delfiles">files</string>
-    <string name="delmsg1">Items deleted</string>
-    <string name="delmsg2">Item deleted</string>
-
-    <string name="needsaccesssummary">Please choose the root directory of \t</string>
-    <string name="needsaccesssummary1">\tto grant write access to operate </string>
-    <string name="permission_txt">Read/Write permission is required</string>
-    <string name="open">OPEN</string>
-    <string name="deleting_file">Deleting files </string>
-
-    <string name="sortName">Name</string>
-    <string name="lastModified">Last Modified(Date)</string>
-    <string name="sortSize">Size</string>
-    <string name="type">Type</string>
-
-    <string name="sortby">Sort By</string>
-    <string name="ascending">Ascending</string>
-    <string name="descending">Descending</string>
+  <!--taken from filemangaer app-->
 
 
-    <string name="strgdevice">STORAGE DEVICES</string>
+ <string name="actions_rename" >Rename</string>
 
-    <!-- demo add ids -->
-    <!--
-        <string name="admob_app_id">ca-app-pub-5603925957932903~3576315291</string>
-        <string name="banner_add_id">ca-app-pub-3940256099942544/6300978111</string>
-        <string name="ad_unit_id">ca-app-pub-3940256099942544/1033173712</string>
-        <string name="ad_unit_id_reward">ca-app-pub-3940256099942544/5224354917</string>
-     -->
-      <!-- demo add ids -->
+ <string name="menu_item_delete" >Delete</string>
+ <string name="menu_item_move">Move</string>
+ <string name="action_search">Search</string>
+ <string name="action_sort">Sort</string>
+ <!--taken from filemangaer app-->
+
+ <string name="file_provider_authority" >com.example.filehunt.provider</string>
+
+ <string name="loading_msg">Loading...</string>
+ <string name="msg_set_wall">Setting wallpaper</string>
+ <string name="copying_msg">Copying...</string>
+ <string name="foldercreatedmsg">folder created successfully</string>
+
+ <string name="menu_selectAll">SELECT ALL</string>
+ <string name="menu_unselectAll" >UNSELECT ALL</string>
+ <string name="menu_paste" >Paste</string>
+
+ <string name="cat_Images">Image</string>
+ <string name="cat_Videos">Video</string>
+ <string name="cat_Audio">Audio</string>
+ <string name="cat_Documents">Document</string>
+ <string name="cat_Download">Download</string>
+ <string name="cat_Animation">Animation</string>
+ <string name="cat_Recent">Recent</string>
+ <string name="cat_Apk">Apps</string>
+ <string name="cat_zip_title">Zip</string>
+ <string name="createfolder">CREATE</string>
+ <string name="save">SAVE</string>
+ <string name="cancel">CANCEL</string>
+ <string name="create_folder">Create folder</string>
+ <string name="encrypt_heading">Encrypt file</string>
+ <string name="password">write password</string>
+ <string name="encrypt">ENCRYPT</string>
+ <string name="rename_success">File renamed successfully</string>
+ <string name="rename_failed">Rename failed</string>
+ <string name="emty_error">can not be empty</string>
+ <string name="foldernamerequire">Folder name required</string>
+ <string name="namerequired">Name is required</string>
+ <string name="error">Error</string>
+
+ <string name="delfile">file</string>
+ <string name="delfiles">files</string>
+ <string name="delmsg1">Items deleted</string>
+ <string name="delmsg2">Item deleted</string>
+
+ <string name="needsaccesssummary">Please choose the root directory of \t</string>
+ <string name="needsaccesssummary1">\tto grant write access to operate </string>
+ <string name="permission_txt">Read/Write permission is required</string>
+ <string name="open">OPEN</string>
+ <string name="deleting_file">Deleting files </string>
+
+ <string name="sortName">Name</string>
+ <string name="lastModified">Last Modified(Date)</string>
+ <string name="sortSize">Size</string>
+ <string name="type">Type</string>
+
+ <string name="sortby">Sort By</string>
+ <string name="ascending">Ascending</string>
+ <string name="descending">Descending</string>
 
 
+ <string name="strgdevice">STORAGE DEVICES</string>
 
-
-    <!--actual  add ids for lvvoMobile -->
-    <!--
-       <string name="admob_app_id">ca-app-pub-5603925957932903~7136674365</string>
-
-       <string name="banner_add_id">ca-app-pub-5603925957932903/9547215284</string>
-       <string name="ad_unit_id">ca-app-pub-5603925957932903/4809893925</string>
-
-       <string name="ad_unit_id_reward">ca-app-pub-5603925957932903/5622774574</string>
-    -->
-    <!--actualapp id -->
-
-
-    <!--actual  add id for FileHunt blockedAccount -->
-<!--
-     <string name="admob_app_id">ca-app-pub-5603925957932903~3576315291</string>
-     <string name="banner_add_id">ca-app-pub-5603925957932903/8134685014</string>
-     <string name="ad_unit_id">ca-app-pub-5603925957932903/9183865192</string>
-     <string name="ad_unit_id_reward">ca-app-pub-5603925957932903/5622774574</string>
+ <!-- demo add ids -->
+ <!--
+  <string name="admob_app_id">ca-app-pub-5603925957932903~3576315291</string>
+  <string name="banner_add_id">ca-app-pub-3940256099942544/6300978111</string>
+  <string name="ad_unit_id">ca-app-pub-3940256099942544/1033173712</string>
+  <string name="ad_unit_id_reward">ca-app-pub-3940256099942544/5224354917</string>
   -->
-    <!--actual  add id for FileHunt blockedAccount -->
+  <!-- demo add ids -->
 
 
-    <!--actual  add id for FileHunt runningAccount -->
 
-       <string name="admob_app_id">ca-app-pub-4867602581600600~6953664315</string>
-       <string name="banner_add_id">ca-app-pub-4867602581600600/8632210515</string>
-       <string name="ad_unit_id">ca-app-pub-4867602581600600/6512355771</string>
-       <string name="ad_unit_id_reward">ca-app-pub-4867602581600600/6141778543</string>
 
-    <!--actual  add id for FileHunt runningAccount -->
+ <!--actual add ids for lvvoMobile -->
+ <!--
+  <string name="admob_app_id">ca-app-pub-5603925957932903~7136674365</string>
+
+  <string name="banner_add_id">ca-app-pub-5603925957932903/9547215284</string>
+  <string name="ad_unit_id">ca-app-pub-5603925957932903/4809893925</string>
+
+  <string name="ad_unit_id_reward">ca-app-pub-5603925957932903/5622774574</string>
+ -->
+ <!--actualapp id -->
+
+
+ <!--actual add id for FileHunt blockedAccount -->
+<!--
+  <string name="admob_app_id">ca-app-pub-5603925957932903~3576315291</string>
+  <string name="banner_add_id">ca-app-pub-5603925957932903/8134685014</string>
+  <string name="ad_unit_id">ca-app-pub-5603925957932903/9183865192</string>
+  <string name="ad_unit_id_reward">ca-app-pub-5603925957932903/5622774574</string>
+ -->
+ <!--actual add id for FileHunt blockedAccount -->
+
+
+ <!--actual add id for FileHunt runningAccount -->
+
+  <string name="admob_app_id">ca-app-pub-4867602581600600~6953664315</string>
+  <string name="banner_add_id">ca-app-pub-4867602581600600/8632210515</string>
+  <string name="ad_unit_id">ca-app-pub-4867602581600600/6512355771</string>
+  <string name="ad_unit_id_reward">ca-app-pub-4867602581600600/6141778543</string>
+
+ <!--actual add id for FileHunt runningAccount -->
 
 
 

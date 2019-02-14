@@ -128,6 +128,7 @@ public class Category_Explore_Activity extends AppCompatActivity implements Adap
         mAdView = (AdView) findViewById(R.id.adView);
         adContainer = findViewById(R.id.adMobView);
         smaaToAddContainer = findViewById(R.id.smaaToAddContainer);
+        smaaToAddContainer.setVisibility(View.GONE);
 
         smaaTobannerView = new BannerView((this).getApplication());
         smaaTobannerView.addAdListener(this);
@@ -152,6 +153,11 @@ public class Category_Explore_Activity extends AppCompatActivity implements Adap
                     String string = e.getMessage();
                     System.out.print(""+string);
                 }
+            }
+
+            else if(AddPrioverId.equalsIgnoreCase(AddConstants.FaceBookAddProividerId))
+            {
+                adutil.dispFacebookBannerAdd(ctx,addprefs , Category_Explore_Activity.this);
             }
 
         }
@@ -529,6 +535,10 @@ public class Category_Explore_Activity extends AppCompatActivity implements Adap
             }
 
         }
+        else if(receivedBannerInterface.getErrorCode() == ErrorCode.NO_ERROR)
+        {
+            smaaToAddContainer.setVisibility(View.VISIBLE);
+        }
     }
 
 
@@ -662,7 +672,7 @@ public class Category_Explore_Activity extends AppCompatActivity implements Adap
 
     public void refreshAdapter()
     {
-
+          if(obj_adapter !=null)
         obj_adapter.notifyDataSetChanged();
     }
 

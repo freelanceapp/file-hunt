@@ -2,6 +2,8 @@ package com.mojodigi.filehunt.Application;
 
 import android.app.Application;
 
+import com.facebook.ads.AudienceNetworkActivity;
+import com.facebook.ads.AudienceNetworkAds;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
@@ -11,7 +13,9 @@ import com.mojodigi.filehunt.AddsUtility.AddConstants;
 import com.mojodigi.filehunt.AddsUtility.SharedPreferenceUtil;
 import com.mojodigi.filehunt.Analytics.AnalyticsTrackers;
 
-public class MyApplication extends Application {
+//public class MyApplication extends Application {
+public class MyApplication extends android.support.multidex.MultiDexApplication {
+
     public static final String TAG = MyApplication.class
             .getSimpleName();
 
@@ -35,8 +39,23 @@ public class MyApplication extends Application {
 
         //
 
+        //for fb adds
+        //https://developers.facebook.com/docs/audience-network/reference/android/com/facebook/ads/audiencenetworkads.html/
+        AudienceNetworkAds.initialize(getApplicationContext());
+        AudienceNetworkAds.isInAdsProcess(getApplicationContext());
+
         AnalyticsTrackers.initialize(this);
         AnalyticsTrackers.getInstance().get(AnalyticsTrackers.Target.APP);
+
+
+        //freeAnalytics
+
+        // Start the Kochava Tracker
+        com.kochava.base.Tracker.configure(new com.kochava.base.Tracker.Configuration(getApplicationContext())
+                .setAppGuid("kofilehunt-android-55ct67t").setLogLevel(com.kochava.base.Tracker.LOG_LEVEL_DEBUG)
+        );
+
+
     }
 
     public static synchronized MyApplication getInstance() {

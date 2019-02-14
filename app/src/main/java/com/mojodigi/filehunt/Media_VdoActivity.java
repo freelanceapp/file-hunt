@@ -2,14 +2,17 @@ package com.mojodigi.filehunt;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.MediaController;
@@ -42,6 +45,8 @@ public class Media_VdoActivity extends AppCompatActivity implements View.OnClick
     ArrayList<File> delete_list=new ArrayList<>();
     int activity_Tracker;
     AlertDialogHelper alertDialogHelper;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,8 +90,8 @@ public class Media_VdoActivity extends AppCompatActivity implements View.OnClick
 
         mediaController = new MediaController(this);
         mediaController.setAnchorView(mVdoVideoView);
-        mediaController.setPadding(0, 0, 0, 95);
-
+        mediaController.setPadding(0, 0, 0, 0);
+        mediaController.setBackground(ContextCompat.getDrawable(this, R.drawable.bg_controller));
 
         Intent extrasIntent = getIntent();
         if (extrasIntent != null) {
@@ -94,8 +99,8 @@ public class Media_VdoActivity extends AppCompatActivity implements View.OnClick
             activity_Tracker=extrasIntent.getIntExtra(Constants.MEDIA_DELETE_ACTIVITY_TRACKER,100 );
             if(selectedVdoPath!=null)
             {
-                 file =  new File(selectedVdoPath);
-                 selectedVideoUri=Uri.parse(file.toString());
+                file =  new File(selectedVdoPath);
+                selectedVideoUri=Uri.parse(file.toString());
             }
 
         }
@@ -104,7 +109,26 @@ public class Media_VdoActivity extends AppCompatActivity implements View.OnClick
             mVdoVideoView.setMediaController(mediaController);
             mVdoVideoView.setVideoURI(selectedVideoUri);
             mVdoVideoView.requestFocus();
-            mVdoVideoView.start();
+           mVdoVideoView.start();
+
+//              //only this showed the controller for me!!
+//            mVdoVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+//                @Override
+//                public void onPrepared(MediaPlayer mp) {
+//                    mVdoVideoView.start();
+//                    mediaController.show(900000000);
+//                }
+//            });
+//
+//            //finish after playing
+//            mVdoVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+//                @Override
+//                public void onCompletion(MediaPlayer mediaPlayer) {
+//                    finish();
+//                }
+//            });
+
+
         } else {
 
             Utility.dispToast(mContext, "can't play file");
@@ -122,9 +146,9 @@ public class Media_VdoActivity extends AppCompatActivity implements View.OnClick
 
             case R.id.mVideoShareImgView:
 
-             if(file!=null && mContext!=null)
-                 Utility.shareFile(mContext, file.getAbsolutePath());
-             break;
+                if(file!=null && mContext!=null)
+                    Utility.shareFile(mContext, file.getAbsolutePath());
+                break;
 
             case R.id.mVideoInfoImgView:
                 if(file!=null) {
@@ -138,11 +162,11 @@ public class Media_VdoActivity extends AppCompatActivity implements View.OnClick
                 if(file!=null) {
                     delete_list.add(file);
                     if(alertDialogHelper !=null && delete_list.size()>0)
-                        {
-                            alertDialogHelper.showAlertDialog("", "Delete Video", "DELETE", "CANCEL", 1, false);
-                        }
+                    {
+                        alertDialogHelper.showAlertDialog("", "Delete Video", "DELETE", "CANCEL", 1, true);
+                    }
 
-                        }
+                }
                 break;
 
         }
@@ -150,14 +174,6 @@ public class Media_VdoActivity extends AppCompatActivity implements View.OnClick
 
 
 
-    @Override
-    public void onPause() {
-       // Log.d("", "onPause called");
-        super.onPause();
-        stopPosition = mVdoVideoView.getCurrentPosition();
-        addprefs.setIntValue("position", stopPosition);
-        //mVdoVideoView.pause();
-    }
 
 //    @Override
 //    public void onStop() {
@@ -169,19 +185,9 @@ public class Media_VdoActivity extends AppCompatActivity implements View.OnClick
 //    }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        //Log.d("", "onResume called" + stopPosition);
-       // mVdoVideoView.seekTo(stopPosition);
-        mVdoVideoView.seekTo(addprefs.getIntValue("position",0));
-        //mVdoVideoView.resume();
-        mVdoVideoView.start();
-    }
-
-    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        mVdoVideoView.pause();
+        //mVdoVideoView.pause();
         stopPosition = mVdoVideoView.getCurrentPosition();
         outState.putInt("position", stopPosition);
     }
@@ -190,7 +196,26 @@ public class Media_VdoActivity extends AppCompatActivity implements View.OnClick
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         stopPosition = savedInstanceState.getInt("position");
-        Log.d("", "onRestore called" + stopPosition);
+        //Log.d("", "onRestore called" + stopPosition);
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //Log.d("", "onResume called" + stopPosition);
+        // mVdoVideoView.seekTo(stopPosition);
+        mVdoVideoView.seekTo(addprefs.getIntValue("position",0));
+        //mVdoVideoView.resume();
+        mVdoVideoView.start();
+    }
+
+
+    @Override
+    public void onPause() {
+        // Log.d("", "onPause called");
+        super.onPause();
+        stopPosition = mVdoVideoView.getCurrentPosition();
+        addprefs.setIntValue("position", stopPosition);
+        //mVdoVideoView.pause();
     }
 
     @Override
@@ -198,6 +223,12 @@ public class Media_VdoActivity extends AppCompatActivity implements View.OnClick
 
         onBackPressed();
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 
     @Override

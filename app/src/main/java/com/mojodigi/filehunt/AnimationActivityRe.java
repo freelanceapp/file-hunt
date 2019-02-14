@@ -98,6 +98,8 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
     BannerView smaaTobannerView;
     private boolean isSearchModeActive;
 
+    MenuItem sortView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,6 +121,7 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
         mAdView = (AdView) findViewById(R.id.adView);
         adContainer = findViewById(R.id.adMobView);
         smaaToAddContainer = findViewById(R.id.smaaToAddContainer);
+        smaaToAddContainer.setVisibility(View.GONE);
 
         //smaaTobannerView =  findViewById(R.id.smaaTobannerView);
 
@@ -146,6 +149,11 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
                     System.out.print(""+string);
                 }
             }
+            else if(AddPrioverId.equalsIgnoreCase(AddConstants.FaceBookAddProividerId))
+            {
+                adutil.dispFacebookBannerAdd(mcontext,addprefs , AnimationActivityRe.this);
+            }
+
 
         }
         else {
@@ -199,6 +207,12 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
 
                     if (mActionMode == null) {
                         mActionMode = startActionMode(mActionModeCallback);
+
+                        Utility.hideKeyboard(AnimationActivityRe.this);
+                        isSearchModeActive = false;
+                        searchView.onActionViewCollapsed();
+
+                        sortView.setVisible(true);
                     }
                 }
 
@@ -269,6 +283,11 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
     }
     public void refreshAdapterAfterRename(String newPath, String newName)
     {
+
+        // finish  acrtion mode aftr  rename  file is  done
+        if(mActionMode!=null) {
+            mActionMode.finish();
+        }
         fileTorename.setFilePath(newPath);
         fileTorename.setFileName(newName);
         animList.set(renamePosition,fileTorename);
@@ -296,6 +315,8 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
     public boolean onCreateOptionsMenu(final Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
        getMenuInflater().inflate(R.menu.menu_common_activity, menu);
+
+        sortView = menu.findItem(R.id.action_sort);
 
         // Associate searchable configuration with the SearchView
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
@@ -334,7 +355,8 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
                 item.setVisible(true);
                 //invalidateOptionsMenu();
                 searchView.requestFocus(0);
-                searchView.setFocusable(false);
+                //searchView.setFocusable(false);
+
                 isSearchModeActive=false;
                 Utility.hideKeyboard(AnimationActivityRe.this);
                 return false;
@@ -401,8 +423,15 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
                 // to  rename file contain old file;
             }
 
-            if (multiselect_list.size() > 0)
+            if (multiselect_list.size() > 0) {
                 mActionMode.setTitle("" + multiselect_list.size());
+                //keep  the reference of file to  be renamed
+                if (animList.contains(multiselect_list.get(0))) {
+                    renamePosition = animList.indexOf(multiselect_list.get(0));
+                    fileTorename = multiselect_list.get(0);
+                }
+                //keep  the reference of file to  be renamed
+            }
             else
                 mActionMode.setTitle("");
 
@@ -412,20 +441,20 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
     }
 
 
-    public void refreshAdapter()
-    {
-        multiSelectAdapter.selected_AnimList=multiselect_list;
-        multiSelectAdapter.AnimList=animList;
-        multiSelectAdapter.notifyDataSetChanged();
-        selectMenuChnage();
+    public void refreshAdapter() {
+        if(multiSelectAdapter !=null) {
+            multiSelectAdapter.selected_AnimList = multiselect_list;
+            multiSelectAdapter.AnimList = animList;
+            multiSelectAdapter.notifyDataSetChanged();
+            selectMenuChnage();
 
-        //finish action mode when user deselect files one by one ;
-   if(multiselect_list.size()==0) {
-       if (mActionMode != null) {
-           mActionMode.finish();
-       }
-   }
-
+            //finish action mode when user deselect files one by one ;
+            if (multiselect_list.size() == 0) {
+                if (mActionMode != null) {
+                    mActionMode.finish();
+                }
+            }
+        }
     }
     private void DispDetailsDialog( Model_Anim fileProperty )
     {
@@ -536,7 +565,7 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
                     if(multiselect_list.size()>=1) {
                         int mFileCount = multiselect_list.size();
                         String msgDeleteFile = mFileCount > 1 ? mFileCount + " " + getResources().getString(R.string.delfiles) : mFileCount + " " + getResources().getString(R.string.delfile);
-                        alertDialogHelper.showAlertDialog("", "Delete Image"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, false);
+                        alertDialogHelper.showAlertDialog("", "Delete Image"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, true);
                     }
 
                     return true;
@@ -686,6 +715,11 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
             {
                 smaaToAddContainer.setVisibility(View.GONE);
             }
+
+        }
+        else if(receivedBanner.getErrorCode() == ErrorCode.NO_ERROR)
+        {
+            smaaToAddContainer.setVisibility(View.VISIBLE);
         }
     }
 
@@ -1290,6 +1324,8 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
                 isSearchModeActive=false;
                 resetAdapter();
                 searchView.onActionViewCollapsed();
+
+                sortView.setVisible(true);
             }
 
             return;

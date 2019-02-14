@@ -1,96 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clickable="true"
+    android:focusable="true"
     android:orientation="vertical"
     android:weightSum="20"
-    tools:context=".Media_VdoActivity">
+    android:background="@color/black">
 
-
-
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1.65"
-        android:gravity="left"
-        android:background="@android:color/black">
+        android:layout_weight="18.5">
 
-        <ImageView
-            android:id="@+id/idInfoBackArrowImage"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:src="@mipmap/ic_back"
-            android:paddingTop="11dp"
-            android:background="@drawable/custom_ripple"
-            android:paddingBottom="11dp"
-            android:paddingRight="20dp"
-            />
-    </RelativeLayout>
-
-
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="16.7"
-        >
-
-        <VideoView
-            android:id="@+id/idAdoAudioView"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clickable="true"
-            android:focusable="true"
-            />
+            android:focusable="true">
 
-        <TextView
-            android:id="@+id/idSongNameImageText"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="bottom"
-            android:gravity="center"
-            android:layout_marginLeft="@dimen/dp35"
-            android:layout_marginTop="@dimen/dp35"
-            android:layout_marginRight="@dimen/dp35"
-            android:layout_marginBottom="150dp"
-            android:maxLines="1"
-            android:textColor="@android:color/white"
-            android:background="@drawable/ic_mp3_bg"
-            />
+            <FrameLayout
+                android:id="@+id/idAudioFrameLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/black"
+                android:clickable="true"
+                android:focusable="true">
 
-        <TextView
-            android:id="@+id/idSongNameText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:text="@string/app_name"
-            android:gravity="center"
-            android:textColor="@android:color/white"
-            android:textSize="15dp"
-            android:layout_marginBottom="100dp"
-            android:background="@color/black"
-            />
+                <VideoView
+                    android:id="@+id/idAdoAudioView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/black"
+                    android:clickable="true"
+                    android:focusable="true" />
 
-    </FrameLayout>
+                <TextView
+                    android:id="@+id/idSongNameImageText"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="bottom"
+                    android:layout_marginLeft="50dp"
+                    android:layout_marginTop="90dp"
+                    android:layout_marginRight="50dp"
+                    android:layout_marginBottom="250dp"
+                    android:background="@drawable/ic_mp3_bg"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:textColor="@android:color/white" />
+
+                <TextView
+                    android:id="@+id/idSongNameText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_marginBottom="150dp"
+                    android:background="@color/black"
+                    android:gravity="center"
+                    android:paddingLeft="@dimen/dp10"
+                    android:paddingRight="@dimen/dp10"
+                    android:text="@string/app_name"
+                    android:textColor="@android:color/white"
+                    android:textSize="15dp" />
+
+            </FrameLayout>
+
+
+            <RelativeLayout
+
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_alignParentTop="true"
+
+                >
+
+                <ImageView
+                    android:id="@+id/idInfoBackArrowImage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/custom_ripple"
+                    android:paddingTop="11dp"
+                    android:paddingRight="20dp"
+                    android:paddingBottom="11dp"
+                    android:src="@mipmap/ic_back" />
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+    </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/idBottomLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_gravity="bottom"
-        android:layout_weight="1.65"
-        android:orientation="horizontal"
-        android:background="@android:color/black"
-        android:weightSum="3">
+        android:layout_weight="1.5"
+        android:background="@color/black">
+
+        <LinearLayout
+            android:id="@+id/idBottomLayout"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="bottom"
+            android:background="@color/black"
+            android:orientation="horizontal"
+            android:weightSum="3">
 
             <ImageView
                 android:id="@+id/idAudioShareImgView"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:padding="10dp"
                 android:background="@drawable/custom_ripple"
+                android:padding="10dp"
                 android:src="@mipmap/ic_share" />
 
             <ImageView
@@ -98,8 +121,8 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:padding="10dp"
                 android:background="@drawable/custom_ripple"
+                android:padding="10dp"
                 android:src="@drawable/ic_info_details" />
 
             <ImageView
@@ -107,12 +130,9 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:padding="10dp"
                 android:background="@drawable/custom_ripple"
+                android:padding="10dp"
                 android:src="@mipmap/ic_delete" />
-
+        </LinearLayout>
     </LinearLayout>
-
-
-
 </LinearLayout>
