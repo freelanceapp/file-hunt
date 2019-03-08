@@ -158,6 +158,11 @@ public class MultiSelectAdapter_Recent extends RecyclerView.Adapter<MultiSelectA
             iconDrawable = mContext.getResources().getDrawable(R.drawable.ic_db);
             holder.FileIcon.setImageDrawable(iconDrawable);
         }
+        else if(model.getFileType().equalsIgnoreCase("pptx") || model.getFileType().equalsIgnoreCase("pptx"))
+        {
+            iconDrawable=mContext.getResources().getDrawable(R.drawable.ic_powerpnt );
+            holder.FileIcon.setImageDrawable(iconDrawable);
+        }
        else
            {
             iconDrawable = mContext.getResources().getDrawable(R.mipmap.file_icon);

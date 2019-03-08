@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "343609843612",
+    "firebase_url": "https://filehunt-karbon.firebaseio.com",
+    "project_id": "filehunt-karbon",
+    "storage_bucket": "filehunt-karbon.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:343609843612:android:8516af6dfb0ad738",
+        "android_client_info": {
+          "package_name": "com.mojodigi.filehunt"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "343609843612-pf0dcrn8ifcnpk40m9hbsqustsotmjlt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mojodigi.filehunt",
+            "certificate_hash": "a559e4ea20d4e565dac68852fd2a360016dd37ff"
+          }
+        },
+        {
+          "client_id": "343609843612-q08f6ub2qvvdqs286fqvs7484gq9epsm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mojodigi.filehunt",
+            "certificate_hash": "b3a6fb26021ca0754e02da747f5820c21e4b88f9"
+          }
+        },
+        {
+          "client_id": "343609843612-s63vsarmapgsmh9nfaecs3g1mrvsci9j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDid4G0Mb8HIQhFWf0YHgpLT10KXM-OHhw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "343609843612-s63vsarmapgsmh9nfaecs3g1mrvsci9j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

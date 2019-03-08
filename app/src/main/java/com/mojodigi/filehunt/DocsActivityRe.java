@@ -38,6 +38,7 @@ import com.mojodigi.filehunt.Adapter.MultiSelectAdapter_Docs;
 import com.mojodigi.filehunt.AddsUtility.AddConstants;
 import com.mojodigi.filehunt.AddsUtility.AddMobUtils;
 import com.mojodigi.filehunt.AddsUtility.SharedPreferenceUtil;
+import com.mojodigi.filehunt.AsyncTasks.encryptAsyncTask;
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Model.Model_Docs;
 import com.mojodigi.filehunt.Utils.AlertDialogHelper;
@@ -215,7 +216,7 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
     @Override
     protected void onResume() {
         super.onResume();
-
+        Utility.log_FirebaseActivity_Events(DocsActivityRe.this,"Docs Activity");
         }
 
     @Override
@@ -518,7 +519,40 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
 
-                case R.id.action_move:
+                case R.id.action_hide:
+                    if(Utility.isManualPasswordSet()) {
+                        if (multiselect_list.size() >= 1) {
+
+
+                            if (Utility.createOrFindAppDirectory(Constants.MEDIA_TYPE_DOC))
+                            {
+                                File[] f = new File[multiselect_list.size()];
+                                for (int i = 0; i < multiselect_list.size(); i++) {
+                                    File file = new File(multiselect_list.get(i).getFilePath());
+                                    f[i] = file;
+                                }
+                                if (f.length >= 1)
+                                    new encryptAsyncTask(mcontext, f, Constants.encryptionPassword,Constants.MEDIA_TYPE_DOC).execute();
+                                else
+                                    Utility.dispToast(mcontext, getResources().getString(R.string.filenotfound));
+                            }
+
+                            else
+                            {
+                                Utility.dispToast(mcontext,getResources().getString(R.string.directorynotfound));
+                            }
+
+
+
+                        }
+                    }
+                    else {
+                        Intent i = new Intent(mcontext,LockerPasswordActivity.class);
+                        startActivity(i);
+                    }
+                    return  true;
+
+                    case R.id.action_move:
                     Utility.dispToast(mcontext,"Move");
                     return true;
                 case R.id.action_encrypt:
@@ -674,13 +708,29 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
               // AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));  // did not work on high resolution phones
               LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
               recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
-              recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
-                      DividerItemDecoration.VERTICAL));
+              //recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
+                  //    DividerItemDecoration.VERTICAL));
               recyclerView.setAdapter(multiSelectAdapter);
           }else
           {
               blankIndicator.setVisibility(View.VISIBLE);
           }
+
+
+
+         /*boolean hideSmallFile=addprefs.getBoolanValue(AddConstants.KEY_DISPLAY_SMALL_FILE, false);
+          if(!hideSmallFile) {
+              ArrayList<Model_Docs> docsList_refreshed=new ArrayList<>();
+              int size=docsList.size();
+              for (int i = 0; i < size; i++) {
+                  Long fileSize = docsList.get(i).getFileSizeCmpr();
+                  if (fileSize < Constants.fileSizeFilter)
+                      docsList.remove(i);
+              }
+              multiSelectAdapter = new MultiSelectAdapter_Docs(this, docsList, multiselect_list, this);
+              recyclerView.setAdapter(multiSelectAdapter);
+          }*/
+
 
 
     }
@@ -1108,6 +1158,8 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
             last.setChecked(true);
         else if(lastCheckedSortOptions==2)
             size.setChecked(true);
+        else  if(lastCheckedSortOptions==3)
+            type.setChecked(true);
 
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -1183,7 +1235,12 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
                 else if(action.equalsIgnoreCase("Type"))
                 {
 
-
+                     Collections.sort(docsList, new Comparator<Model_Docs>() {
+                         @Override
+                         public int compare(Model_Docs o1, Model_Docs o2) {
+                             return o2.getFileType().compareToIgnoreCase(o1.getFileType());
+                         }
+                     });
 
                 }
 
@@ -1237,6 +1294,13 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
                 }
                 else if(action.equalsIgnoreCase("Type"))
                 {
+                    Collections.sort(docsList, new Comparator<Model_Docs>() {
+                        @Override
+                        public int compare(Model_Docs o1, Model_Docs o2) {
+                            return o1.getFileType().compareToIgnoreCase(o2.getFileType());
+                        }
+                    });
+
 
                 }
 
@@ -1269,6 +1333,11 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
         else if(action.equalsIgnoreCase("Size"))
         {
             lastCheckedSortOptions=2;
+            this.action=action;
+        }
+        else if(action.equalsIgnoreCase("Type"))
+        {
+            lastCheckedSortOptions=3;
             this.action=action;
         }
     }

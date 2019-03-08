@@ -8,6 +8,7 @@
 
     <RelativeLayout
         android:id="@+id/rellayout"
+        android:background="@drawable/custom_ripple"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
@@ -20,7 +21,6 @@
             android:scaleType="centerCrop"
             android:layout_width="@dimen/dp30"
             android:layout_height="@dimen/dp30"
-
             />
 
         <RelativeLayout

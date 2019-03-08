@@ -1,22 +1,28 @@
 <resources>
  <string name="app_name">FileHunt</string>
+ <string name="app_version">App Version</string>
 
  <string name="internalstorage">Internal Storage</string>
  <string name="externalstorage">External Storage</string>
  <string name="avlbl">Available</string>
 
-  <!--taken from filemangaer app-->
+ <!--taken from filemangaer app-->
 
+ <string name="navigation_drawer_open">Open navigation drawer</string>
+ <string name="navigation_drawer_close">Close navigation drawer</string>
+ <string name="nav_header_title">FileHunt</string>
+ <string name="nav_header_subtitle">jmm@android.com</string>
+ <string name="nav_header_desc">Navigation header</string>
 
- <string name="actions_rename" >Rename</string>
+ <string name="actions_rename">Rename</string>
 
- <string name="menu_item_delete" >Delete</string>
+ <string name="menu_item_delete">Delete</string>
  <string name="menu_item_move">Move</string>
  <string name="action_search">Search</string>
  <string name="action_sort">Sort</string>
  <!--taken from filemangaer app-->
 
- <string name="file_provider_authority" >com.example.filehunt.provider</string>
+ <string name="file_provider_authority">com.example.filehunt.provider</string>
 
  <string name="loading_msg">Loading...</string>
  <string name="msg_set_wall">Setting wallpaper</string>
@@ -24,8 +30,8 @@
  <string name="foldercreatedmsg">folder created successfully</string>
 
  <string name="menu_selectAll">SELECT ALL</string>
- <string name="menu_unselectAll" >UNSELECT ALL</string>
- <string name="menu_paste" >Paste</string>
+ <string name="menu_unselectAll">UNSELECT ALL</string>
+ <string name="menu_paste">Paste</string>
 
  <string name="cat_Images">Image</string>
  <string name="cat_Videos">Video</string>
@@ -36,12 +42,22 @@
  <string name="cat_Recent">Recent</string>
  <string name="cat_Apk">Apps</string>
  <string name="cat_zip_title">Zip</string>
+ <string name="cat_hidden">Locker</string>
+ <string name="title_settings">Settings</string>
+ <string name="password_hint">write password</string>
+ <string name="cpassword_hint">confirm password</string>
  <string name="createfolder">CREATE</string>
  <string name="save">SAVE</string>
  <string name="cancel">CANCEL</string>
  <string name="create_folder">Create folder</string>
  <string name="encrypt_heading">Encrypt file</string>
  <string name="password">write password</string>
+ <string name="setpassword">Set password</string>
+
+    <string name="filenotfound">Cound not get the file to hide</string>
+    <string name="directorynotfound">Could not find the directory"</string>
+ <string name="decmsg">Preparing files...</string>
+ <string name="encmsg">Hiding files...</string>
  <string name="encrypt">ENCRYPT</string>
  <string name="rename_success">File renamed successfully</string>
  <string name="rename_failed">Rename failed</string>
@@ -64,7 +80,7 @@
  <string name="sortName">Name</string>
  <string name="lastModified">Last Modified(Date)</string>
  <string name="sortSize">Size</string>
- <string name="type">Type</string>
+ <string name="type">Group by Type</string>
 
  <string name="sortby">Sort By</string>
  <string name="ascending">Ascending</string>
@@ -73,50 +89,54 @@
 
  <string name="strgdevice">STORAGE DEVICES</string>
 
+ <string name="showfiles">Show hidden files</string>
+ <string name="txtsize">Text Size</string>
+ <string name="dispsmallfile">Display images less than 30 kb</string>
+ <string name="hidestorage">Hide device storage</string>
+
+
+
+
  <!-- demo add ids -->
  <!--
-  <string name="admob_app_id">ca-app-pub-5603925957932903~3576315291</string>
-  <string name="banner_add_id">ca-app-pub-3940256099942544/6300978111</string>
-  <string name="ad_unit_id">ca-app-pub-3940256099942544/1033173712</string>
-  <string name="ad_unit_id_reward">ca-app-pub-3940256099942544/5224354917</string>
-  -->
-  <!-- demo add ids -->
-
-
+<string name="admob_app_id">ca-app-pub-5603925957932903~3576315291</string>
+<string name="banner_add_id">ca-app-pub-3940256099942544/6300978111</string>
+<string name="ad_unit_id">ca-app-pub-3940256099942544/1033173712</string>
+<string name="ad_unit_id_reward">ca-app-pub-3940256099942544/5224354917</string>
+-->
+ <!-- demo add ids -->
 
 
  <!--actual add ids for lvvoMobile -->
  <!--
-  <string name="admob_app_id">ca-app-pub-5603925957932903~7136674365</string>
+<string name="admob_app_id">ca-app-pub-5603925957932903~7136674365</string>
 
-  <string name="banner_add_id">ca-app-pub-5603925957932903/9547215284</string>
-  <string name="ad_unit_id">ca-app-pub-5603925957932903/4809893925</string>
+<string name="banner_add_id">ca-app-pub-5603925957932903/9547215284</string>
+<string name="ad_unit_id">ca-app-pub-5603925957932903/4809893925</string>
 
-  <string name="ad_unit_id_reward">ca-app-pub-5603925957932903/5622774574</string>
- -->
+<string name="ad_unit_id_reward">ca-app-pub-5603925957932903/5622774574</string>
+-->
  <!--actualapp id -->
 
 
  <!--actual add id for FileHunt blockedAccount -->
-<!--
-  <string name="admob_app_id">ca-app-pub-5603925957932903~3576315291</string>
-  <string name="banner_add_id">ca-app-pub-5603925957932903/8134685014</string>
-  <string name="ad_unit_id">ca-app-pub-5603925957932903/9183865192</string>
-  <string name="ad_unit_id_reward">ca-app-pub-5603925957932903/5622774574</string>
- -->
+ <!--
+<string name="admob_app_id">ca-app-pub-5603925957932903~3576315291</string>
+<string name="banner_add_id">ca-app-pub-5603925957932903/8134685014</string>
+<string name="ad_unit_id">ca-app-pub-5603925957932903/9183865192</string>
+<string name="ad_unit_id_reward">ca-app-pub-5603925957932903/5622774574</string>
+-->
  <!--actual add id for FileHunt blockedAccount -->
 
 
  <!--actual add id for FileHunt runningAccount -->
 
-  <string name="admob_app_id">ca-app-pub-4867602581600600~6953664315</string>
-  <string name="banner_add_id">ca-app-pub-4867602581600600/8632210515</string>
-  <string name="ad_unit_id">ca-app-pub-4867602581600600/6512355771</string>
-  <string name="ad_unit_id_reward">ca-app-pub-4867602581600600/6141778543</string>
+ <string name="admob_app_id">ca-app-pub-4867602581600600~6953664315</string>
+ <string name="banner_add_id">ca-app-pub-4867602581600600/8632210515</string>
+ <string name="ad_unit_id">ca-app-pub-4867602581600600/6512355771</string>
+ <string name="ad_unit_id_reward">ca-app-pub-4867602581600600/6141778543</string>
 
  <!--actual add id for FileHunt runningAccount -->
-
-
 
 
 </resources>

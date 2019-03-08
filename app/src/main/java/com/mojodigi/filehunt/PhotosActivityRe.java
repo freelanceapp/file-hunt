@@ -40,6 +40,7 @@ import com.mojodigi.filehunt.Adapter.MultiSelectAdapter;
 import com.mojodigi.filehunt.AddsUtility.AddConstants;
 import com.mojodigi.filehunt.AddsUtility.AddMobUtils;
 import com.mojodigi.filehunt.AddsUtility.SharedPreferenceUtil;
+import com.mojodigi.filehunt.AsyncTasks.encryptAsyncTask;
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Model.Grid_Model;
 import com.mojodigi.filehunt.Utils.AlertDialogHelper;
@@ -199,7 +200,7 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
     @Override
     protected void onResume() {
         super.onResume();
-
+        Utility.log_FirebaseActivity_Events(PhotosActivityRe.this,"Images Activity");
     }
 
 
@@ -469,6 +470,8 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
                 gridImg.setDateToSort(f.lastModified());
                 gridImg.setFileName(f.getName());
                 gridImg.setFileSizeCmpr(f.length());
+                gridImg.setFileType(Utility.getFileExtensionfromPath(f.getAbsolutePath()));
+
             }
             catch (Exception e){}
             gridImg.setImgPath(Intent_Images_List.get(i));
@@ -559,6 +562,39 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
+
+                case R.id.action_hide:
+                    if(Utility.isManualPasswordSet()) {
+                        if (multiselect_list.size() >= 1) {
+
+
+                            if (Utility.createOrFindAppDirectory(Constants.MEDIA_TYPE_IMG))
+                            {
+                                File[] f = new File[multiselect_list.size()];
+                                for (int i = 0; i < multiselect_list.size(); i++) {
+                                    File file = new File(multiselect_list.get(i).getImgPath());
+                                    f[i] = file;
+                                }
+                                if (f.length >= 1)
+                                    new encryptAsyncTask(mcontext, f, Constants.encryptionPassword,Constants.MEDIA_TYPE_IMG).execute();
+                                else
+                                    Utility.dispToast(mcontext, getResources().getString(R.string.filenotfound));
+                            }
+
+                            else
+                            {
+                                Utility.dispToast(mcontext,getResources().getString(R.string.directorynotfound));
+                            }
+
+
+
+                        }
+                    }
+                    else {
+                        Intent i = new Intent(mcontext,LockerPasswordActivity.class);
+                        startActivity(i);
+                    }
+                    return  true;
 
                 case R.id.action_move:
                     Utility.dispToast(mcontext,"Move");
@@ -1117,6 +1153,8 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
             last.setChecked(true);
         else if(lastCheckedSortOptions==2)
             size.setChecked(true);
+        else if(lastCheckedSortOptions==3)
+            type.setChecked(true);
 
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -1192,7 +1230,13 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
                 }
                 else if(action.equalsIgnoreCase("Type"))
                 {
+                    Collections.sort(img_ImgList, new Comparator<Grid_Model>()
+                    {
+                        public int compare(Grid_Model o1, Grid_Model o2) {
 
+                            return o2.getFileType().compareToIgnoreCase(o1.getFileType());
+                        }
+                    });
                 }
 
                 System.out.print(""+img_ImgList);
@@ -1232,6 +1276,14 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
                 }
                 else if(action.equalsIgnoreCase("Type"))
                 {
+
+                    Collections.sort(img_ImgList, new Comparator<Grid_Model>()
+                    {
+                        public int compare(Grid_Model o1, Grid_Model o2) {
+
+                            return o1.getFileType().compareToIgnoreCase(o2.getFileType());
+                        }
+                    });
                 }
                 System.out.print(""+img_ImgList);
                 refreshAdapter();
@@ -1256,6 +1308,11 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
         else if(action.equalsIgnoreCase("Size"))
         {
             lastCheckedSortOptions=2;
+            this.action=action;
+        }
+        else if(action.equalsIgnoreCase("Type"))
+        {
+            lastCheckedSortOptions=3;
             this.action=action;
         }
     }

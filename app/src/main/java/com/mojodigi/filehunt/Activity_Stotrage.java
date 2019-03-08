@@ -73,15 +73,13 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
     private   File initial_path = new File(Environment.getExternalStorageDirectory() + "");
     private   File previous_path = new File(Environment.getExternalStorageDirectory() + "");
 
+     // variables for sdcard
+     // private   File path_sdcard;
+     // private   File initial_path;
+    //  private   File previous_path ;
 
 
-//    // variables for sdcard
-    // private   File path_sdcard;
-//    private   File initial_path;
-//    private   File previous_path ;
     // variables for sdcard
-
-
     static ArrayList<String> str = new ArrayList<String>();
     static ArrayList<File> pathList=new ArrayList<>();
     private static final String TAG = "F_PATH";
@@ -1561,6 +1559,12 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
         {
             multiSelectAdapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Utility.log_FirebaseActivity_Events(Activity_Stotrage.this,"Storage");
     }
 
     public int  changePathOnBackPress() {

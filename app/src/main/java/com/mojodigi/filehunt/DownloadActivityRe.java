@@ -215,7 +215,7 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
     @Override
     protected void onResume() {
         super.onResume();
-
+        Utility.log_FirebaseActivity_Events(DownloadActivityRe.this,"DownloadActivity");
 
     }
 
@@ -685,8 +685,8 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
             // AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));  // did not work on high resolution phones
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
             recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
-            recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
-                    DividerItemDecoration.VERTICAL));
+            //recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
+              //      DividerItemDecoration.VERTICAL));
             recyclerView.setAdapter(multiSelectAdapter);
         }else
         {
@@ -1125,6 +1125,8 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
             last.setChecked(true);
         else if(lastCheckedSortOptions==2)
             size.setChecked(true);
+        else if(lastCheckedSortOptions==3)
+            type.setChecked(true);
 
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -1172,11 +1174,11 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
                 if(action.equalsIgnoreCase("Name"))
                 {
                     Collections.sort(DownloadList, new Comparator<Model_Download>() {
-                        public int compare(Model_Download o1, Model_Download o2) {
-                            return o2.getFileName().compareToIgnoreCase(o1.getFileName());
+                    public int compare(Model_Download o1, Model_Download o2) {
+                        return o2.getFileName().compareToIgnoreCase(o1.getFileName());
 
-                        }
-                    });
+                    }
+                });
                 }
                 else if(action.equalsIgnoreCase("Last"))
                 {
@@ -1201,7 +1203,12 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
                 else if(action.equalsIgnoreCase("Type"))
                 {
 
+                    Collections.sort(DownloadList, new Comparator<Model_Download>() {
+                        public int compare(Model_Download o1, Model_Download o2) {
+                            return o2.getFiletype().compareToIgnoreCase(o1.getFiletype());
 
+                        }
+                    });
 
                 }
 
@@ -1254,7 +1261,12 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
                 }
                 else if(action.equalsIgnoreCase("Type"))
                 {
+                    Collections.sort(DownloadList, new Comparator<Model_Download>() {
+                        public int compare(Model_Download o1, Model_Download o2) {
+                            return o1.getFiletype().compareToIgnoreCase(o2.getFiletype());
 
+                        }
+                    });
                 }
 
 
@@ -1286,6 +1298,11 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
         else if(action.equalsIgnoreCase("Size"))
         {
             lastCheckedSortOptions=2;
+            this.action=action;
+        }
+        else if(action.equalsIgnoreCase("Type"))
+        {
+            lastCheckedSortOptions=3;
             this.action=action;
         }
     }

@@ -1,14 +1,19 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    
+
     repositories {
+        // for firebase Crashlytics
+        maven {
+            url 'https://maven.fabric.io/public'
+        }
+        // for firebase Crashlytics
         google()
         jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.1.2'
-        
+        classpath 'com.google.gms:google-services:4.0.1'    // firebase analytics
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -17,6 +22,11 @@ buildscript {
 
 allprojects {
     repositories {
+        // for firebase Crashlytics
+        maven {
+            url 'https://maven.google.com/'
+        }
+        // for firebase Crashlytics
         google()
         jcenter()
     }

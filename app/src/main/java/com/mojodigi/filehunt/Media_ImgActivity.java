@@ -126,6 +126,7 @@ public class Media_ImgActivity extends AppCompatActivity implements View.OnClick
 
         Intent extrasIntent = getIntent();
         if (extrasIntent != null) {
+
             cur_position = extrasIntent.getIntExtra(Constants.CUR_POS_VIEW_PAGER,0);
             activity_Tracker=extrasIntent.getIntExtra(Constants.MEDIA_DELETE_ACTIVITY_TRACKER,100 );
             wallPath=Constants.img_ArrayImgList.get(cur_position).getImgPath();
@@ -177,6 +178,13 @@ public class Media_ImgActivity extends AppCompatActivity implements View.OnClick
         getMenuInflater().inflate(R.menu.manu_wallpaper, menu);
 
         return true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Utility.log_FirebaseActivity_Events(Media_ImgActivity.this,"ImageViewActivity");
     }
 
     @Override

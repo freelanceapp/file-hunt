@@ -33,6 +33,10 @@
         android:visible="false"
         android:title="Encrypt"/>
 
+    <item  android:id="@+id/action_hide"
+        android:visible="true"
+        android:title="Hide"/>
+
     <item  android:id="@+id/action_details"
         android:title="Details"/>
 

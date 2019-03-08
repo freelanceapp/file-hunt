@@ -3,6 +3,7 @@ package com.mojodigi.filehunt.Utils;
 import android.app.Dialog;
 import android.content.Context;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -14,7 +15,7 @@ public class EncryptDialogUtility
 
     public interface EncryptDialogListener  {
         void onCancelClick();
-        void onEncryptClick();
+        int onEncryptClick(String password);
 
     }
     public EncryptDialogUtility(  EncryptDialogListener delegate )
@@ -43,6 +44,9 @@ public class EncryptDialogUtility
         View_cancel.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mcontext));
         View_encrypt.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mcontext));
 
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+
+
         View_cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -56,9 +60,13 @@ public class EncryptDialogUtility
             public void onClick(View v) {
                 if (Utility.IsNotEmpty(encrypt_password_box)) {
 
-                    //Utility.dispToast(mcontext,"encrypt");
-                    delegate.onEncryptClick();
-                    dialog.dismiss();
+
+                    int status= delegate.onEncryptClick(encrypt_password_box.getText().toString());
+                    if(status==1)
+                        dialog.dismiss();
+                    else
+                        encrypt_password_box.setError("Incorrect password");
+
                 }
 
 

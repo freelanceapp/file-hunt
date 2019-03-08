@@ -19,7 +19,7 @@
   -->
 
 
-    <bool name="ga_autoActivityTracking">true</bool>
+    <bool name="ga_autoActivityTracking">false</bool>
 
     <!--  The property id associated with this analytics tracker -->
 

@@ -17,6 +17,10 @@ import static com.smaato.soma.SOMA.getPackageName;
 public class AddConstants
 {
 
+    public static  String NEWSURL="NewsUrl";
+    public static final String WEB_URL="WebUrl";
+    public static final String CLICK_PUSH_NOTIFICATION="ClickPushNotification";
+    public static final String API_PUSH_NOTIFICATION = "http://development.bdigimedia.com/riccha_dev/video_player/pushNotifications/setFcmToken.php";
 
 
     public static final String API_RESPONSE_CODE="apiResponseCode";
@@ -62,10 +66,21 @@ public class AddConstants
 
     public static final String NOT_FOUND="0";
     public static final String NO_ADDS="No ad is currently available matching the requesting parameter.";
+    public static final String APP_VERSION = "appversion";
+
+
+
+
+    public static final String KEY_SHOW_HIDDEN_FILE="showFiles";
+    public static final String KEY_DISPLAY_SMALL_FILE="smallfile";
+    public static final String KEY_HIDE_EXTERNAL_STORAGE="hideExtStrg";
+    public static final String KEY_TEXT_SIZE="txtSizeIndex";
+    public static final String KEY_TEXT_SIZE_INDEX="txtSize";
+
 
     //sharedPrefKeys
 
-
+    public static final  int SMALL_FILE_SIZE=30;   // in kb;
 
     //InMobiVars
     public static final int BANNER_WIDTH_INMOBI = 320;
@@ -106,46 +121,27 @@ public class AddConstants
 
 
 
-
-    public static JSONObject prepareAddJsonRequest(Context mContext, String valueVendorId)
+    public static JSONObject prepareAddJsonRequest(Context mContext, String valueVendorId, String versionName,int versionCode)
     {
-
         String deviceModel="";
         String deviceManufacturer="";
         String deviceId="";
-        String versionName="";
-        int versionCode=0;
         try
         {
-
-
             //get device information
             deviceModel = android.os.Build.MODEL;
             deviceManufacturer = android.os.Build.MANUFACTURER;
             deviceId= Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
             System.out.print(""+deviceId);
-
             //get device information
-
         }
         catch (Exception e) {
-           String str=e.getMessage();
+            String str=e.getMessage();
             Log.d("Exception",""+str);
         }
 
 
-
-        try {
-             PackageInfo pInfo = mContext.getPackageManager().getPackageInfo(getPackageName(), 0);
-             versionName = pInfo.versionName;
-             versionCode=pInfo.versionCode;
-
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        catch (Exception e){}
-
-        JSONObject object  =  new JSONObject();
+        JSONObject object = new JSONObject();
         try {
 
             object.put(key_appName, mContext.getString(com.mojodigi.filehunt.R.string.app_name)+APP_NAME_POSTFIX);
@@ -158,12 +154,11 @@ public class AddConstants
             object.put(key_AppVersioName, versionName);
             object.put(key_AppversionCode, versionCode);
 
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-           Log.d("JsonRequest",object.toString() );
+        Log.d("JsonRequest",object.toString() );
         return object;
     }
 
@@ -187,6 +182,23 @@ public class AddConstants
     public static int dpToPx(int dp)
     {
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+
+
+
+
+    public static JSONObject prepareFcmJsonRequest(Context mContext, String deviceID , String nameOfDevice , String fcm_Token , String appVersion)
+    {
+        JSONObject object  =  new JSONObject();
+        try {
+            object.put("deviceId", deviceID);
+            object.put("deviceName", nameOfDevice);
+            object.put("fcmToken", fcm_Token);
+            object.put("appVer", appVersion);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return object;
     }
 
 

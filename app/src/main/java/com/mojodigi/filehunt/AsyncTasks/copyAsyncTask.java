@@ -61,13 +61,11 @@ public class copyAsyncTask extends AsyncTask<Integer, Integer, Integer> {
                     continue;
                 }
 
-
                 int cnt = UtilityStorage.copyFileOrDirectory(mcontext, Constants.filesToCopy.get(i).toString(), destPath + "/",isPastinginInternal);
                 if (cnt > 0) {
                     filesCopied.add(Constants.filesToCopy.get(i).toString());
                 }
                 counter += cnt;///
-
             }
 
 

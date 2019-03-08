@@ -247,7 +247,7 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
     protected void onResume() {
         super.onResume();
 
-
+        Utility.log_FirebaseActivity_Events(AnimationActivityRe.this,"Animation");
 
 
     }
@@ -685,8 +685,8 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
             // AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));  // did not work on high resolution phones
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
             recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
-            recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
-                    DividerItemDecoration.VERTICAL));
+            //recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
+                  //  DividerItemDecoration.VERTICAL));
 
             recyclerView.setAdapter(multiSelectAdapter);
         }
@@ -699,11 +699,10 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
         Utility.dispToast(mcontext,"cancle_click");
     }
 
-    @Override
-    public void onEncryptClick() {
+        @Override
+         public int onEncryptClick(String password ) {
           Utility.dispToast(mcontext,"EncyptClick");
-
-
+          return 0;
           }
 
     @Override
@@ -1132,7 +1131,7 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
         RadioButton last=view.findViewById(R.id.sort_last_modified);
         RadioButton size=view.findViewById(R.id.sort_size);
         RadioButton type=view.findViewById(R.id.sort_type);
-
+        type.setVisibility(View.GONE);
         name.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
         last.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
         size.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));

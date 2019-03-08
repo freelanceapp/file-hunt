@@ -303,7 +303,7 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
         if (mAdView != null) {
             mAdView.resume();
         }
-
+        Utility.log_FirebaseActivity_Events(ApkActivityRe.this,"ApkActivity");
 
     }
 
@@ -750,8 +750,8 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
             // AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));  // did not work on high resolution phones
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
             recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
-            recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
-                    DividerItemDecoration.VERTICAL));
+            //recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
+              //      DividerItemDecoration.VERTICAL));
             recyclerView.setAdapter(multiSelectAdapter);
 
         };
@@ -1123,6 +1123,7 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
         RadioButton last=view.findViewById(R.id.sort_last_modified);
         RadioButton size=view.findViewById(R.id.sort_size);
         RadioButton type=view.findViewById(R.id.sort_type);
+        type.setVisibility(View.GONE);
 
         if(lastCheckedSortOptions==0)
             name.setChecked(true);

@@ -1,30 +1,32 @@
 <resources>
 
     <!-- Base application theme. -->
-   <!-- <style name="MainActivityTheme" parent="Theme.AppCompat.NoActionBar">-->
-    <style name="MainActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
-
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:textColorPrimary">@android:color/black</item>
-        <item name="android:itemBackground">@color/design_fab_shadow_mid_color</item>
-    </style>
-
-   <style name="AppTheme" parent="Base.Theme.AppCompat.Light.DarkActionBar">
-       <!-- Customize your theme here. -->
+    <style name="AppTheme" parent="Base.Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="actionModeStyle">@style/LStyled.ActionMode</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="colorAccent">@color/colorAccent</item>
-      <!--  <item name="android:actionOverflowButtonStyle">@style/MyOverFlow</item>-->
         <item name="android:textColorPrimary">@android:color/black</item>
-        <!--<item name="android:textColorSecondary">@color/titleColor</item>-->
         <item name="android:itemBackground">@color/design_fab_shadow_mid_color</item>
     </style>
 
+
+    <style name="MainActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColorPrimary">@android:color/black</item>
+        <item name="android:itemBackground">@color/design_fab_shadow_mid_color</item>
+        <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
+        <!--For change hamburger icon color-->
+    </style>
+
+    <!--For change hamburger icon color-->
+    <style name="DrawerArrowStyle" parent="@style/Widget.AppCompat.DrawerArrowToggle">
+        <item name="spinBars">true</item>
+        <item name="color">@android:color/black</item>
+    </style>
 
     <style name="LStyled.ActionMode" parent="@style/Widget.AppCompat.ActionMode">
         <item name="background">@color/onePlusAccentColor_device_default_dark</item>
@@ -39,8 +41,7 @@
 
 
     <style name="TextViewStyle1" parent="android:Widget.TextView">
-       <!-- <item name="android:textColor">@color/black</item>-->
-          <item name="android:textColor">#3E3C3C</item>
+        <item name="android:textColor">#3E3C3C</item>
         <item name="android:paddingLeft">@dimen/dp15</item>
         <item name="android:paddingTop">@dimen/dp15</item>
         <item name="android:paddingBottom">@dimen/dp15</item>
@@ -58,8 +59,6 @@
 
 
     <style name="WallpaperTheme" parent="Base.Theme.AppCompat.Light.DarkActionBar">
-
-        <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="actionModeStyle">@style/LStyled.ActionMode</item>
@@ -76,6 +75,39 @@
 
     <style name="HeaderBar">
         <item name="android:background">#000</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+
+
+    <style name="spinner_style">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/gradient_spinner</item>
+        <item name="android:layout_margin">10dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">20dp</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingBottom">5dp</item>
+        <item name="android:popupBackground">#DFFFFFFF</item>
+    </style>
+
+    <!-- TextView Style 1-->
+
+    <style name="MyTextViewStyle" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/sp18</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">@dimen/dp5</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+
+
     </style>
 
 

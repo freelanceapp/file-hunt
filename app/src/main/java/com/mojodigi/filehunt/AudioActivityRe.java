@@ -39,6 +39,7 @@ import com.mojodigi.filehunt.Adapter.MultiSelectAdapter_Audio;
 import com.mojodigi.filehunt.AddsUtility.AddConstants;
 import com.mojodigi.filehunt.AddsUtility.AddMobUtils;
 import com.mojodigi.filehunt.AddsUtility.SharedPreferenceUtil;
+import com.mojodigi.filehunt.AsyncTasks.encryptAsyncTask;
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Model.Model_Audio;
 import com.mojodigi.filehunt.Utils.AlertDialogHelper;
@@ -270,7 +271,7 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
     @Override
     protected void onResume() {
         super.onResume();
-
+        Utility.log_FirebaseActivity_Events(AudioActivityRe.this,"Audio Activity");
         }
     @Override
     protected void onStart() {
@@ -565,8 +566,8 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
         if(audioList.size()!=0) {
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
             recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
-            recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
-                    DividerItemDecoration.VERTICAL));
+            //recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
+               //     DividerItemDecoration.VERTICAL));
             // recyclerView.setItemAnimator(new DefaultItemAnimator());
 
             multiSelectAdapter = new MultiSelectAdapter_Audio(this, audioList, multiselect_list, this);
@@ -633,6 +634,7 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
             model.setFileSizeCmpr(f.length());
             model.setAudioFileSize(Utility.humanReadableByteCount(f.length(),true));
             model.setAudiFileName(f.getName());
+            model.setFileType(Utility.getFileExtensionfromPath(f.getAbsolutePath()));
             if(i<Intent_duration_List.size())
                 model.setAudioFileDuration(Intent_duration_List.get(i));
             audioList.add(model);
@@ -721,6 +723,38 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
 
+                case R.id.action_hide:
+                    if(Utility.isManualPasswordSet()) {
+                        if (multiselect_list.size() >= 1) {
+
+
+                            if (Utility.createOrFindAppDirectory(Constants.MEDIA_TYPE_ADO))
+                            {
+                                File[] f = new File[multiselect_list.size()];
+                                for (int i = 0; i < multiselect_list.size(); i++) {
+                                    File file = new File(multiselect_list.get(i).getAudioPath());
+                                    f[i] = file;
+                                }
+                                if (f.length >= 1)
+                                    new encryptAsyncTask(mcontext, f, Constants.encryptionPassword,Constants.MEDIA_TYPE_ADO).execute();
+                                else
+                                    Utility.dispToast(mcontext, getResources().getString(R.string.filenotfound));
+                            }
+
+                            else
+                            {
+                                Utility.dispToast(mcontext,getResources().getString(R.string.directorynotfound));
+                            }
+
+
+
+                        }
+                    }
+                    else {
+                        Intent i = new Intent(mcontext,LockerPasswordActivity.class);
+                        startActivity(i);
+                    }
+                    return  true;
                 case R.id.action_move:
                     Utility.dispToast(mcontext,"Move");
                     return true;
@@ -1328,6 +1362,8 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
             last.setChecked(true);
         else if(lastCheckedSortOptions==2)
             size.setChecked(true);
+        else  if(lastCheckedSortOptions==3)
+            type.setChecked(true);
 
         name.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
         last.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
@@ -1407,7 +1443,12 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
                 else if(action.equalsIgnoreCase("Type"))
                 {
 
+                    Collections.sort(audioList, new Comparator<Model_Audio>() {
+                        public int compare(Model_Audio o1, Model_Audio o2) {
+                            return o2.getFileType().compareToIgnoreCase(o1.getFileType());
 
+                        }
+                    });
 
                 }
 
@@ -1461,7 +1502,12 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
                 }
                 else if(action.equalsIgnoreCase("Type"))
                 {
+                    Collections.sort(audioList, new Comparator<Model_Audio>() {
+                        public int compare(Model_Audio o1, Model_Audio o2) {
+                            return o1.getFileType().compareToIgnoreCase(o2.getFileType());
 
+                        }
+                    });
                 }
 
 
@@ -1493,6 +1539,11 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
         else if(action.equalsIgnoreCase("Size"))
         {
             lastCheckedSortOptions=2;
+            this.action=action;
+        }
+        else if(action.equalsIgnoreCase("Type"))
+        {
+            lastCheckedSortOptions=3;
             this.action=action;
         }
     }

@@ -177,6 +177,11 @@ public class MultiSelectAdapter_Download extends RecyclerView.Adapter<MultiSelec
             iconDrawable = mContext.getResources().getDrawable(R.drawable.cat_ic_zip);
             holder.FileIcon.setImageDrawable(iconDrawable);
         }
+        else if(model.getFiletype().equalsIgnoreCase("pptx") || model.getFiletype().equalsIgnoreCase("pptx"))
+        {
+            iconDrawable=mContext.getResources().getDrawable(R.drawable.ic_powerpnt );
+            holder.FileIcon.setImageDrawable(iconDrawable);
+        }
         else
         {
             iconDrawable = mContext.getResources().getDrawable(R.mipmap.file_icon);

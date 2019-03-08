@@ -6,9 +6,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.NotificationCompatSideChannelService;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
+import com.mojodigi.filehunt.AddsUtility.AddConstants;
+import com.mojodigi.filehunt.AddsUtility.SharedPreferenceUtil;
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Model.Model_Anim;
 import com.mojodigi.filehunt.Model.Model_Apk;
@@ -40,13 +43,18 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
     public  T model_type;
     int fileStorageType;
 
+    boolean showSmallImages;
+    SharedPreferenceUtil sharedPrefs;
+
+
 
     public  AsynctaskUtility(Context mcontext, AsyncResponse delegate, int fileStorageType)
     {
         this.mcontext=mcontext;
         this.delegate=delegate;
         this.fileStorageType=fileStorageType;
-
+        sharedPrefs=new SharedPreferenceUtil(mcontext);
+        showSmallImages=sharedPrefs.getBoolanValue(AddConstants.KEY_DISPLAY_SMALL_FILE, false);
 
     }
     @Override
@@ -97,6 +105,7 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
 
     @Override
     protected void onPostExecute(ArrayList<T> list) {
+
         delegate.processFinish(list);
 
         CustomProgressDialog.dismiss();
@@ -175,15 +184,36 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
 
         Cursor cursor;
         int column_index_data, column_index_folder_name,column_index_date_modified;
-
         String absolutePathOfImage = null;
 
         Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+
         String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME, MediaStore.MediaColumns.DATE_MODIFIED};
 
         final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
-        cursor = mcontext.getContentResolver().query( uri, projection, null, null, orderBy + " DESC");
-        if(cursor==null) {
+        //  showSmallFile  varibale get its  value from shared preference set from settingsActivity;
+
+
+        //hidden file
+
+        String FILE_TYPE_NO_MEDIA = ".nomedia";
+        String nonMediaCondition = MediaStore.Files.FileColumns.MEDIA_TYPE + "=" + MediaStore.Files.FileColumns.MEDIA_TYPE_NONE;
+        // String where = nonMediaCondition + " AND " + MediaStore.Files.FileColumns.TITLE + " LIKE "+"'%" + FILE_TYPE_NO_MEDIA + "%'" ;
+        String[] params = new String[] { "%" + FILE_TYPE_NO_MEDIA + "%" };
+
+        //hidden files
+
+        if(showSmallImages) {
+            cursor = mcontext.getContentResolver().query(uri, projection,null, null, orderBy + " DESC");
+        }
+        else
+        {
+            String searchFilter = MediaStore.Images.Media.SIZE + " > " + Constants.fileSizeFilter;
+            cursor = mcontext.getContentResolver().query(uri, projection, searchFilter, null, orderBy + " DESC");
+
+            }
+
+            if(cursor==null) {
             return al_images;
         }
         column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
@@ -557,17 +587,25 @@ public long dd(Date d)
 
 
     }
+
     private ArrayList<Model_Docs> FetchDocuments()
     {
+
+
         ArrayList<Model_Docs> docsList = new ArrayList<>();
         String colName=MediaStore.Files.FileColumns.MIME_TYPE;
-        String selectionMimeType = colName + "='text/plain' or "+colName+"='application/vnd.openxmlformats-officedocument.wordprocessingml.document' or "+colName+"= 'application/pdf'" ;
-        //String selectionMimeType = colName + "="+ Constants.mimeType_NotePad+" or "+colName+"='application/vnd.openxmlformats-officedocument.wordprocessingml.document' or "+colName+"= 'application/pdf'" ;
+        String colNameSize=MediaStore.Files.FileColumns.SIZE;
+        long fileSizeFilter=10720; // 30  kb
+
+
+        String  selectionMimeType = colName + "='text/plain' or "+colName+"='application/vnd.openxmlformats-officedocument.wordprocessingml.document' or "+colName+"= 'application/pdf' or "+colName+"= 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' or "+colName+"= 'application/vnd.openxmlformats-officedocument.presentationml.presentation' " ;
+
 
         final String[] projection = {MediaStore.Files.FileColumns.DATA, MediaStore.Files.FileColumns.TITLE, MediaStore.Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_ADDED, MediaStore.Files.FileColumns.MEDIA_TYPE,MediaStore.Files.FileColumns.MIME_TYPE};
         String orderby= MediaStore.Files.FileColumns.DATE_ADDED;
         Cursor cursor = mcontext.getContentResolver().query(MediaStore.Files.getContentUri("external"),
                 projection, selectionMimeType, null, orderby+" desc");
+
 
         String[] types = new String[]{"pdf","doc", "docx", "txt", "wpd", "wps","xls","xlsx","ppt",
                 "pptx"
@@ -617,14 +655,15 @@ public long dd(Date d)
                     model.setFileSizeCmpr(fileSize);
                     model.setDateToSort(Long.parseLong(fileDateModified));
 
-                    docsList.add(model);
 
+                    docsList.add(model);
 
                 }
             }
             while (cursor.moveToNext());
         }
         cursor.close();
+
         System.out.println("docs data count" + docsList.size());
 
         return docsList;
@@ -674,7 +713,11 @@ public long dd(Date d)
         ArrayList<Model_Anim> animList = new ArrayList<>();
         final String[] projection = {MediaStore.Files.FileColumns.DATA, MediaStore.Files.FileColumns.TITLE, MediaStore.Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_ADDED, MediaStore.Files.FileColumns.MIME_TYPE};
         final String orderBy = MediaStore.Files.FileColumns.DATE_ADDED;
-        String selectionMimeType = MediaStore.Files.FileColumns.MIME_TYPE + "='image/gif'";
+
+        // plication/vnd.openxmlformats-officedocument.presentationml.presentation' "+" ) "+"  AND  "+colNameSize+" > ' "+Constants.fileSizeFilter+" '" ;
+
+          String selectionMimeType = MediaStore.Files.FileColumns.MIME_TYPE + "='image/gif'";
+
         Cursor cursor = mcontext.getContentResolver().query(MediaStore.Files.getContentUri("external"),
                 projection, selectionMimeType, null, orderBy+" desc");
 

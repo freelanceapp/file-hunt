@@ -8,6 +8,16 @@ public class Grid_Model {
     long dateToSort;
     long fileSizeCmpr;
 
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
+    String fileType;
+
     public String getFileName() {
         return fileName;
     }

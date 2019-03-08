@@ -36,6 +36,7 @@ import com.mojodigi.filehunt.Adapter.MultiSelectAdapter_Video;
 import com.mojodigi.filehunt.AddsUtility.AddConstants;
 import com.mojodigi.filehunt.AddsUtility.AddMobUtils;
 import com.mojodigi.filehunt.AddsUtility.SharedPreferenceUtil;
+import com.mojodigi.filehunt.AsyncTasks.encryptAsyncTask;
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Model.Grid_Model;
 import com.mojodigi.filehunt.Utils.AlertDialogHelper;
@@ -251,7 +252,7 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
     @Override
     protected void onResume() {
         super.onResume();
-
+        Utility.log_FirebaseActivity_Events(VideoActivityRe.this,"VideosActivity");
     }
 
 
@@ -549,6 +550,7 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
                 gridImg.setDateToSort(f.lastModified());
                 gridImg.setFileName(f.getName());
                 gridImg.setFileSizeCmpr(f.length());
+                gridImg.setFileType(Utility.getFileExtensionfromPath(f.getAbsolutePath()));
             }
             catch (Exception e){}
 
@@ -678,6 +680,40 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
+
+
+                case R.id.action_hide:
+                    if(Utility.isManualPasswordSet()) {
+                        if (multiselect_list.size() >= 1) {
+
+
+                            if (Utility.createOrFindAppDirectory(Constants.MEDIA_TYPE_VDO))
+                            {
+                                File[] f = new File[multiselect_list.size()];
+                                for (int i = 0; i < multiselect_list.size(); i++) {
+                                    File file = new File(multiselect_list.get(i).getImgPath());
+                                    f[i] = file;
+                                }
+                                if (f.length >= 1)
+                                    new encryptAsyncTask(mcontext, f, Constants.encryptionPassword,Constants.MEDIA_TYPE_VDO).execute();
+                                else
+                                    Utility.dispToast(mcontext, getResources().getString(R.string.filenotfound));
+                            }
+
+                            else
+                            {
+                                Utility.dispToast(mcontext,getResources().getString(R.string.directorynotfound));
+                            }
+
+
+
+                        }
+                    }
+                    else {
+                        Intent i = new Intent(mcontext,LockerPasswordActivity.class);
+                        startActivity(i);
+                    }
+                    return  true;
 
                 case R.id.action_move:
                     Utility.dispToast(mcontext,"Move");
@@ -1141,6 +1177,8 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
             last.setChecked(true);
         else if(lastCheckedSortOptions==2)
             size.setChecked(true);
+        else  if(lastCheckedSortOptions==3)
+            type.setChecked(true);
 
 
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -1216,7 +1254,12 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
                 else if(action.equalsIgnoreCase("Type"))
                 {
 
+                    Collections.sort(vidioList, new Comparator<Grid_Model>() {
+                        public int compare(Grid_Model o1, Grid_Model o2) {
+                            return o2.getFileType().compareToIgnoreCase(o1.getFileType());
 
+                        }
+                    });
 
                 }
 
@@ -1271,7 +1314,12 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
                 }
                 else if(action.equalsIgnoreCase("Type"))
                 {
+                    Collections.sort(vidioList, new Comparator<Grid_Model>() {
+                        public int compare(Grid_Model o1, Grid_Model o2) {
+                            return o1.getFileType().compareToIgnoreCase(o2.getFileType());
 
+                        }
+                    });
                 }
 
 
@@ -1303,6 +1351,11 @@ public class VideoActivityRe extends AppCompatActivity implements AlertDialogHel
         else if(action.equalsIgnoreCase("Size"))
         {
             lastCheckedSortOptions=2;
+            this.action=action;
+        }
+        else if(action.equalsIgnoreCase("Type"))
+        {
+            lastCheckedSortOptions=3;
             this.action=action;
         }
     }

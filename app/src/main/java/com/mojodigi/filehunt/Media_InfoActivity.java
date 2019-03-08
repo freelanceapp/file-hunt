@@ -147,6 +147,13 @@ public class Media_InfoActivity extends AppCompatActivity implements View.OnClic
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+
+        Utility.log_FirebaseActivity_Events(Media_InfoActivity.this,"MediaInfoActivty");
+    }
+
+    @Override
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;

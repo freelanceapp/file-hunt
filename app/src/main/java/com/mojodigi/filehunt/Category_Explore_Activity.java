@@ -222,7 +222,7 @@ public class Category_Explore_Activity extends AppCompatActivity implements Adap
         }
 
 
-
+        Utility.log_FirebaseActivity_Events(Category_Explore_Activity.this,"Category screen");
 
     }
 

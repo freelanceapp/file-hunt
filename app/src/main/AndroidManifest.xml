@@ -3,73 +3,115 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.mojodigi.filehunt">
 
-    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.SET_WALLPAPER"/>
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
+
     <protected-broadcast android:name="android.intent.action.MEDIA_MOUNTED" />
+
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
 
-
     <application
-        android:name="com.mojodigi.filehunt.Application.MyApplication"
+        android:name=".Application.MyApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
         android:hardwareAccelerated="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
         android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:label="@string/app_name"
-
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-  >
+        android:theme="@style/AppTheme">
 
-        <activity android:theme="@style/MainActivityTheme" android:name="com.mojodigi.filehunt.MainActivity" android:screenOrientation="portrait"  >
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/MainActivityTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".Category_Explore_Activity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".PhotosActivityRe"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".VideoActivityRe"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".AudioActivityRe"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".DocsActivityRe"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".AnimationActivityRe"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ApkActivityRe"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".DownloadActivityRe"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".RecentActivityRe"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ZipActivityRe"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity_Stotrage"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Media_VdoActivity"
+            android:configChanges="screenLayout|screenSize"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Media_AdoActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Media_ImgActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Media_InfoActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".SettingsActivity" android:screenOrientation="portrait"></activity>
 
-        <!--<activity android:name="com.mojodigi.filehunt.MainActivity" android:screenOrientation="portrait"></activity>-->
-
-        <activity android:name="com.mojodigi.filehunt.Category_Explore_Activity" android:screenOrientation="portrait"></activity>
-
-        <activity android:name="com.mojodigi.filehunt.PhotosActivityRe"
-            android:screenOrientation="portrait"></activity>
-        <activity android:name="com.mojodigi.filehunt.VideoActivityRe" android:screenOrientation="portrait"></activity>
-        <activity android:name="com.mojodigi.filehunt.AudioActivityRe" android:screenOrientation="portrait"></activity>
-        <activity android:name="com.mojodigi.filehunt.DocsActivityRe" android:screenOrientation="portrait"></activity>
-        <activity android:name="com.mojodigi.filehunt.AnimationActivityRe" android:screenOrientation="portrait"></activity>
-        <activity android:name="com.mojodigi.filehunt.ApkActivityRe" android:screenOrientation="portrait"></activity>
-        <activity android:name="com.mojodigi.filehunt.DownloadActivityRe" android:screenOrientation="portrait"></activity>
-        <activity android:name="com.mojodigi.filehunt.RecentActivityRe" android:screenOrientation="portrait"></activity>
-        <activity android:name="com.mojodigi.filehunt.ZipActivityRe" android:screenOrientation="portrait"></activity>
-        <activity  android:theme="@style/AppTheme.NoActionBar" android:name="com.mojodigi.filehunt.Activity_Stotrage"
-            android:screenOrientation="portrait"></activity>
-
-        <activity android:theme="@style/AppTheme.NoActionBar" android:name="com.mojodigi.filehunt.Media_VdoActivity"
-            android:configChanges="screenLayout|screenSize"></activity>
-        <activity android:theme="@style/AppTheme.NoActionBar" android:name="com.mojodigi.filehunt.Media_AdoActivity"
-            android:screenOrientation="portrait"></activity>
-        <activity android:theme="@style/AppTheme.NoActionBar" android:name="com.mojodigi.filehunt.Media_ImgActivity"
-            android:screenOrientation="portrait"></activity>
-        <activity android:theme="@style/AppTheme.NoActionBar" android:name="com.mojodigi.filehunt.Media_InfoActivity"
-            android:screenOrientation="portrait"></activity>
-
-        <!--for facebook adds-->
-        <activity android:name="com.facebook.ads.AudienceNetworkActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"/>
+        <activity android:name=".LockerPasswordActivity" android:screenOrientation="portrait"></activity>
+        <activity android:name=".LockerActivityMain" android:screenOrientation="portrait"></activity>
+        <activity android:name=".List_Hidden_Files_Activity" android:screenOrientation="portrait"></activity>
 
 
-        <!--to  show  interesitial adds uisng smaato -->
-        <activity android:name="com.smaato.soma.interstitial.InterstitialActivity"
-            android:resizeableActivity="false" android:configChanges="keyboardHidden|orientation|screenSize">
-        </activity>
+        <!-- newely  added for google adds -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-5603925957932903~3576315291" /> <!-- test app ids added -->
+        <!-- newly  added for google adds -->
+        <meta-data
+            android:name="firebase_crashlytics_collection_enabled"
+            android:value="false" /> <!-- for crashlytics -->
+        <!-- for facebook adds -->
+        <activity
+            android:name="com.facebook.ads.AudienceNetworkActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" /> <!-- to  show  interesitial adds uisng smaato -->
+        <activity
+            android:name="com.smaato.soma.interstitial.InterstitialActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:resizeableActivity="false"></activity>
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -80,9 +122,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_provider_paths" />
         </provider>
-
-
-
 
         <receiver
             android:name="com.google.android.gms.analytics.AnalyticsReceiver"
@@ -106,7 +145,22 @@
         </receiver>
 
         <service android:name="com.google.android.gms.analytics.CampaignTrackingService" />
+        <service
+            android:name=".firebase.MyFirebaseMessagingService"
+            android:stopWithTask="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
 
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_fcm_icon"/>
+
+          <meta-data
+             android:name="com.google.firebase.messaging.default_notification_color"
+             android:resource="@color/color_icon"/>
 
     </application>
 

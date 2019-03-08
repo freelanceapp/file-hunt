@@ -1,8 +1,5 @@
 package com.mojodigi.filehunt.Application;
 
-import android.app.Application;
-
-import com.facebook.ads.AudienceNetworkActivity;
 import com.facebook.ads.AudienceNetworkAds;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.analytics.GoogleAnalytics;
@@ -48,13 +45,17 @@ public class MyApplication extends android.support.multidex.MultiDexApplication 
         AnalyticsTrackers.getInstance().get(AnalyticsTrackers.Target.APP);
 
 
-        //freeAnalytics
+     /*   //freeAnalytics
 
+// for the  time being free analytics  is  not  being used library  in gradle have been made comment
         // Start the Kochava Tracker
         com.kochava.base.Tracker.configure(new com.kochava.base.Tracker.Configuration(getApplicationContext())
                 .setAppGuid("kofilehunt-android-55ct67t").setLogLevel(com.kochava.base.Tracker.LOG_LEVEL_DEBUG)
         );
 
+
+        // for the  time being free analytics  is  not  being used library  in gradle have been made comment
+*/
 
     }
 

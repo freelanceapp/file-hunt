@@ -18,6 +18,7 @@ import android.media.MediaScannerConnection;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
 import android.provider.BaseColumns;
@@ -48,7 +49,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.internal.ServiceSpecificExtraArgs;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.mojodigi.filehunt.Activity_Stotrage;
+import com.mojodigi.filehunt.AddsUtility.AddConstants;
+import com.mojodigi.filehunt.AddsUtility.SharedPreferenceUtil;
 import com.mojodigi.filehunt.AnimationActivityRe;
 import com.mojodigi.filehunt.ApkActivityRe;
 import com.mojodigi.filehunt.Application.MyApplication;
@@ -58,7 +63,6 @@ import com.mojodigi.filehunt.Class.CustomTypefaceSpan;
 import com.mojodigi.filehunt.Class.Icons;
 import com.mojodigi.filehunt.DocsActivityRe;
 import com.mojodigi.filehunt.DownloadActivityRe;
-
 import com.mojodigi.filehunt.PhotosActivityRe;
 import com.mojodigi.filehunt.R;
 import com.mojodigi.filehunt.RecentActivityRe;
@@ -67,6 +71,7 @@ import com.mojodigi.filehunt.ZipActivityRe;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -75,13 +80,27 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Random;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.PBEParameterSpec;
 
 import static com.mojodigi.filehunt.Class.Constants.FileProtocol;
 
@@ -605,6 +624,14 @@ public class Utility extends Activity
             System.out.println("" + str);
         }
     }
+    public  static boolean hasUserHideStorages(SharedPreferenceUtil sharedPref)
+    {
+        if(sharedPref!=null)
+           return sharedPref.getBoolanValue(AddConstants.KEY_HIDE_EXTERNAL_STORAGE, false);
+        else
+            return false;
+
+    }
 
     public static void OpenFileWithNoughtAndAll(String name, Context ctx, String authority) {
         try {
@@ -823,6 +850,16 @@ public class Utility extends Activity
         DisplayMetrics displayMetrics = ctx.getResources().getDisplayMetrics();
         return Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
     }
+    public static  int getFontSizeValue(SharedPreferenceUtil sharedPreferenceUtil)
+    {
+        if(sharedPreferenceUtil!=null) {
+            int txtSize = sharedPreferenceUtil.getIntValue(AddConstants.KEY_TEXT_SIZE, 12);
+            Log.d("fontSize- sizeUtility", ""+txtSize);
+            return txtSize;
+        }
+        return  12;  //considering it  as default value in case of any exception etc .
+    }
+
 
     public static int percentOfValue(int TotalValue, int percent) {
         return TotalValue * percent / 100;
@@ -903,6 +940,286 @@ public class Utility extends Activity
 
 
     }
+
+    // encryption functions
+    public static boolean isManualPasswordSet()
+    {
+        // boolean status=false;
+        try {
+            String path = Environment.getExternalStorageDirectory() + "/" + Constants.passDir+"/"+Constants.passwordFileDes;
+            File f = new File(path);
+            return f.exists();
+        }catch (Exception e)
+        {
+            return  false;
+        }
+
+    }
+
+    public static String getEncryptFileName(String filePath, int cat_Type)
+    {
+        switch (cat_Type) {
+            case 1://IMG
+            filePath = Environment.getExternalStorageDirectory() + "/" + Constants.encryptFilesFolder + "/" + Constants.encrypImagesFolder + "/" + new File(filePath).getName() + ".des";
+            break;
+            case 2://VDO
+                filePath = Environment.getExternalStorageDirectory() + "/" + Constants.encryptFilesFolder + "/" + Constants.encrypVideosFolder + "/" + new File(filePath).getName() + ".des";
+                break;
+            case 3: //ADO
+                filePath = Environment.getExternalStorageDirectory() + "/" + Constants.encryptFilesFolder + "/" + Constants.encrypAudioFolder + "/" + new File(filePath).getName() + ".des";
+                break;
+            case 4://DOCS
+                filePath = Environment.getExternalStorageDirectory() + "/" + Constants.encryptFilesFolder + "/" + Constants.encrypDocsFolder + "/" + new File(filePath).getName() + ".des";
+                break;
+
+            //filePath =filePath.substring(0, filePath.lastIndexOf("."))+".des";
+        }
+        return  filePath;
+    }
+    private static boolean checkOrCreateParentDirectory()
+    {
+        String path = Environment.getExternalStorageDirectory() + "/" + Constants.encryptFilesFolder;
+        File file=new File(path);
+        if(file.exists())
+            return file.exists();
+        else return  file.mkdir();
+
+
+    }
+    public static boolean createOrFindAppDirectory(int mediaType)
+    {
+        boolean status = false;
+
+        if(checkOrCreateParentDirectory())
+        {
+            String path = "";
+
+            switch (mediaType) {
+                case 1:  //IMG
+                    path = Environment.getExternalStorageDirectory() + "/" + Constants.encryptFilesFolder + "/" + Constants.encrypImagesFolder;
+                    break;
+                case 2: //VDO
+                    path = Environment.getExternalStorageDirectory() + "/" + Constants.encryptFilesFolder + "/" + Constants.encrypVideosFolder;
+                    break;
+                case 3:  //ADO
+                    path = Environment.getExternalStorageDirectory() + "/" + Constants.encryptFilesFolder + "/" + Constants.encrypAudioFolder;
+                    break;
+                case 4:  //DOCS
+                    path = Environment.getExternalStorageDirectory() + "/" + Constants.encryptFilesFolder + "/" + Constants.encrypDocsFolder;
+                    break;
+
+
+            }
+            File f = new File(path);
+            if (!f.exists()) {
+                if (f.mkdir())
+                    status = true;
+                else
+                    status = false;
+            } else
+                status = true;
+
+
+        }
+        return  status;
+
+    }
+
+    public static String setDecryptFilePath(int mediaType)
+    {
+        switch (mediaType)
+        {
+            case 1://img
+                 return Environment.getExternalStorageDirectory()+"/"+Constants.encryptFilesFolder+"/"+Constants.encrypImagesFolder+"/";
+
+            case 2: //vdo
+                return Environment.getExternalStorageDirectory()+"/"+Constants.encryptFilesFolder+"/"+Constants.encrypVideosFolder+"/";
+
+
+            case 3://img
+                return Environment.getExternalStorageDirectory()+"/"+Constants.encryptFilesFolder+"/"+Constants.encrypAudioFolder+"/";
+
+            case 4: //vdo
+                return Environment.getExternalStorageDirectory()+"/"+Constants.encryptFilesFolder+"/"+Constants.encrypDocsFolder+"/";
+
+        }
+        return  "";
+    }
+    public static  String readPasswordFile()
+    {
+        String path = Environment.getExternalStorageDirectory() + "/" + Constants.passDir+"/"+Constants.passwordFileDes;
+        try {
+            String password = Constants.encryptionPassword;
+            PBEKeySpec pbeKeySpec = new PBEKeySpec(password.toCharArray());
+            // SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance("PBEWithMD5AndTripleDES");  //in java
+            SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance("PBEWITHSHA256AND256BITAES-CBC-BC");  //in android
+            SecretKey secretKey = secretKeyFactory.generateSecret(pbeKeySpec);
+            File inputFile=new File(path);
+            if(inputFile.exists())
+            {
+                FileInputStream fis = new FileInputStream(inputFile);
+
+                byte[] salt = new byte[8];
+                fis.read(salt);
+
+                PBEParameterSpec pbeParameterSpec = new PBEParameterSpec(salt, 100);
+
+                //Cipher cipher = Cipher.getInstance("PBEWithMD5AndTripleDES");  //in java
+                Cipher cipher = Cipher.getInstance("PBEWITHSHA256AND256BITAES-CBC-BC");  // in android
+                cipher.init(Cipher.DECRYPT_MODE, secretKey, pbeParameterSpec);
+
+                //FileOutputStream fos = new FileOutputStream(outputFile);
+                // FileOutputStream fos = new FileOutputStream("G:\\EncryptTest\\image\\Takendra_decrypted.jpg");
+                byte[] in = new byte[64];
+                int read;
+                while ((read = fis.read(in)) != -1) {
+                    byte[] output = cipher.update(in, 0, read);
+                    // if (output != null)
+                    // fos.write(output);
+                }
+
+                byte[] output = cipher.doFinal();
+                if (output != null) {
+                    // fos.write(output);
+                    String s = new String(output);
+                    return s;
+                }
+
+                fis.close();
+                // fos.flush();
+                //fos.close();
+                // Utility.RunMediaScan(ctx,outputFile);
+            }
+
+        }catch (InvalidKeyException e)
+        {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (InvalidKeySpecException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (BadPaddingException e) {
+            e.printStackTrace();
+        } catch (InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+        } catch (NoSuchPaddingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (IllegalBlockSizeException e) {
+            e.printStackTrace();
+        }
+
+
+
+        return  "";
+    }
+    public static  int  createPasswordFile(Context ctx,String userPassword) {
+        try {
+
+            String path = Environment.getExternalStorageDirectory() + "/" + Constants.passDir;
+
+            File f = new File(path);
+            if (!f.exists()) {
+                if (f.mkdir()) {
+                    String cPath=path+"/"+Constants.passwordFile;
+                    String data = userPassword;
+                    FileOutputStream out = new FileOutputStream(cPath);
+                    out.write(data.getBytes());
+                    out.close();
+                    File file=new File(cPath);
+
+                    if (file.exists())
+                    {
+                        try {
+                            FileInputStream inFile = new FileInputStream(file);
+                            FileOutputStream outFile = new FileOutputStream(path+"/"+Constants.passwordFileDes);
+
+                            String password = Constants.encryptionPassword;
+                            PBEKeySpec pbeKeySpec = new PBEKeySpec(password.toCharArray());
+                            // SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance("PBEWithMD5AndTripleDES");  //in java
+                            SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance("PBEWITHSHA256AND256BITAES-CBC-BC");  //in android
+                            SecretKey secretKey = secretKeyFactory.generateSecret(pbeKeySpec);
+
+
+
+
+                            byte[] salt = new byte[8];
+                            Random random = new Random();
+                            random.nextBytes(salt);
+
+                            PBEParameterSpec pbeParameterSpec = new PBEParameterSpec(salt, 100);
+                            //Cipher cipher = Cipher.getInstance("PBEWithMD5AndTripleDES");  //in java
+                            Cipher cipher = Cipher.getInstance("PBEWITHSHA256AND256BITAES-CBC-BC");  // in android
+                            cipher.init(Cipher.ENCRYPT_MODE, secretKey, pbeParameterSpec);
+                            outFile.write(salt);
+
+                            byte[] input = new byte[64];
+                            int bytesRead;
+                            while ((bytesRead = inFile.read(input)) != -1) {
+                                byte[] output = cipher.update(input, 0, bytesRead);
+                                if (output != null)
+                                    outFile.write(output);
+                            }
+
+                            byte[] output = cipher.doFinal();
+                            if (output != null)
+                                outFile.write(output);
+
+                            inFile.close();
+                            outFile.flush();
+                            outFile.close();
+
+                            // delete  the  temporary file;
+                            if(file.exists()) {
+                                file.delete();
+                                Utility.RunMediaScan(ctx,file);
+                            }
+
+                        }
+                        catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (InvalidKeySpecException e) {
+                            e.printStackTrace();
+                        } catch (NoSuchAlgorithmException e) {
+                            e.printStackTrace();
+                        } catch (BadPaddingException e) {
+                            e.printStackTrace();
+                        } catch (InvalidKeyException e) {
+                            e.printStackTrace();
+                        } catch (InvalidAlgorithmParameterException e) {
+                            e.printStackTrace();
+                        } catch (NoSuchPaddingException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (IllegalBlockSizeException e) {
+                            e.printStackTrace();
+                        }
+
+                        return 1;
+
+                    }
+
+
+                } else {
+                    Utility.dispToast(ctx, "file  not created"); // remove this message
+                    return 0;
+                }
+            } else {
+                Utility.dispToast(ctx, "can't create password");
+                return 0;
+            }
+        }
+        catch (Exception e)
+        {
+            return  0;
+        }
+        return  0;
+    }
+
 
     public static void redirect(Context ctx, Class<?> target) {
 
@@ -1361,17 +1678,28 @@ public class Utility extends Activity
 
 
     public static void hideKeyboard(Activity activity) {
-        View v = activity.getCurrentFocus();
-        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        assert imm != null && v != null;
-        imm.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        try {
+            View v = activity.getCurrentFocus();
+            InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            assert imm != null && v != null;
+            imm.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        }catch (Exception e)
+        {
+
+        }
     }
 
     public static void showKeyboard(Activity activity) {
-        View v = activity.getCurrentFocus();
-        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        assert imm != null && v != null;
-        imm.showSoftInput(v, InputMethodManager.SHOW_IMPLICIT);
+        try {
+
+            View v = activity.getCurrentFocus();
+            InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            assert imm != null && v != null;
+            imm.showSoftInput(v, InputMethodManager.SHOW_IMPLICIT);
+        }catch (Exception e)
+        {
+
+        }
     }
 
     /* if want both the available storage visible send 1 in layoutVisibilityFlag
@@ -1466,6 +1794,19 @@ public class Utility extends Activity
         dialog.show();
 
 
+    }
+
+    public  static  void log_FirebaseActivity_Events(Activity activity,String activityName)
+    {
+         FirebaseAnalytics mFirebaseAnalytics= FirebaseAnalytics.getInstance(activity);
+         if(mFirebaseAnalytics !=null)
+         {
+             Bundle bundle = new Bundle();
+             bundle.putString(FirebaseAnalytics.Param.ITEM_ID, activityName);
+             bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, activityName);
+             bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "Activity");
+             mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
+         }
     }
 
 

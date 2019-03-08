@@ -206,6 +206,9 @@ public class Media_VdoActivity extends AppCompatActivity implements View.OnClick
         mVdoVideoView.seekTo(addprefs.getIntValue("position",0));
         //mVdoVideoView.resume();
         mVdoVideoView.start();
+
+
+        Utility.log_FirebaseActivity_Events(Media_VdoActivity.this,"VideoPlayer Activity");
     }
 
 

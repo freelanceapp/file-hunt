@@ -24,6 +24,7 @@
             android:layout_marginTop="@dimen/dp40"
             android:layout_marginBottom="@dimen/dp40"
             android:id="@+id/encrypt_password_box"
+            android:inputType="textPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 

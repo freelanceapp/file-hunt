@@ -103,6 +103,8 @@ public class MultiSelectAdapter_Docs extends RecyclerView.Adapter<MultiSelectAda
                      iconDrawable=mContext.getResources().getDrawable(R.drawable.ic_json);
                  else if(model.getFileType().equalsIgnoreCase("xlsx")||model.getFileType().equalsIgnoreCase("xls"))
                      iconDrawable=mContext.getResources().getDrawable(R.drawable.ic_excel);
+                 else if(model.getFileType().equalsIgnoreCase("ppt") || model.getFileType().equalsIgnoreCase("pptx"))
+                     iconDrawable=mContext.getResources().getDrawable(R.drawable.ic_powerpnt );
                  else
                      iconDrawable=mContext.getResources().getDrawable(R.drawable.ic_other);
 

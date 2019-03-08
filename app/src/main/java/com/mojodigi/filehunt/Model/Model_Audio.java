@@ -15,8 +15,20 @@ public class Model_Audio {
     private String audioFileSize;
     private String audiofileMDate;
     private String audioFileDuration;
+
+
+    private String fileType;
     long dateToSort;
     long fileSizeCmpr;
+
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
 
     public long getDateToSort() {
         return dateToSort;

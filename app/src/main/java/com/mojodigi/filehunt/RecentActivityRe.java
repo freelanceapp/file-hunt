@@ -290,7 +290,7 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
     @Override
     protected void onResume() {
         super.onResume();
-
+        Utility.log_FirebaseActivity_Events(RecentActivityRe.this,"RecentActivity");
     }
 
     @Override
@@ -691,8 +691,8 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
 
            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
            recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
-           recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
-                   DividerItemDecoration.VERTICAL));
+           //recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
+             //      DividerItemDecoration.VERTICAL));
            recyclerView.setAdapter(multiSelectAdapter);
 
 
@@ -1135,6 +1135,8 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
             last.setChecked(true);
         else if(lastCheckedSortOptions==2)
             size.setChecked(true);
+        else if(lastCheckedSortOptions==3)
+            type.setChecked(true);
 
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -1211,7 +1213,12 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
                 else if(action.equalsIgnoreCase("Type"))
                 {
 
+                    Collections.sort(RecentList, new Comparator<Model_Recent>() {
+                        public int compare(Model_Recent o1, Model_Recent o2) {
+                            return o2.getFileType().compareToIgnoreCase(o1.getFileType());
 
+                        }
+                    });
 
                 }
 
@@ -1265,6 +1272,12 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
                 }
                 else if(action.equalsIgnoreCase("Type"))
                 {
+                    Collections.sort(RecentList, new Comparator<Model_Recent>() {
+                        public int compare(Model_Recent o1, Model_Recent o2) {
+                            return o1.getFileType().compareToIgnoreCase(o2.getFileType());
+
+                        }
+                    });
                 }
                 System.out.print(""+RecentList);
                 refreshAdapter();
@@ -1287,6 +1300,11 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
         else if(action.equalsIgnoreCase("Size"))
         {
             lastCheckedSortOptions=2;
+            this.action=action;
+        }
+        else  if(action.equalsIgnoreCase("Type"))
+        {
+            lastCheckedSortOptions=3;
             this.action=action;
         }
     }

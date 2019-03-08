@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.view.menu.MenuWrapperFactory;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.MediaController;
@@ -20,6 +19,7 @@ import android.widget.VideoView;
 
 import com.mojodigi.filehunt.AddsUtility.SharedPreferenceUtil;
 import com.mojodigi.filehunt.Class.Constants;
+
 import com.mojodigi.filehunt.Utils.AlertDialogHelper;
 import com.mojodigi.filehunt.Utils.CustomProgressDialog;
 import com.mojodigi.filehunt.Utils.Utility;
@@ -27,6 +27,8 @@ import com.mojodigi.filehunt.Utils.UtilityStorage;
 
 import java.io.File;
 import java.util.ArrayList;
+
+import com.mojodigi.filehunt.R;
 
 public class Media_AdoActivity extends AppCompatActivity implements View.OnClickListener, AlertDialogHelper.AlertDialogListener {
 
@@ -49,7 +51,6 @@ public class Media_AdoActivity extends AppCompatActivity implements View.OnClick
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_media__ado);
-
        mContex=Media_AdoActivity.this;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Utility.setstatusBarColorBelowM(Media_AdoActivity.this);
@@ -154,6 +155,8 @@ public class Media_AdoActivity extends AppCompatActivity implements View.OnClick
         super.onResume();
         mAdoVideoView.seekTo(addprefs.getIntValue("position",0));
         mAdoVideoView.start();
+
+        Utility.log_FirebaseActivity_Events(Media_AdoActivity.this,"AudioPlayerActivity");
     }
 
     @Override

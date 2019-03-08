@@ -2,40 +2,43 @@ package com.mojodigi.filehunt;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.ActionProvider;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -44,6 +47,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.mojodigi.filehunt.AddsUtility.AddConstants;
 import com.mojodigi.filehunt.AddsUtility.AddMobUtils;
 import com.mojodigi.filehunt.AddsUtility.JsonParser;
@@ -51,7 +57,7 @@ import com.mojodigi.filehunt.AddsUtility.OkhttpMethods;
 import com.mojodigi.filehunt.AddsUtility.SharedPreferenceUtil;
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Model.category_Model;
-import com.mojodigi.filehunt.R;
+import com.mojodigi.filehunt.Utils.EncryptDialogUtility;
 import com.mojodigi.filehunt.Utils.Utility;
 import com.mojodigi.filehunt.Utils.UtilityStorage;
 import com.smaato.soma.AdDownloaderInterface;
@@ -70,7 +76,7 @@ import java.util.List;
 
 import static com.mojodigi.filehunt.Class.Constants.POSITION;
 
-public class MainActivity extends AppCompatActivity implements AdListenerInterface {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AdListenerInterface ,EncryptDialogUtility.EncryptDialogListener {
 
 
     Toolbar toolbar;
@@ -80,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
 
     ProgressBar progressBar, progressBar_Ext;
     TextView avlbMemory, totalMemmory, internalTxt, avlbTxt;
-    TextView avlbMemory_Ext, totalMemmory_Ext, internalTxt_Ext, avlbTxt_Ext;
+    TextView avlbMemory_Ext, totalMemmory_Ext, internalTxt_Ext, avlbTxt_Ext , navAppVersion_Txt;
     RelativeLayout storage_section;
     LinearLayout ext_layout,internalLLayout;
 
@@ -102,8 +108,16 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
     View adContainer;
     RelativeLayout addhoster;
 
-    //add vars
+    //add push notification
+    String fcm_Token ="" ;
+    public   String deviceID ="";
+    public   String nameOfDevice ="";
+    public   String appVersionName ="";
 
+    String clickPushNotification ="";
+    boolean isNetworkAvailable  ;
+    int max_execute ;
+    boolean hideExtPrefValue;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -113,15 +127,13 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
         mContext=MainActivity.this;
         permissionStatus =mContext.getSharedPreferences("permissionStatus", MODE_PRIVATE);
 
-
         askForPermission();
 
-
-
-        mContext=MainActivity.this;
         if(mContext!=null)
         {
             addprefs = new SharedPreferenceUtil(mContext);
+
+
             addhoster=findViewById(R.id.addhoster);
             mAdView = (AdView) findViewById(R.id.adView);
             adContainer = findViewById(R.id.adMobView);
@@ -134,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
             smaaTobannerView.addAdListener(this);
 
 
-            }
+        }
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -174,13 +186,105 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
         registerReceiver(internetChangerReceiver, intentFilter);
         // this broadcast  will  listen the  internet state change for sendig request  when internet becomes available
 
-       }
+
+        navAppVersion_Txt = (TextView) findViewById(R.id.navAppVersion_Txt);
+
+
+
+/***********************Start**********************************************/
+        isNetworkAvailable = AddConstants.checkIsOnline(mContext);
+
+        addprefs = new SharedPreferenceUtil(mContext);
+        if(addprefs!=null){
+            clickPushNotification = addprefs.getStringValue(AddConstants.CLICK_PUSH_NOTIFICATION, "");
+        }
+        deviceID = Settings.Secure.getString(getBaseContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+        Log.e("Android ID : ",""+deviceID);
+        nameOfDevice = Build.MANUFACTURER+" "+Build.MODEL+" "+Build.VERSION.RELEASE;
+        Log.e("Device Name : ",""+nameOfDevice);
+        PackageInfo pinfo = null;
+        try {
+            pinfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            appVersionName = pinfo.versionName;
+            Log.e("App Version Name : ",""+appVersionName);
+
+            if(appVersionName!=null) {
+                String appVersion = "App Version : " + appVersionName;
+                setNavAppVersion(appVersion);
+            }
+
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }catch (Exception ex){ ex.printStackTrace();}
+
+
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener( MainActivity.this,
+                new OnSuccessListener<InstanceIdResult>() {
+                    @Override
+                    public void onSuccess(InstanceIdResult instanceIdResult) {
+                        fcm_Token = instanceIdResult.getToken();
+                        Log.e("New Token : ", fcm_Token);
+
+                        if (isNetworkAvailable) {
+                            Log.e("Network is available ", "PushNotification Called");
+                            // new PushNotificationCall().execute();
+                        } else {
+                            Log.e("No Network", "PushNotification Call failed");
+                        }
+                    }
+                });
+
+
+        Intent intent = new Intent();
+        String manufacturer = android.os.Build.MANUFACTURER;
+        switch (manufacturer) {
+
+            case "xiaomi":
+                intent.setComponent(new ComponentName("com.miui.securitycenter",
+                        "com.miui.permcenter.autostart.AutoStartManagementActivity"));
+                break;
+            case "oppo":
+                intent.setComponent(new ComponentName("com.coloros.safecenter",
+                        "com.coloros.safecenter.permission.startup.StartupAppListActivity"));
+
+                break;
+            case "vivo":
+                intent.setComponent(new ComponentName("com.vivo.permissionmanager",
+                        "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"));
+                break;
+        }
+
+        List<ResolveInfo> arrayListInfo =  getPackageManager().queryIntentActivities(intent,
+                PackageManager.MATCH_DEFAULT_ONLY);
+
+        if (arrayListInfo.size() > 0) {
+            startActivity(intent);
+        }
+
+
+
+
+    }
+
+
+    public void setNavAppVersion(String appVersion){
+        navAppVersion_Txt.setText(appVersion);
+    }
+
 
     @Override
     protected void onResume() {
         super.onResume();
 
-       // dispbannerAdd();
+        Utility.log_FirebaseActivity_Events(MainActivity.this,"HomeScreen");
+        // dispbannerAdd();
+
+        // hide /show the external storage  on the basis  of  userPreference
+        if(mContext!=null && addprefs!=null ) {
+            dispDevicesStorage();
+        }
+
+
     }
 
     @Override
@@ -190,45 +294,45 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
     }
 
     private void dispbannerAdd()
-{
-    // displat add from preferences
-
-    AddMobUtils adutil = new AddMobUtils();
-
-    if(AddConstants.checkIsOnline(mContext) && adContainer !=null && addprefs !=null)
     {
-        String AddPrioverId=addprefs.getStringValue(AddConstants.ADD_PROVIDER_ID, AddConstants.NOT_FOUND);
-        if(AddPrioverId.equalsIgnoreCase(AddConstants.Adsense_Admob_GooglePrivideId)) {
-          adutil.displayServerBannerAdd(addprefs, adContainer, mContext);
+        // display add from preferences
 
-          }
-        else if(AddPrioverId.equalsIgnoreCase(AddConstants.SmaatoProvideId))
+        AddMobUtils adutil = new AddMobUtils();
+
+        if(AddConstants.checkIsOnline(mContext) && adContainer !=null && addprefs !=null)
         {
-            try {
-                int publisherId = Integer.parseInt(addprefs.getStringValue(AddConstants.APP_ID, AddConstants.NOT_FOUND));
-                int addSpaceId = Integer.parseInt(addprefs.getStringValue(AddConstants.BANNER_ADD_ID, AddConstants.NOT_FOUND));
-                adutil.displaySmaatoBannerAdd(smaaTobannerView, smaaToAddContainer, publisherId, addSpaceId);
-            }catch (Exception e)
-            {
-                String string = e.getMessage();
-                System.out.print(""+string);
+            String AddPrioverId=addprefs.getStringValue(AddConstants.ADD_PROVIDER_ID, AddConstants.NOT_FOUND);
+            if(AddPrioverId.equalsIgnoreCase(AddConstants.Adsense_Admob_GooglePrivideId)) {
+                adutil.displayServerBannerAdd(addprefs, adContainer, mContext);
+
             }
+            else if(AddPrioverId.equalsIgnoreCase(AddConstants.SmaatoProvideId))
+            {
+                try {
+                    int publisherId = Integer.parseInt(addprefs.getStringValue(AddConstants.APP_ID, AddConstants.NOT_FOUND));
+                    int addSpaceId = Integer.parseInt(addprefs.getStringValue(AddConstants.BANNER_ADD_ID, AddConstants.NOT_FOUND));
+                    adutil.displaySmaatoBannerAdd(smaaTobannerView, smaaToAddContainer, publisherId, addSpaceId);
+                }catch (Exception e)
+                {
+                    String string = e.getMessage();
+                    System.out.print(""+string);
+                }
+            }
+            else if(AddPrioverId.equalsIgnoreCase(AddConstants.FaceBookAddProividerId))
+            {
+                adutil.dispFacebookBannerAdd(mContext,addprefs , MainActivity.this);
+            }
+
         }
-        else if(AddPrioverId.equalsIgnoreCase(AddConstants.FaceBookAddProividerId))
-        {
-              adutil.dispFacebookBannerAdd(mContext,addprefs , MainActivity.this);
+        else {
+            adutil.displayLocalBannerAdd(mAdView);
         }
 
+
+
+        //  banner add
+        // displat add from preferences
     }
-    else {
-        adutil.displayLocalBannerAdd(mAdView);
-    }
-
-
-
-    //  banner add
-    // displat add from preferences
-}
 
     public void askForPermission()
     {
@@ -291,8 +395,8 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
             editor.commit();
         } else {
             //You already have the permission, just go ahead.
-           initActivityComponents();
-           iniVars();
+            initActivityComponents();
+            iniVars();
 
         }
     }
@@ -355,6 +459,7 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
         category_Model cat_Document=new category_Model("Document");
         category_Model cat_Recent=new category_Model("Recent");
         category_Model cat_zip=new category_Model("Zip");
+        category_Model cat_Locker=new category_Model("Locker");
 
 
         catList.add(cat_Img);
@@ -366,6 +471,7 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
         catList.add(cat_Recent);
         catList.add(cat_Apk);
         catList.add(cat_zip);
+        catList.add(cat_Locker);
 
 
 
@@ -379,24 +485,43 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
 
 
 
-        if(mContext!=null) {
+        if(mContext!=null ) {
 
             fillProgressBar();
-
             try {
                 String sdCardPath = UtilityStorage.getExternalStoragePath(mContext, true);
                 // if sdcard is ejected the returned path will not exist;
-                if (sdCardPath != null && Utility.isPathExist(sdCardPath, mContext)) {
+                if (sdCardPath != null && Utility.isPathExist(sdCardPath, mContext) ) {
                     ext_layout.setVisibility(View.VISIBLE);
                     fillProgressBar_Ext();
 
+                }
+                else {
+                    ext_layout.setVisibility(View.GONE);
                 }
             } catch (Exception e) {
 
             }
 
 
+
         }
+
+
+
+
+    }
+
+    private void dispDevicesStorage() {
+
+          if(storage_section !=null) {
+
+              if (addprefs != null && Utility.hasUserHideStorages(addprefs)) {
+                  storage_section.setVisibility(View.GONE);
+              } else {
+                  storage_section.setVisibility(View.VISIBLE);
+              }
+          }
 
 
 
@@ -406,6 +531,17 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
     {
         toolbar =  findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(MainActivity.this);
+
+
         recyclerView = findViewById(R.id.recycler_view);
 
         storage_section=findViewById(R.id.storage_section);
@@ -507,7 +643,7 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
         long per = AvailableMemory_Ext / (TotalMemory_Ext / 100);
         System.out.print("Memory Stats--> Total " + TotalMemory_Ext + " Avaailable" + AvailableMemory_Ext + "" + per);
 
-       // avlbMemory_Ext.setText(Utility.humanReadableByteCount(AvailableMemory_Ext, true) + "(" + per + "%)");   // old code
+        // avlbMemory_Ext.setText(Utility.humanReadableByteCount(AvailableMemory_Ext, true) + "(" + per + "%)");   // old code
         avlbMemory_Ext.setText(Utility.humanReadableByteCount(AvailableMemory_Ext, true) + "(" + Utility.setdecimalPoints(String.valueOf(per), 2) + "%)");
 
         totalMemmory_Ext.setText("Total " + Utility.humanReadableByteCount(TotalMemory_Ext, true));
@@ -522,7 +658,7 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
-       //menuInflater.inflate(R.menu.menu, menu);
+        //menuInflater.inflate(R.menu.menu, menu);
 
         //  this menu  is not required as per vipul  storage will always be visible
 
@@ -555,28 +691,28 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
 
 
 
-   private void showHidestorage(int flag)
-   {
+    private void showHidestorage(int flag)
+    {
 
-       switch (flag)
-       {
+        switch (flag)
+        {
 
-           case  1:
+            case  1:
 
-               storage_section.setVisibility(View.VISIBLE);
-               invalidateOptionsMenu();// this calls oncreateOptiosMenu there we we show/hide storage
-               break;
-           case 2:
-               storage_section.setVisibility(View.GONE);
-               invalidateOptionsMenu();// this calls oncreateOptiosMenu there we we show/hide storage
-
-
-               break;
-
-               }
+                storage_section.setVisibility(View.VISIBLE);
+                invalidateOptionsMenu();// this calls oncreateOptiosMenu there we we show/hide storage
+                break;
+            case 2:
+                storage_section.setVisibility(View.GONE);
+                invalidateOptionsMenu();// this calls oncreateOptiosMenu there we we show/hide storage
 
 
-   }
+                break;
+
+        }
+
+
+    }
 
 
 
@@ -632,6 +768,26 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
 
     }
 
+    @Override
+    public void onCancelClick() {
+
+    }
+
+    @Override
+    public int onEncryptClick(String password) {
+        String s  =  Utility.readPasswordFile();
+        //Utility.dispToast(ctx,""+s.toString());
+        if(s.equals(password))
+        {
+            redirectToActivity(LockerActivityMain.class);
+            return 1;
+        }
+        else {
+            Utility.dispToast(mContext,"Password does not match.");
+            return  0;
+        }
+    }
+
 
     public class categoryAdapter extends RecyclerView.Adapter<categoryAdapter.categoryViewHolder> {
 
@@ -678,9 +834,9 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
                 case 8:
                     holder.catIcon.setImageResource(R.drawable.cat_ic_zip);
                     break;
-                    default:
-                   holder.catIcon.setImageResource(R.drawable.cat_ic_zip);
-                        break;
+                default:
+                    holder.catIcon.setImageResource(R.drawable.cat_ic_zip);
+                    break;
             }
 
             holder.catName.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
@@ -700,7 +856,7 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
                             break;
                         case 4:
                             redirectToActivity(DownloadActivityRe.class);
-                                break;
+                            break;
                         case 5:
                             redirectToActivity(AnimationActivityRe.class);
                             break;
@@ -713,11 +869,24 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
                         case 8:
                             redirectToActivity(ZipActivityRe.class);
                             break;
-                            default:
-                                Intent i = new Intent(mContext, Category_Explore_Activity.class);
-                                i.putExtra(POSITION, position);
-                                startActivity(i);
-                                break;
+
+                        case 9:
+                            if(Utility.isManualPasswordSet())
+                            {
+
+                                new EncryptDialogUtility(MainActivity.this).fileEncryptPasswordDialog(mContext);
+                            }
+                            else
+                            {
+                                redirectToActivity(LockerPasswordActivity.class);
+
+                            }
+                            break;
+                        default:
+                            Intent i = new Intent(mContext, Category_Explore_Activity.class);
+                            i.putExtra(POSITION, position);
+                            startActivity(i);
+                            break;
                     }
 
 
@@ -748,6 +917,8 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
                 catIcon =  view.findViewById(R.id.cat_Icon);
                 container_Layout=view.findViewById(R.id.container_Layout);
 
+                catName.setTextSize(Utility.getFontSizeValue(addprefs));
+
 
             }
         }
@@ -758,24 +929,7 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
         }
 
     }
-    boolean doubleBackToExitPressedOnce = false;
-    @Override
-    public void onBackPressed() {
-        if (doubleBackToExitPressedOnce) {
-            super.onBackPressed();
-            return;
-        }
 
-        this.doubleBackToExitPressedOnce = true;
-        Toast.makeText(this, "Please press again to exit.", Toast.LENGTH_SHORT).show();
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                doubleBackToExitPressedOnce = false;
-            }
-        }, 2000);
-    }
 
     public class WebCall extends AsyncTask<String,String,String>
     {
@@ -788,9 +942,24 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
 
         @Override
         protected String doInBackground(String... strings) {
+            String versioName="0";
+            int versionCode=0;
+            try {
+                versioName = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+                versionCode=getPackageManager().getPackageInfo(getPackageName(),0 ).versionCode;
+
+                Log.d("currentVersion", "" + versioName);
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+            }
+            catch (Exception e)
+            {
+                         // handel any other exception
+            }
 
             try {
-                JSONObject requestObj= AddConstants.prepareAddJsonRequest(mContext, AddConstants.VENDOR_ID);
+                JSONObject requestObj= AddConstants.prepareAddJsonRequest(mContext, AddConstants.VENDOR_ID , versioName ,versionCode );
+
                 return OkhttpMethods.CallApi(mContext,AddConstants.API_URL,requestObj.toString());
             } catch (IOException e) {
                 e.printStackTrace();
@@ -829,17 +998,18 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
 
                                         String adProviderId =JsonParser.getkeyValue_Str(dataJson, "adProviderId");
                                         String adProviderName = JsonParser.getkeyValue_Str(dataJson, "adProviderName");
+                                        String newVersion=JsonParser.getkeyValue_Str(dataJson,"appVersion");
 
-                                         String appId_PublisherId = JsonParser.getkeyValue_Str(dataJson, "appId_PublisherId");
+                                    /*     String appId_PublisherId = JsonParser.getkeyValue_Str(dataJson, "appId_PublisherId");
                                          String bannerAdId = JsonParser.getkeyValue_Str(dataJson, "bannerAdId");
                                          String interstitialAdId = JsonParser.getkeyValue_Str(dataJson, "interstitialAdId");
-                                         String videoAdId = JsonParser.getkeyValue_Str(dataJson, "videoAdId");
+                                         String videoAdId = JsonParser.getkeyValue_Str(dataJson, "videoAdId");*/
 
 
-//                                        String appId_PublisherId = "ca-app-pub-3940256099942544~3347511713";//testID
-//                                        String bannerAdId = "ca-app-pub-3940256099942544/6300978111"; //testId
-//                                        String interstitialAdId = "ca-app-pub-3940256099942544/1033173712";//testId
-//                                        String videoAdId = "ca-app-pub-3940256099942544/5224354917";//testId
+                                        String appId_PublisherId = "ca-app-pub-3940256099942544~3347511713";//testID
+                                        String bannerAdId = "ca-app-pub-3940256099942544/6300978111"; //testId
+                                        String interstitialAdId = "ca-app-pub-3940256099942544/1033173712";//testId
+                                        String videoAdId = "ca-app-pub-3940256099942544/5224354917";//testId
 
 
                                         Log.d("AddiDs", adProviderName + " ==" + appId_PublisherId + "==" + bannerAdId + "==" + interstitialAdId + "==" + videoAdId);
@@ -853,7 +1023,8 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
                                             // IN CASE OF EXCEPTION CONSIDER  FALSE AS THE VALUE WILL NOT BE TRUE,FALSE.
                                             addprefs.setValue(AddConstants.SHOW_ADD, false);
                                         }
-
+                                        addprefs.setValue(AddConstants.APP_VERSION, newVersion);
+                                        //addprefs.setValue(AddConstants.APP_VERSION, "1.22");
                                         addprefs.setValue(AddConstants.ADD_PROVIDER_ID, adProviderId);
                                         addprefs.setValue(AddConstants.APP_ID, appId_PublisherId);
                                         addprefs.setValue(AddConstants.BANNER_ADD_ID, bannerAdId);
@@ -909,7 +1080,7 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
                                             //requestSmaatoBanerAdds
                                         }
 
-
+                                        dispUpdateDialog();
 
                                     } else {
                                         String message = JsonParser.getkeyValue_Str(mainJson, "message");
@@ -1028,4 +1199,223 @@ public class MainActivity extends AppCompatActivity implements AdListenerInterfa
         }
         return 0;
     }
+
+
+    boolean doubleBackToExitPressedOnce = false;
+
+    @Override
+    public void onBackPressed() {
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+
+
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed();
+            return;
+        }
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Please press again to exit.", Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce = false;
+            }
+        }, 2000);
+    }
+
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+        int id = menuItem.getItemId();
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        //Selected item remaining selected on drawer close but solve it ,  leave to further
+        //menuItem.setCheckable(false);
+        menuItem.setCheckable(false);
+
+        if (id == R.id.nav_settings) {
+            redirectToActivity(SettingsActivity.class);
+        } else if (id == R.id.nav_about) {
+            Toast.makeText(this , "About Clicked" ,Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.nav_share) {
+            Toast.makeText(this , "Share Clicked" ,Toast.LENGTH_SHORT).show();
+        }
+
+        return true;
+    }
+
+
+
+
+    // this web call  is also  being done  on LockScreenViewService too  as that  is the most  viewed scrren from the user;
+    public class PushNotificationCall extends AsyncTask<String,String,String>
+    {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+
+            try {
+                Log.e("deviceId ", deviceID);
+                Log.e("deviceName ", nameOfDevice);
+                Log.e("fcmToken ", fcm_Token);
+                Log.e("appVer ", appVersionName);
+
+                JSONObject requestObj = AddConstants.prepareFcmJsonRequest(mContext, deviceID, nameOfDevice, fcm_Token , appVersionName);
+                return OkhttpMethods.CallApi(mContext, AddConstants.API_PUSH_NOTIFICATION, requestObj.toString());
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                return ""+e.getMessage();
+            }
+        }
+
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+
+            Log.e("Push Json Response ", s);
+
+            if (addprefs != null)
+            {
+                int responseCode=addprefs.getIntValue(AddConstants.API_RESPONSE_CODE, 0);
+
+                if (s != null  && responseCode==200 ) {
+                    try {
+                        JSONObject mainJson = new JSONObject(s);
+                        if (mainJson.has("status")) {
+                            String status = JsonParser.getkeyValue_Str(mainJson, "status");
+                            Log.e("status", "" + status);
+
+
+                            if (status.equalsIgnoreCase("false")) {
+
+                                if (mainJson.has("data")) {
+                                    JSONObject dataJson = mainJson.getJSONObject("data");
+                                } else {
+                                    String message = JsonParser.getkeyValue_Str(mainJson, "message");
+                                    Log.e("message", "" + message);
+                                }
+                            }
+                            if (status.equalsIgnoreCase("false")) {
+                                Log.e("status", "" + status);
+
+                                if(max_execute<=5){
+                                    new PushNotificationCall().execute();
+                                    max_execute++;
+                                }
+                            }
+                        }
+                    } catch (JSONException e) {
+                        Log.d("jsonParse", "error while parsing json -->" + e.getMessage());
+                        e.printStackTrace();
+                    }
+                } else {
+                    Log.e("", "else"  );
+                }
+            }
+        }
+    }
+
+
+
+    private void dispUpdateDialog() {
+        try {
+            String currentVersion = "0";
+            String newVersion="0";
+            if(addprefs!=null)
+                newVersion=addprefs.getStringValue(AddConstants.APP_VERSION, AddConstants.NOT_FOUND);
+
+            try {
+                currentVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+                Log.d("currentVersion", "" + currentVersion);
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            if (Float.parseFloat(newVersion) > Float.parseFloat(currentVersion) && !newVersion.equalsIgnoreCase("0"))
+
+            {
+                if (mContext != null) {
+                    final Dialog dialog = new Dialog(mContext);
+                    dialog.setContentView(R.layout.dialog_version_update);
+                    long time = addprefs.getLongValue("displayedTime", 0);
+                      long diff=86400000; // one day
+                    //long diff=60000; // one minute;
+
+                    if (time < System.currentTimeMillis() - diff) {
+                        dialog.show();
+                        addprefs.setValue("displayedTime", System.currentTimeMillis());
+                    }
+
+
+                    TextView later = dialog.findViewById(R.id.idDialogLater);
+                    TextView updateNow = dialog.findViewById(R.id.idDialogUpdateNow);
+                    TextView idVersionDetailsText = dialog.findViewById(R.id.idVersionDetailsText);
+                    TextView idAppVersionText = dialog.findViewById(R.id.idAppVersionText);
+                    TextView idVersionTitleText = dialog.findViewById(R.id.idVersionTitleText);
+
+
+                    idVersionTitleText.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
+                    idVersionDetailsText.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
+                    idAppVersionText.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
+                    later.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
+                    updateNow.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
+
+                    idAppVersionText.setText(newVersion);
+
+
+                    later.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+
+                            dialog.dismiss();
+                        }
+                    });
+
+
+                    updateNow.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+
+                            final String appPackageName = getPackageName(); // package name of the app
+                            try {
+                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+                            } catch (android.content.ActivityNotFoundException anfe) {
+                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                            }
+
+
+                            dialog.dismiss();
+                        }
+                    });
+
+
+                }
+
+
+            }
+        }
+        catch (Exception e)
+        {
+
+        }
+
+    }
+
+
 }

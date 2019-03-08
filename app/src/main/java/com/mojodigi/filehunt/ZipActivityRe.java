@@ -291,7 +291,7 @@ public class ZipActivityRe extends AppCompatActivity implements AlertDialogHelpe
         if (mAdView != null) {
             mAdView.resume();
         }
-
+        Utility.log_FirebaseActivity_Events(ZipActivityRe.this,"Zip Activity");
 
     }
 
@@ -712,8 +712,7 @@ public class ZipActivityRe extends AppCompatActivity implements AlertDialogHelpe
     @Override
     public void processFinish(ArrayList output) {
 
-
-        ZipList=output;
+        ZipList = output;
         multiSelectAdapter = new MultiSelectAdapter_Zip(this, ZipList, multiselect_list, this);
         if(ZipList.size()==0)
         {
@@ -724,13 +723,13 @@ public class ZipActivityRe extends AppCompatActivity implements AlertDialogHelpe
             // AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, (int)Utility.px2dip(mcontext,150.0f));  // did not work on high resolution phones
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
             recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
-            recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
-                    DividerItemDecoration.VERTICAL));
+            //recyclerView.addItemDecoration(new DividerItemDecoration(mcontext,
+                    //DividerItemDecoration.VERTICAL));
             recyclerView.setAdapter(multiSelectAdapter);
-
         };
-
     }
+
+
 
     @Override
     public void onReceiveAd(AdDownloaderInterface adDownloaderInterface, ReceivedBannerInterface receivedBannerInterface) {
@@ -743,14 +742,15 @@ public class ZipActivityRe extends AppCompatActivity implements AlertDialogHelpe
             {
                 smaaToAddContainer.setVisibility(View.GONE);
             }
-
-
         }
         else if(receivedBannerInterface.getErrorCode() == ErrorCode.NO_ERROR)
         {
             smaaToAddContainer.setVisibility(View.VISIBLE);
         }
     }
+
+
+
     private class DeleteFileTask extends AsyncTask<Void,Void,Integer>
     {
         @Override
@@ -1089,6 +1089,7 @@ public class ZipActivityRe extends AppCompatActivity implements AlertDialogHelpe
         RadioButton last=view.findViewById(R.id.sort_last_modified);
         RadioButton size=view.findViewById(R.id.sort_size);
         RadioButton type=view.findViewById(R.id.sort_type);
+        type.setVisibility(View.GONE);
 
         if(lastCheckedSortOptions==0)
             name.setChecked(true);

@@ -103,6 +103,31 @@ public class Constants {
 
     public static Model_images model;
 
+    public static  long fileSizeFilter=    1024*30; // 30  kb
 
+
+
+
+    public static  String encryptFilesFolder=".FileHunt";
+    public static String encrypImagesFolder="Images";
+    public static String encrypVideosFolder="Videos";
+    public static String encrypAudioFolder="Audios";
+    public static String encrypDocsFolder="Documents";
+
+
+    public static  String passDir=".mojoDigi";
+    public static String passwordFile="filehunt.txt";
+    public static  String passwordFileDes="filehunt.des";
+    public static String encryptionPassword="x!23ghjt@#";
+    public static String encryptedFilePassword=".des";
+
+
+    public static int MEDIA_TYPE_IMG=1;
+    public static int MEDIA_TYPE_VDO=2;
+    public static int MEDIA_TYPE_ADO=3;
+    public static int MEDIA_TYPE_DOC=4;
+
+
+    public static boolean isAsyncOperationStopped=false;
 
 }
