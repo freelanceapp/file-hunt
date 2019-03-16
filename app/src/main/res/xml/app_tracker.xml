@@ -19,7 +19,7 @@
   -->
 
 
-    <bool name="ga_autoActivityTracking">false</bool>
+    <bool name="ga_autoActivityTracking">true</bool>
 
     <!--  The property id associated with this analytics tracker -->
 
@@ -67,6 +67,10 @@
      <screenName name="com.mojodigi.filehunt.Media_AdoActivity">MediaAudioPlayActivity</screenName>
      <screenName name="com.mojodigi.filehunt.Media_ImgActivity">MediaImgActivity</screenName>
      <screenName name="com.mojodigi.filehunt.Activity_Stotrage">StorageActivity</screenName>
+     <screenName name="com.mojodigi.filehunt.SettingsActivity">SettingActivity</screenName>
+     <screenName name="com.mojodigi.filehunt.LockerActivityMain">LockActivityMain</screenName>
+     <screenName name="com.mojodigi.filehunt.LockerPasswordActivity">LockerPasswordActivity</screenName>
+     <screenName name="com.mojodigi.filehunt.List_Hidden_Files_Activity">ListHiddenFileActivity</screenName>
 
 
 

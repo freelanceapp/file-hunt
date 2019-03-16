@@ -101,16 +101,16 @@ public class Category_Explore_Activity extends AppCompatActivity implements Adap
         switch (position)
         {
             case 0:
-                Utility.setActivityTitle(ctx,getResources().getString(R.string.cat_Images));
+                Utility.setActivityTitle2(ctx,getResources().getString(R.string.cat_Images));
                 new AsynctaskUtility<Model_images>(ctx,this,IMAGES).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
                 break;
             case 1:
-                Utility.setActivityTitle(ctx,getResources().getString(R.string.cat_Videos));
+                Utility.setActivityTitle2(ctx,getResources().getString(R.string.cat_Videos));
                 new AsynctaskUtility<Model_images>(ctx,this,VIDEO).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 break;
             case 2:
-                Utility.setActivityTitle(ctx,getResources().getString(R.string.cat_Audio));
+                Utility.setActivityTitle2(ctx,getResources().getString(R.string.cat_Audio));
                 new AsynctaskUtility<Model_images>(ctx,this,AUDIO).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 break;
             case 3:
@@ -198,13 +198,6 @@ public class Category_Explore_Activity extends AppCompatActivity implements Adap
     protected void onResume() {
         super.onResume();
 
-
-//        if(Constants.redirectToStorage)
-//        {
-//            finish();  // if copy operation is selected then finish this activity  to open
-//            // the MainActivity with storage option;
-//            return;
-//        }
 
         if(Constants.DELETED_VDO_FILES>0 && position==1)
         {

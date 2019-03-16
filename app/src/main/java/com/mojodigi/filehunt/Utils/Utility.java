@@ -11,9 +11,14 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.FaceDetector;
+import android.media.Image;
 import android.media.MediaScannerConnection;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
@@ -29,16 +34,21 @@ import android.support.design.widget.BottomSheetDialog;
 import android.support.media.ExifInterface;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -46,6 +56,7 @@ import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -116,7 +127,7 @@ public class Utility extends Activity
     private static final String EXTERNAL_STORAGE = System.getenv("EXTERNAL_STORAGE");
 
     static boolean fileStatus = false;
-
+   private  static  SharedPreferenceUtil addprefs;
     public static long getAvailMemory(Context context) {
 
         ActivityManager activityManager = (ActivityManager) context
@@ -796,18 +807,62 @@ public class Utility extends Activity
 
 
     }
+   public static void setActivityTitle2(final Context ctx, String title)
+   {
+       android.support.v7.app.ActionBar actionBar = ((AppCompatActivity) ctx).getSupportActionBar();
+
+       //actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#FF4500")));
+
+       //  custom Layout
+
+       LayoutInflater inflator = (LayoutInflater) ctx .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+       View v = inflator.inflate(R.layout.actionbarlayout, null);
+
+       TextView tileleTxt=v.findViewById(R.id.titleTxt);
+       ImageView backButton=v.findViewById(R.id.backButton);
+
+        tileleTxt.setText(title);
+        tileleTxt.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(ctx));
+        tileleTxt.setTextSize(Utility.getFontSizeValueHeading(ctx));
+
+
+
+       backButton.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View view) {
+               ((AppCompatActivity) ctx).finish();
+           }
+       });
+       //  custom Layout
+
+       // Set the ActionBar display option
+       actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+       actionBar.setCustomView(v);
+   }
+
 
     public static void setActivityTitle(Context ctx, String title) {
+
+        // this function works fine but not being used  now because another function
+        //setActivityTitle2 provides custom layout in action bar  which enable  high level  of customization in user Interface
+
+
         //((AppCompatActivity)ctx).getSupportActionBar().setTitle(title);
         // ((AppCompatActivity)ctx).getSupportActionBar().setTitle(Html.fromHtml("<font color='#000000'>"+title+"</font>"));
         Typeface tf = typeFace_adobe_caslonpro_Regular(ctx);
         SpannableString s = new SpannableString(title);
-        s.setSpan(new ForegroundColorSpan(ctx.getResources().getColor(R.color.titleColor)), 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+
+        //s.setSpan(new RelativeSizeSpan(2f), 0,s.length(), 0); // set size
+        s.setSpan(new ForegroundColorSpan(ctx.getResources().getColor(R.color.titleColor)), 0, s.length(), 0);// set color
         s.setSpan(new CustomTypefaceSpan("", tf), 0, s.length(), Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+
         // Update the action bar title with the TypefaceSpan instance
         android.support.v7.app.ActionBar actionBar = ((AppCompatActivity) ctx).getSupportActionBar();
 
         actionBar.setTitle(s);
+
+
         actionBar.setDisplayHomeAsUpEnabled(true);
 
         try {
@@ -850,14 +905,102 @@ public class Utility extends Activity
         DisplayMetrics displayMetrics = ctx.getResources().getDisplayMetrics();
         return Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
     }
-    public static  int getFontSizeValue(SharedPreferenceUtil sharedPreferenceUtil)
+    public static  int getFontSizeValueHeading(Context mContext)
     {
-        if(sharedPreferenceUtil!=null) {
-            int txtSize = sharedPreferenceUtil.getIntValue(AddConstants.KEY_TEXT_SIZE, 12);
+        if(addprefs!=null) {
+            Log.d("TagTest", ""+addprefs);
+            int txtSize = addprefs.getIntValue(AddConstants.KEY_TEXT_SIZE, 16);
             Log.d("fontSize- sizeUtility", ""+txtSize);
             return txtSize;
         }
-        return  12;  //considering it  as default value in case of any exception etc .
+        else
+        {
+            Log.d("TagTest", ""+addprefs);
+            addprefs=new SharedPreferenceUtil(mContext);
+            int txtSize = addprefs.getIntValue(AddConstants.KEY_TEXT_SIZE, 16);
+            Log.d("fontSize- sizeUtility", ""+txtSize);
+            return txtSize;
+        }
+
+    }
+
+
+
+    public static  int getFontSizeValueSubHead(Context mContext)
+    {
+        if(addprefs!=null) {
+            Log.d("TagTest", ""+addprefs);
+            int txtSize = addprefs.getIntValue(AddConstants.KEY_TEXT_SIZE, 16);
+            txtSize=txtSize*80/100;
+            Log.d("fontSize- sizeUtility", ""+txtSize);
+            return txtSize;
+        }
+        else
+        {
+            Log.d("TagTest", ""+addprefs);
+            addprefs=new SharedPreferenceUtil(mContext);
+            int txtSize = addprefs.getIntValue(AddConstants.KEY_TEXT_SIZE, 16);
+            txtSize=txtSize*80/100;
+            Log.d("fontSize- sizeUtility", ""+txtSize);
+            return txtSize;
+        }
+
+    }
+    public static  int getFontSizeValueSubHead3(Context mContext)
+    {
+        // for very small  text
+        if(addprefs!=null) {
+            Log.d("TagTest", ""+addprefs);
+            int txtSize = addprefs.getIntValue(AddConstants.KEY_TEXT_SIZE, 16);
+            txtSize=txtSize*70/100;
+            Log.d("fontSize- sizeUtility", ""+txtSize);
+            return txtSize;
+        }
+        else
+        {
+            Log.d("TagTest", ""+addprefs);
+            addprefs=new SharedPreferenceUtil(mContext);
+            int txtSize = addprefs.getIntValue(AddConstants.KEY_TEXT_SIZE, 16);
+            txtSize=txtSize*70/100;
+            Log.d("fontSize- sizeUtility", ""+txtSize);
+            return txtSize;
+        }
+
+    }
+    public static  int getFontSizeValueSubHead2(Context mContext)
+    {
+        // for very small  text
+        if(addprefs!=null) {
+            Log.d("TagTest", ""+addprefs);
+            int txtSize = addprefs.getIntValue(AddConstants.KEY_TEXT_SIZE, 16);
+            txtSize=txtSize*60/100;
+            Log.d("fontSize- sizeUtility", ""+txtSize);
+            return txtSize;
+        }
+        else
+        {
+            Log.d("TagTest", ""+addprefs);
+            addprefs=new SharedPreferenceUtil(mContext);
+            int txtSize = addprefs.getIntValue(AddConstants.KEY_TEXT_SIZE, 16);
+            txtSize=txtSize*60/100;
+            Log.d("fontSize- sizeUtility", ""+txtSize);
+            return txtSize;
+        }
+
+    }
+    public  static boolean isShowHiddenFiles(Context mContext)
+    {
+        boolean st;
+        if(addprefs!=null) {
+            st =addprefs.getBoolanValue(AddConstants.KEY_SHOW_HIDDEN_FILE, false);
+            return st;
+        }
+        else
+        {
+             addprefs=new SharedPreferenceUtil(mContext);
+             st =addprefs.getBoolanValue(AddConstants.KEY_SHOW_HIDDEN_FILE, false);
+             return st;
+        }
     }
 
 

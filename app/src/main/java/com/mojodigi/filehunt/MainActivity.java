@@ -39,8 +39,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -50,12 +52,15 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
+import com.mojodigi.filehunt.Adapter.DrawerNavListAdapter;
+import com.mojodigi.filehunt.Adapter.MultiSelectAdapter;
 import com.mojodigi.filehunt.AddsUtility.AddConstants;
 import com.mojodigi.filehunt.AddsUtility.AddMobUtils;
 import com.mojodigi.filehunt.AddsUtility.JsonParser;
 import com.mojodigi.filehunt.AddsUtility.OkhttpMethods;
 import com.mojodigi.filehunt.AddsUtility.SharedPreferenceUtil;
 import com.mojodigi.filehunt.Class.Constants;
+import com.mojodigi.filehunt.Model.DrawerObjectItemList;
 import com.mojodigi.filehunt.Model.category_Model;
 import com.mojodigi.filehunt.Utils.EncryptDialogUtility;
 import com.mojodigi.filehunt.Utils.Utility;
@@ -76,7 +81,7 @@ import java.util.List;
 
 import static com.mojodigi.filehunt.Class.Constants.POSITION;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AdListenerInterface ,EncryptDialogUtility.EncryptDialogListener {
+public class MainActivity extends AppCompatActivity implements  AdListenerInterface ,EncryptDialogUtility.EncryptDialogListener {
 
 
     Toolbar toolbar;
@@ -85,8 +90,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Context mContext;
 
     ProgressBar progressBar, progressBar_Ext;
-    TextView avlbMemory, totalMemmory, internalTxt, avlbTxt;
-    TextView avlbMemory_Ext, totalMemmory_Ext, internalTxt_Ext, avlbTxt_Ext , navAppVersion_Txt;
+    TextView avlbMemory, totalMemmory, internalTxt, avlbTxt,appNameTxt;
+    TextView avlbMemory_Ext, totalMemmory_Ext, internalTxt_Ext, avlbTxt_Ext , navAppVersion_Txt,strgTxt,toolbar_title;
     RelativeLayout storage_section;
     LinearLayout ext_layout,internalLLayout;
 
@@ -118,6 +123,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     boolean isNetworkAvailable  ;
     int max_execute ;
     boolean hideExtPrefValue;
+
+    categoryAdapter cat_adapter;
+
+
+    private ActionBarDrawerToggle mDrawerToggle;
+    private DrawerLayout mDrawerLayout;
+    private DrawerNavListAdapter drawerNavListAdapter;
+    private ListView mDrawerList;
+
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -283,6 +297,48 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if(mContext!=null && addprefs!=null ) {
             dispDevicesStorage();
         }
+
+
+        if(Constants.isTextSizeChanged)
+        {
+            //update the textsize  of RecycletItems;
+            cat_adapter = new categoryAdapter(catList);
+            recyclerView.setAdapter(cat_adapter);
+
+
+
+            toolbar_title.setTextSize(Utility.getFontSizeValueHeading(mContext));
+
+
+            strgTxt.setTextSize(Utility.getFontSizeValueSubHead(mContext));
+
+
+
+            internalTxt.setTextSize(Utility.getFontSizeValueSubHead3(mContext));
+            internalTxt_Ext.setTextSize(Utility.getFontSizeValueSubHead3(mContext));
+
+            avlbMemory.setTextSize(Utility.getFontSizeValueSubHead2(mContext));
+            avlbMemory_Ext.setTextSize(Utility.getFontSizeValueSubHead2(mContext));
+            totalMemmory.setTextSize(Utility.getFontSizeValueSubHead2(mContext));
+            totalMemmory_Ext.setTextSize(Utility.getFontSizeValueSubHead2(mContext));
+            avlbTxt.setTextSize(Utility.getFontSizeValueSubHead2(mContext));
+            avlbTxt_Ext.setTextSize(Utility.getFontSizeValueSubHead2(mContext));
+
+            appNameTxt.setTextSize(Utility.getFontSizeValueHeading(mContext));
+
+            if(drawerNavListAdapter!=null)
+            drawerNavListAdapter.notifyDataSetChanged();
+
+            Constants.isTextSizeChanged=false;
+        }
+
+
+
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
 
 
     }
@@ -476,11 +532,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
-        categoryAdapter cat_adapter = new categoryAdapter(catList);
+         cat_adapter = new categoryAdapter(catList);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
         recyclerView.addItemDecoration(new DividerItemDecoration(mContext, DividerItemDecoration.HORIZONTAL));
         // recyclerView.setItemAnimator(new DefaultItemAnimator());
+        if(cat_adapter!=null)
         recyclerView.setAdapter(cat_adapter);
 
 
@@ -532,15 +589,61 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toolbar =  findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(MainActivity.this);
+        DrawerObjectItemList[] drawerItem = new DrawerObjectItemList[3];
 
+        drawerItem[0] = new DrawerObjectItemList(R.drawable.ic_menu_settings, "Settings");
+//        drawerItem[1] = new DrawerObjectItemList(R.drawable.ic_menu_about, "About");
+        drawerItem[1] = new DrawerObjectItemList(R.drawable.ic_menu_share, "Share");
+        drawerItem[2] = new DrawerObjectItemList(R.drawable.ic_privacy_policy, "Privacy policy");
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        mDrawerToggle = new ActionBarDrawerToggle(
+                this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close){
+
+            //Called when a drawer has settled in a completely closed state.
+            public void onDrawerClosed(View view) {
+
+                super.onDrawerClosed(view);
+            }
+
+            //Called when a drawer has settled in a completely open state. /
+            public void onDrawerOpened(View drawerView) {
+
+                super.onDrawerOpened(drawerView);
+            }
+        };
+        mDrawerLayout.addDrawerListener(mDrawerToggle);
+        mDrawerToggle.syncState();
+
+        mDrawerList = (ListView) findViewById(R.id.drawerMenuList);
+        drawerNavListAdapter = new DrawerNavListAdapter(MainActivity.this, R.layout.drawer_item_listview, drawerItem);
+        mDrawerList.setAdapter(drawerNavListAdapter);
+        appNameTxt=findViewById(R.id.appNameTxt);
+        appNameTxt.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
+
+        mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                switch (position) {
+                    case 0:
+                        redirectToActivity(SettingsActivity.class);
+                        drawerClosed();
+                        break;
+                    case 1:
+                        shareApp();
+                        drawerClosed();
+                        break;
+                    case 2:
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.privacyUrl));
+                        startActivity(browserIntent);
+                        drawerClosed();
+                        break;
+
+                }
+            }
+        });
 
         recyclerView = findViewById(R.id.recycler_view);
 
@@ -560,13 +663,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         internalTxt_Ext = findViewById(R.id.externalTxt);
         avlbTxt_Ext =  findViewById(R.id.avlbTxt_ext);
 
-        TextView toolbar_title=findViewById(R.id.toolbar_title);
-        TextView strgTxt=findViewById(R.id.strgTxt);
+         toolbar_title=findViewById(R.id.toolbar_title);
+         strgTxt=findViewById(R.id.strgTxt);
 
 
         //setTypeFce
         //setTypeFce
         if(mContext!=null) {
+
 
             toolbar_title.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
             avlbTxt_Ext.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
@@ -575,8 +679,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             avlbTxt.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
             internalTxt.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
             totalMemmory.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
+
+            totalMemmory_Ext.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
             avlbMemory.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
             strgTxt.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
+
+
+
+
+
+
+
 
 
         }
@@ -789,6 +902,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
+
+
     public class categoryAdapter extends RecyclerView.Adapter<categoryAdapter.categoryViewHolder> {
 
         List<category_Model> catList;
@@ -834,8 +949,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 case 8:
                     holder.catIcon.setImageResource(R.drawable.cat_ic_zip);
                     break;
+                    case 9:
+                        holder.catIcon.setImageResource(R.drawable.cat_ic_locker);
+                        break;
                 default:
-                    holder.catIcon.setImageResource(R.drawable.cat_ic_zip);
+                    holder.catIcon.setImageResource(R.drawable.cat_ic_locker);
                     break;
             }
 
@@ -917,7 +1035,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 catIcon =  view.findViewById(R.id.cat_Icon);
                 container_Layout=view.findViewById(R.id.container_Layout);
 
-                catName.setTextSize(Utility.getFontSizeValue(addprefs));
+                catName.setTextSize(Utility.getFontSizeValueHeading(mContext));
 
 
             }
@@ -1000,16 +1118,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                         String adProviderName = JsonParser.getkeyValue_Str(dataJson, "adProviderName");
                                         String newVersion=JsonParser.getkeyValue_Str(dataJson,"appVersion");
 
-                                    /*     String appId_PublisherId = JsonParser.getkeyValue_Str(dataJson, "appId_PublisherId");
+                                         String appId_PublisherId = JsonParser.getkeyValue_Str(dataJson, "appId_PublisherId");
                                          String bannerAdId = JsonParser.getkeyValue_Str(dataJson, "bannerAdId");
                                          String interstitialAdId = JsonParser.getkeyValue_Str(dataJson, "interstitialAdId");
-                                         String videoAdId = JsonParser.getkeyValue_Str(dataJson, "videoAdId");*/
+                                         String videoAdId = JsonParser.getkeyValue_Str(dataJson, "videoAdId");
 
 
-                                        String appId_PublisherId = "ca-app-pub-3940256099942544~3347511713";//testID
+                                        /*String appId_PublisherId = "ca-app-pub-3940256099942544~3347511713";//testID
                                         String bannerAdId = "ca-app-pub-3940256099942544/6300978111"; //testId
                                         String interstitialAdId = "ca-app-pub-3940256099942544/1033173712";//testId
-                                        String videoAdId = "ca-app-pub-3940256099942544/5224354917";//testId
+                                        String videoAdId = "ca-app-pub-3940256099942544/5224354917";//testId*/
 
 
                                         Log.d("AddiDs", adProviderName + " ==" + appId_PublisherId + "==" + bannerAdId + "==" + interstitialAdId + "==" + videoAdId);
@@ -1231,27 +1349,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-        int id = menuItem.getItemId();
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        //Selected item remaining selected on drawer close but solve it ,  leave to further
-        //menuItem.setCheckable(false);
-        menuItem.setCheckable(false);
 
-        if (id == R.id.nav_settings) {
-            redirectToActivity(SettingsActivity.class);
-        } else if (id == R.id.nav_about) {
-            Toast.makeText(this , "About Clicked" ,Toast.LENGTH_SHORT).show();
-        } else if (id == R.id.nav_share) {
-            Toast.makeText(this , "Share Clicked" ,Toast.LENGTH_SHORT).show();
-        }
 
-        return true;
+    private void shareApp() {
+        Intent share = new Intent(android.content.Intent.ACTION_SEND);
+        share.setType("text/plain");
+        share.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        // Add data to the intent, the receiving app will decide
+        // what to do with it.
+        share.putExtra(Intent.EXTRA_SUBJECT, "FileHunt");
+        share.putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=com.mojodigi.filehunt&hl=en");
+        startActivity(Intent.createChooser(share, "FileHunt"));
+
+
     }
+
+
+
+
+
+
+
 
 
 
@@ -1417,5 +1536,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
-
+    private void drawerClosed() {
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+            mDrawerLayout.closeDrawer(GravityCompat.START);
+        }
+    }
 }

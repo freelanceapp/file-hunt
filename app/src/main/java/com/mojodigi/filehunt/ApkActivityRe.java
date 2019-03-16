@@ -7,12 +7,15 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
@@ -23,8 +26,10 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.ActionMode;
+import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -180,7 +185,7 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
         UtilityStorage.InitilaizePrefs(mcontext);
         Constants.DELETED_APK_FILES=0;
 
-        Utility.setActivityTitle(mcontext,getResources().getString(R.string.cat_Apk));
+        Utility.setActivityTitle2(mcontext,getResources().getString(R.string.cat_Apk));
         //           int_position = getIntent().getIntExtra("value", 0);
 
         new AsynctaskUtility<Model_Recent>(mcontext,this,APK).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -564,9 +569,18 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
             inflater.inflate(R.menu.menu_multi_select, menu);
             context_menu = menu;
 
+            // customize menu
+
+
+            // customizemenu
+
            // menu.getItem(0).setIcon(ContextCompat.getDrawable(mcontext, R.drawable.ic_option_menu_white));
 
 
+            // hide the action_hide menu as no  apk  will  be  encrypted;
+                 MenuItem action_hide=context_menu.findItem(R.id.action_hide);
+                 if(action_hide!=null)
+                     action_hide.setVisible(false);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 //hold current color of status bar

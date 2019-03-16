@@ -62,7 +62,7 @@ import java.util.Comparator;
 //
 
 
-public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener,MultiSelectAdapter_Docs.DocsListener,AsynctaskUtility.AsyncResponse,AdListenerInterface {
+public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener,MultiSelectAdapter_Docs.DocsListener,AsynctaskUtility.AsyncResponse,AdListenerInterface,encryptAsyncTask.EncryptListener {
 
     ActionMode mActionMode;
     Menu context_menu;
@@ -160,7 +160,7 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
 
         instance=this;
         UtilityStorage.InitilaizePrefs(mcontext);
-        Utility.setActivityTitle(mcontext,getResources().getString(R.string.cat_Documents));
+        Utility.setActivityTitle2(mcontext,getResources().getString(R.string.cat_Documents));
        
 //           int_position = getIntent().getIntExtra("value", 0);
              new AsynctaskUtility<Model_Docs>(mcontext,this,DOCUMENTS).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -532,7 +532,7 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
                                     f[i] = file;
                                 }
                                 if (f.length >= 1)
-                                    new encryptAsyncTask(mcontext, f, Constants.encryptionPassword,Constants.MEDIA_TYPE_DOC).execute();
+                                    new encryptAsyncTask(mcontext, f, Constants.encryptionPassword,Constants.MEDIA_TYPE_DOC,instance).execute();
                                 else
                                     Utility.dispToast(mcontext, getResources().getString(R.string.filenotfound));
                             }
@@ -752,6 +752,25 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
         {
             smaaToAddContainer.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void onEncryptSuccessful() {
+
+        // remove  the  file from the lsit  and refresh the adapte and finish  action mode;
+        if(multiselect_list.size()>0)
+        {
+            for(int i=0;i<multiselect_list.size();i++)
+            {
+                docsList.remove(multiselect_list.get(i));
+            }
+        }
+        multiselect_list.clear();
+        multiSelectAdapter.notifyDataSetChanged();
+        if(mActionMode !=null)
+            mActionMode.finish();
+
+
     }
 
     private class DeleteFileTask extends AsyncTask<Void,Void,Integer>

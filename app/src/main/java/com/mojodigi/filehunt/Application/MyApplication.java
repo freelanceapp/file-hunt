@@ -9,6 +9,8 @@ import com.google.android.gms.analytics.Tracker;
 import com.mojodigi.filehunt.AddsUtility.AddConstants;
 import com.mojodigi.filehunt.AddsUtility.SharedPreferenceUtil;
 import com.mojodigi.filehunt.Analytics.AnalyticsTrackers;
+import com.yandex.metrica.YandexMetrica;
+import com.yandex.metrica.YandexMetricaConfig;
 
 //public class MyApplication extends Application {
 public class MyApplication extends android.support.multidex.MultiDexApplication {
@@ -56,6 +58,23 @@ public class MyApplication extends android.support.multidex.MultiDexApplication 
 
         // for the  time being free analytics  is  not  being used library  in gradle have been made comment
 */
+
+        //App mertrica sdk
+
+        // Creating an extended library configuration.
+
+        //Apikey in appMetricaDashboard settings  is tracking key--
+
+        YandexMetricaConfig config = YandexMetricaConfig.newConfigBuilder("dcdf9400-2d01-4d1e-a5a3-dca8e96db069").build();
+        // Initializing the AppMetrica SDK.
+        YandexMetrica.activate(getApplicationContext(), config);
+        // Automatic tracking of user activity.
+        YandexMetrica.enableActivityAutoTracking(this);
+
+        // Automatic tracking user activity.
+        YandexMetrica.enableActivityAutoTracking(this);
+        //App mertrica sdk
+
 
     }
 

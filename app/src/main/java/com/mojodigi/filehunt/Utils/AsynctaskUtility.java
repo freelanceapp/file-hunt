@@ -189,6 +189,7 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
         Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
         String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME, MediaStore.MediaColumns.DATE_MODIFIED};
+        //String[] projection = {MediaStore.Images.Media.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME, MediaStore.Images.Media.DATE_MODIFIED};
 
         final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
         //  showSmallFile  varibale get its  value from shared preference set from settingsActivity;
@@ -205,6 +206,7 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
 
         if(showSmallImages) {
             cursor = mcontext.getContentResolver().query(uri, projection,null, null, orderBy + " DESC");
+
         }
         else
         {
@@ -216,6 +218,8 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
             if(cursor==null) {
             return al_images;
         }
+
+
         column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
         column_index_folder_name = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
         column_index_date_modified= cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED);

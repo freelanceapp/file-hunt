@@ -39,6 +39,7 @@ import com.mojodigi.filehunt.Adapter.MultiSelectAdapter_Anim;
 import com.mojodigi.filehunt.AddsUtility.AddConstants;
 import com.mojodigi.filehunt.AddsUtility.AddMobUtils;
 import com.mojodigi.filehunt.AddsUtility.SharedPreferenceUtil;
+import com.mojodigi.filehunt.AsyncTasks.encryptAsyncTask;
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Model.Model_Anim;
 import com.mojodigi.filehunt.Utils.AlertDialogHelper;
@@ -63,7 +64,7 @@ import java.util.Comparator;
 //
 
 
-public class AnimationActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener,MultiSelectAdapter_Anim.AnimListener,AsynctaskUtility.AsyncResponse,EncryptDialogUtility.EncryptDialogListener,AdListenerInterface {
+public class AnimationActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener,MultiSelectAdapter_Anim.AnimListener,AsynctaskUtility.AsyncResponse,EncryptDialogUtility.EncryptDialogListener,AdListenerInterface,encryptAsyncTask.EncryptListener {
 
     ActionMode mActionMode;
     Menu context_menu;
@@ -168,7 +169,7 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
 
         instance=this;
         UtilityStorage.InitilaizePrefs(mcontext);
-       Utility.setActivityTitle(mcontext,getResources().getString(R.string.cat_Animation));
+       Utility.setActivityTitle2(mcontext,getResources().getString(R.string.cat_Animation));
 
         new AsynctaskUtility<Model_Anim>(mcontext,this,ANIMATION).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
@@ -526,6 +527,38 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
 
+                case R.id.action_hide:
+                    if(Utility.isManualPasswordSet()) {
+                        if (multiselect_list.size() >= 1) {
+
+
+                            if (Utility.createOrFindAppDirectory(Constants.MEDIA_TYPE_IMG))
+                            {
+                                File[] f = new File[multiselect_list.size()];
+                                for (int i = 0; i < multiselect_list.size(); i++) {
+                                    File file = new File(multiselect_list.get(i).getFilePath());
+                                    f[i] = file;
+                                }
+                                if (f.length >= 1)
+                                    new encryptAsyncTask(mcontext, f, Constants.encryptionPassword,Constants.MEDIA_TYPE_IMG,instance).execute();
+                                else
+                                    Utility.dispToast(mcontext, getResources().getString(R.string.filenotfound));
+                            }
+
+                            else
+                            {
+                                Utility.dispToast(mcontext,getResources().getString(R.string.directorynotfound));
+                            }
+
+
+
+                        }
+                    }
+                    else {
+                        Intent i = new Intent(mcontext,LockerPasswordActivity.class);
+                        startActivity(i);
+                    }
+                    return  true;
 
                 case R.id.action_move:
                     Utility.dispToast(mcontext,"Move");
@@ -720,6 +753,24 @@ public class AnimationActivityRe extends AppCompatActivity implements AlertDialo
         {
             smaaToAddContainer.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void onEncryptSuccessful() {
+
+        // remove  the  file from the lsit  and refresh the adapte and finish  action mode;
+        if(multiselect_list.size()>0)
+        {
+            for(int i=0;i<multiselect_list.size();i++)
+            {
+                animList.remove(multiselect_list.get(i));
+            }
+        }
+        multiselect_list.clear();
+        multiSelectAdapter.notifyDataSetChanged();
+        if(mActionMode !=null)
+            mActionMode.finish();
+
     }
 
 

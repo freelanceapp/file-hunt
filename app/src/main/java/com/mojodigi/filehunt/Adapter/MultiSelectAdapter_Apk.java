@@ -48,9 +48,10 @@ public class MultiSelectAdapter_Apk extends RecyclerView.Adapter<MultiSelectAdap
              fileSize.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
              fileMdate.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
 
+            fileName.setTextSize(Utility.getFontSizeValueHeading(mContext));
 
-
-
+            fileSize.setTextSize(Utility.getFontSizeValueSubHead(mContext));
+            fileMdate.setTextSize(Utility.getFontSizeValueSubHead(mContext));
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override

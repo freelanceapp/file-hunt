@@ -57,6 +57,11 @@ public class MultiSelectAdapter_Recent extends RecyclerView.Adapter<MultiSelectA
             fileMdate.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
 
 
+            fileName.setTextSize(Utility.getFontSizeValueHeading(mContext));
+
+            fileSize.setTextSize(Utility.getFontSizeValueSubHead(mContext));
+            fileMdate.setTextSize(Utility.getFontSizeValueSubHead(mContext));
+
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

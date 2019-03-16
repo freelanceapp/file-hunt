@@ -49,6 +49,10 @@ public class Adapter_Storage extends RecyclerView.Adapter<Adapter_Storage.MyView
              rellayout=(RelativeLayout)view.findViewById(R.id.rellayout);
              FileIcon=(ImageView)view.findViewById(R.id.FileIcon);
 
+              fileName.setTextSize(Utility.getFontSizeValueHeading(mContext));
+              fileSize.setTextSize(Utility.getFontSizeValueSubHead(mContext));
+              fileMdate.setTextSize(Utility.getFontSizeValueSubHead(mContext));
+
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -49,6 +49,12 @@ public class MultiSelectAdapter_Audio extends RecyclerView.Adapter<MultiSelectAd
 
 
 
+            fileName.setTextSize(Utility.getFontSizeValueHeading(mContext));
+
+            fileSize.setTextSize(Utility.getFontSizeValueSubHead(mContext));
+            fileMdate.setTextSize(Utility.getFontSizeValueSubHead(mContext));
+
+
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:background="@drawable/corneredlayout"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+           android:padding="@dimen/dp10"
+            android:id="@+id/app1Layout"
+            android:background="@drawable/custom_ripple"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:background="@drawable/circleimage"
+                android:id="@+id/appIcon"
+                android:src="@drawable/suggestapplockscreen"
+                android:layout_width="60dp"
+                android:layout_height="60dp" />
+
+            <TextView
+                android:id="@+id/txtApp1"
+                android:layout_toRightOf="@+id/appIcon"
+                android:text="ScreenLock"
+                android:textSize="@dimen/sp18"
+                android:layout_marginLeft="@dimen/dp10"
+                android:layout_centerInParent="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </RelativeLayout>
+        <View
+
+            android:layout_marginLeft="@dimen/dp10"
+            android:layout_marginRight="@dimen/dp10"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp1"
+            style="@style/Divider" ></View>
+
+
+        <RelativeLayout
+            android:padding="@dimen/dp10"
+            android:id="@+id/app2Layout"
+            android:background="@drawable/custom_ripple"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:background="@drawable/circleimage"
+                android:id="@+id/appIcon2"
+                android:src="@drawable/suggestappvdo"
+                android:layout_width="60dp"
+                android:layout_height="60dp" />
+
+            <TextView
+                android:id="@+id/txtApp2"
+                android:layout_toRightOf="@+id/appIcon2"
+                android:text="VideoPlayer"
+                android:textSize="@dimen/sp18"
+                android:layout_marginLeft="@dimen/dp10"
+                android:layout_centerInParent="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </RelativeLayout>
+    </LinearLayout>
+

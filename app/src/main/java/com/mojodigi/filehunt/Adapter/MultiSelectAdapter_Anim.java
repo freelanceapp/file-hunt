@@ -50,7 +50,10 @@ public class MultiSelectAdapter_Anim extends RecyclerView.Adapter<MultiSelectAda
               fileSize.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
               fileMdate.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
 
+            fileName.setTextSize(Utility.getFontSizeValueHeading(mContext));
 
+            fileSize.setTextSize(Utility.getFontSizeValueSubHead(mContext));
+            fileMdate.setTextSize(Utility.getFontSizeValueSubHead(mContext));
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -172,7 +172,7 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
 
         instance=this;
         UtilityStorage.InitilaizePrefs(mcontext);
-        Utility.setActivityTitle(mcontext,getResources().getString(R.string.cat_Recent));
+        Utility.setActivityTitle2(mcontext,getResources().getString(R.string.cat_Recent));
         //execute the async task
         new AsynctaskUtility<Model_Recent>(mcontext,this, RECENTFILES).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         alertDialogHelper =new AlertDialogHelper(this);
@@ -518,6 +518,11 @@ public class RecentActivityRe extends AppCompatActivity implements AlertDialogHe
             MenuInflater inflater = mode.getMenuInflater();
             inflater.inflate(R.menu.menu_multi_select, menu);
             context_menu = menu;
+
+            // hide the action_hide menu as no  recent  will  be  encrypted;
+            MenuItem action_hide=context_menu.findItem(R.id.action_hide);
+            if(action_hide!=null)
+                action_hide.setVisible(false);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 //hold current color of status bar

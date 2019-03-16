@@ -35,7 +35,7 @@ public class LockerActivityMain extends AppCompatActivity
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext=LockerActivityMain.this;
-        Utility.setActivityTitle(mContext, "Hidden files");
+        Utility.setActivityTitle2(mContext, "Hidden files");
       setContentView(R.layout.activity_locker_main);
         iniVars();
     }
@@ -95,37 +95,20 @@ public class LockerActivityMain extends AppCompatActivity
 
             switch (position) {
                 case 0:
-                    holder.catIcon.setImageResource(R.drawable.cat_ic_image);
+                    holder.catIcon.setImageResource(R.drawable.locker_ic_image);
                     //holder.catIcon.setImageResource(R.drawable.ic_image);
                     break;
                 case 1:
-                    holder.catIcon.setImageResource(R.drawable.cat_ic_vdo);
+                    holder.catIcon.setImageResource(R.drawable.locker_ic_video);
                     break;
                 case 2:
-                    holder.catIcon.setImageResource(R.drawable.cat_ic_music);
+                    holder.catIcon.setImageResource(R.drawable.locker_ic_audio);
                     break;
                 case 3:
-                    holder.catIcon.setImageResource(R.drawable.cat_ic_docs);
+                    holder.catIcon.setImageResource(R.drawable.locker_ic_docs);
                     break;
-                case 4:
-                    holder.catIcon.setImageResource(R.drawable.cat_ic_download);
-                    break;
-                case 5:
-                    holder.catIcon.setImageResource(R.drawable.cat_ic_animation);
-                    break;
-                case 6:
-                    holder.catIcon.setImageResource(R.drawable.cat_ic_recent);
-                    break;
-                case 7:
-                    holder.catIcon.setImageResource(R.drawable.cat_ic_apk);
-                    break;
-                case 8:
-                    holder.catIcon.setImageResource(R.drawable.cat_ic_zip);
-                    break;
-                default:
-                    holder.catIcon.setImageResource(R.drawable.cat_ic_zip);
-                    break;
-            }
+
+                    }
 
             holder.catName.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
             //holder.itemCount.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(getActivity()));
@@ -187,7 +170,7 @@ public class LockerActivityMain extends AppCompatActivity
                 catIcon =  view.findViewById(R.id.cat_Icon);
                 container_Layout=view.findViewById(R.id.container_Layout);
 
-               // catName.setTextSize(Utility.getFontSizeValue(addprefs));
+                catName.setTextSize(Utility.getFontSizeValueHeading(mContext));
 
 
             }

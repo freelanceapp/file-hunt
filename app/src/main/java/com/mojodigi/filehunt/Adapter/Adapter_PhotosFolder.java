@@ -53,6 +53,9 @@ public class Adapter_PhotosFolder extends RecyclerView.Adapter<Adapter_PhotosFol
             tv_foldern.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(context));
             tv_foldersize.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(context));
 
+            tv_foldern.setTextSize(Utility.getFontSizeValueHeading(context));
+            tv_foldersize.setTextSize(Utility.getFontSizeValueSubHead(context));
+            tv_date_modified.setTextSize(Utility.getFontSizeValueSubHead(context));
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -34,12 +34,14 @@ public class encryptAsyncTask extends AsyncTask<Void, Void, Integer> {
     int counter=0;
     String password;
     int cat_Type;
-    public encryptAsyncTask(Context pContext, File[] pfileList, String pPassword,int cat_Type)
+    EncryptListener listener;
+    public encryptAsyncTask(Context pContext, File[] pfileList, String pPassword,int cat_Type,EncryptListener listener)
     {
         this.mContext=pContext;
         this.fileList=pfileList;
         this.password=pPassword;
         this.cat_Type=cat_Type;
+        this.listener=listener;
 
 
     }
@@ -68,7 +70,13 @@ public class encryptAsyncTask extends AsyncTask<Void, Void, Integer> {
          CustomProgressDialog.dismiss();
          String msg= integer > 1 ? integer + " files encrypted successfully" : integer + " file encrypted successfully";
          Utility.dispToast(mContext,msg);
+         if(integer>0)
+             listener.onEncryptSuccessful();
 
+    }
+    public  interface EncryptListener
+    {
+        void onEncryptSuccessful();
     }
     private  int encrypt(File inputFile, File outputFile, String passwordKey, Context ctx)
     {

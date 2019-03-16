@@ -50,6 +50,11 @@ public class MultiSelectAdapter_Zip extends RecyclerView.Adapter<MultiSelectAdap
 
 
 
+            fileName.setTextSize(Utility.getFontSizeValueHeading(mContext));
+
+            fileSize.setTextSize(Utility.getFontSizeValueSubHead(mContext));
+            fileMdate.setTextSize(Utility.getFontSizeValueSubHead(mContext));
+
 
 
             view.setOnClickListener(new View.OnClickListener() {

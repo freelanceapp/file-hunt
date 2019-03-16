@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.mojodigi.filehunt.Adapter.MultiSelectAdapter_Locker;
+import com.mojodigi.filehunt.AddsUtility.SharedPreferenceUtil;
 import com.mojodigi.filehunt.AsyncTasks.decryptAsynscTask;
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Model.Grid_Model;
@@ -32,12 +33,14 @@ public class List_Hidden_Files_Activity extends AppCompatActivity  implements  M
     ArrayList<Model_Locker> fileList=new ArrayList<Model_Locker>();
     ArrayList<Model_Locker> multiselect_list = new ArrayList<>();
     File fileToDelete;
+    SharedPreferenceUtil addprefs;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_hidden_file);
 
         mContext=List_Hidden_Files_Activity.this;
+        addprefs=new SharedPreferenceUtil(mContext);
         initViews();
 
         Bundle extrasIntent = getIntent().getExtras();
@@ -49,22 +52,22 @@ public class List_Hidden_Files_Activity extends AppCompatActivity  implements  M
         {
             case 1:  //img
                 getFilesfromAppFolder(media_Type);
-                Utility.setActivityTitle(mContext, "Image");
+                Utility.setActivityTitle2(mContext, "Image");
                 break;
 
             case 2:  //vdo
                 getFilesfromAppFolder(media_Type);
-                Utility.setActivityTitle(mContext, "Video");
+                Utility.setActivityTitle2(mContext, "Video");
                 break;
 
             case 3:  //ado
                 getFilesfromAppFolder(media_Type);
-                Utility.setActivityTitle(mContext, "Audio");
+                Utility.setActivityTitle2(mContext, "Audio");
                 break;
 
             case 4:  //docs
                 getFilesfromAppFolder(media_Type);
-                Utility.setActivityTitle(mContext, "Document");
+                Utility.setActivityTitle2(mContext, "Document");
                 break;
 
         }
@@ -116,7 +119,7 @@ public class List_Hidden_Files_Activity extends AppCompatActivity  implements  M
             if(fileList.size()!=0) {
                 LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
                 recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
-                multiSelectAdapter = new MultiSelectAdapter_Locker(this, fileList, multiselect_list, this);
+                multiSelectAdapter = new MultiSelectAdapter_Locker(this, fileList, multiselect_list, this,media_Type);
                 recyclerView.setAdapter(multiSelectAdapter);
             }
             else
@@ -182,7 +185,7 @@ public class List_Hidden_Files_Activity extends AppCompatActivity  implements  M
                 break;
 
             case 2:  //vdo
-
+                addprefs.setIntValue("position", 0);
                 Intent intentVideoGallary = new Intent(mContext, Media_VdoActivity.class);
                 intentVideoGallary.putExtra(Constants.selectedVdo, fileDecrypted.getAbsolutePath());
                 //intentVideoGallary.putExtra(Constants.MEDIA_DELETE_ACTIVITY_TRACKER, Constants.RECENT);
@@ -191,7 +194,7 @@ public class List_Hidden_Files_Activity extends AppCompatActivity  implements  M
                 break;
 
             case 3:  //ado
-
+                addprefs.setIntValue("position", 0);
                 Intent intentAudioGallary = new Intent(mContext, Media_AdoActivity.class);
                 intentAudioGallary.putExtra(Constants.selectedAdo, fileDecrypted.getAbsolutePath());
                 //intentAudioGallary.putExtra(Constants.MEDIA_DELETE_ACTIVITY_TRACKER, Constants.STORAGE);

@@ -50,7 +50,7 @@ public class Constants {
     public static String TAB_FRAGMENT_TAG="FragMent2";
     public static String PATH="ImgPath";
     public static String FileProtocol="file://";
-
+    public static boolean isTextSizeChanged=false;
     public static String fileToBeRenamed;
 
   public static int  totalfolderCopied;
@@ -129,5 +129,11 @@ public class Constants {
 
 
     public static boolean isAsyncOperationStopped=false;
+
+
+    //suggetsedApps packageNames;
+    public static  final String screenLock="com.mojodigi.screenlock";
+    public static  final String videoPlayer="com.mojodigi.videoplayer";
+    public static  final String privacyUrl="http://mojodigitech.com/privacy-policy-for-file-hunt/";
 
 }

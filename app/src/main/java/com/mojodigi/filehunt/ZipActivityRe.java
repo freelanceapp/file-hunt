@@ -125,7 +125,7 @@ public class ZipActivityRe extends AppCompatActivity implements AlertDialogHelpe
         UtilityStorage.InitilaizePrefs(mcontext);
 
 
-        Utility.setActivityTitle(mcontext,getResources().getString(R.string.cat_zip_title));
+        Utility.setActivityTitle2(mcontext,getResources().getString(R.string.cat_zip_title));
         //           int_position = getIntent().getIntExtra("value", 0);
 
         new AsynctaskUtility<Model_Zip>(mcontext,this,Zip).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -541,6 +541,11 @@ public class ZipActivityRe extends AppCompatActivity implements AlertDialogHelpe
             MenuInflater inflater = mode.getMenuInflater();
             inflater.inflate(R.menu.menu_multi_select, menu);
             context_menu = menu;
+
+            // hide the action_hide menu as no  zip  will  be  encrypted;
+            MenuItem action_hide=context_menu.findItem(R.id.action_hide);
+            if(action_hide!=null)
+                action_hide.setVisible(false);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 //hold current color of status bar

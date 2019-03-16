@@ -64,7 +64,7 @@ import java.util.List;
 //
 
 
-public class AudioActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener,MultiSelectAdapter_Audio.AudioListener,AdListenerInterface {
+public class AudioActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener,MultiSelectAdapter_Audio.AudioListener,AdListenerInterface,encryptAsyncTask.EncryptListener {
 
     ActionMode mActionMode;
     Menu context_menu;
@@ -171,14 +171,14 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
 
         UtilityStorage.InitilaizePrefs(mcontext);
         //sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        Utility.setActivityTitle(mcontext,getResources().getString(R.string.cat_Audio));
+        Utility.setActivityTitle2(mcontext,getResources().getString(R.string.cat_Audio));
         //int_position = getIntent().getIntExtra("value", 0);
         instance=this;
         try {
 
             if(Constants.model !=null) {
                 String tittle =Constants.model.getStr_folder();
-                Utility.setActivityTitle(mcontext, tittle);
+                Utility.setActivityTitle2(mcontext, tittle);
                 Intent_Audio_List = Constants.model.getAl_imagepath();
                 Intent_duration_List = Constants.model.getAl_FileDuration();
 
@@ -515,6 +515,26 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onEncryptSuccessful() {
+
+        // remove  the  file from the lsit  and refresh the adapte and finish  action mode;
+        if(multiselect_list.size()>0)
+        {
+            for(int i=0;i<multiselect_list.size();i++)
+            {
+                audioList.remove(multiselect_list.get(i));
+            }
+        }
+        multiselect_list.clear();
+        multiSelectAdapter.notifyDataSetChanged();
+        if(mActionMode !=null)
+            mActionMode.finish();
+
+        // setting this  to  >0 calls  refresh  the  audio  on  category_explore_activity;
+        Constants.DELETED_AUDIO_FILES=1;
+    }
+
     private  class dataLoadAsync extends  AsyncTask<Void,Void,Void>
     {
 
@@ -736,7 +756,7 @@ public class AudioActivityRe extends AppCompatActivity implements AlertDialogHel
                                     f[i] = file;
                                 }
                                 if (f.length >= 1)
-                                    new encryptAsyncTask(mcontext, f, Constants.encryptionPassword,Constants.MEDIA_TYPE_ADO).execute();
+                                    new encryptAsyncTask(mcontext, f, Constants.encryptionPassword,Constants.MEDIA_TYPE_ADO,instance).execute();
                                 else
                                     Utility.dispToast(mcontext, getResources().getString(R.string.filenotfound));
                             }

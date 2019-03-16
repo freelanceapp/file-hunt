@@ -165,7 +165,7 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
 
         instance=this;
         UtilityStorage.InitilaizePrefs(mcontext);
-        Utility.setActivityTitle(mcontext,getResources().getString(R.string.cat_Download));
+        Utility.setActivityTitle2(mcontext,getResources().getString(R.string.cat_Download));
 
 //           int_position = getIntent().getIntExtra("value", 0);
         new AsynctaskUtility<Model_Download>(mcontext,this,DOWNLOADS).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -507,6 +507,11 @@ public class DownloadActivityRe extends AppCompatActivity implements AlertDialog
             MenuInflater inflater = mode.getMenuInflater();
             inflater.inflate(R.menu.menu_multi_select, menu);
             context_menu = menu;
+
+            // hide the action_hide menu as no downloads will  be  encrypted;
+            MenuItem action_hide=context_menu.findItem(R.id.action_hide);
+            if(action_hide!=null)
+                action_hide.setVisible(false);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 //hold current color of status bar

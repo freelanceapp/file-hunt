@@ -69,7 +69,7 @@ import static com.mojodigi.filehunt.Utils.Utility.pathToBitmap;
 //
 
 
-public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener ,MultiSelectAdapter.ImgListener,AdListenerInterface {
+public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHelper.AlertDialogListener ,MultiSelectAdapter.ImgListener,AdListenerInterface,encryptAsyncTask.EncryptListener {
 
     ActionMode mActionMode;
     Menu context_menu;
@@ -177,7 +177,7 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
             if(Constants.model!=null) {
                 Intent_Images_List =Constants.model.getAl_imagepath();
                 String tittle = Constants.model.getStr_folder();
-                Utility.setActivityTitle(mcontext, tittle);
+                Utility.setActivityTitle2(mcontext, tittle);
                 if (Intent_Images_List != null) {
 
                     cnt=Intent_Images_List.size();
@@ -419,6 +419,28 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
 
     }
 
+    @Override
+    public void onEncryptSuccessful() {
+
+        // remove  the  file from the lsit  and refresh the adapte and finish  action mode;
+        if(multiselect_list.size()>0)
+        {
+            for(int i=0;i<multiselect_list.size();i++)
+            {
+                img_ImgList.remove(multiselect_list.get(i));
+            }
+        }
+        multiselect_list.clear();
+        multiSelectAdapter.notifyDataSetChanged();
+        if(mActionMode !=null)
+            mActionMode.finish();
+
+        // setting this  to  >0 calls  refresh  the  images  on  category_explore_activity;
+          Constants.DELETED_IMG_FILES=1;
+
+
+    }
+
 
     private  class dataLoadAsync extends  AsyncTask<Void,Void,Void>
     {
@@ -576,7 +598,7 @@ public class PhotosActivityRe extends AppCompatActivity implements AlertDialogHe
                                     f[i] = file;
                                 }
                                 if (f.length >= 1)
-                                    new encryptAsyncTask(mcontext, f, Constants.encryptionPassword,Constants.MEDIA_TYPE_IMG).execute();
+                                    new encryptAsyncTask(mcontext, f, Constants.encryptionPassword,Constants.MEDIA_TYPE_IMG,instance).execute();
                                 else
                                     Utility.dispToast(mcontext, getResources().getString(R.string.filenotfound));
                             }

@@ -85,4 +85,7 @@
     <color name="strgtextclr">#89000000</color>
     <color name="white">#ffffff</color>
     <color name="color_icon">#26A69A</color>
+    <color name="settings_separator">#eeeded</color>
+
+    <color name="switch_uncheck_color">#cccccc</color>
 </resources>

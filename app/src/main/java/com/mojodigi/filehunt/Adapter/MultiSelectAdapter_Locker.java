@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.common.internal.ServiceSpecificExtraArgs;
 import com.mojodigi.filehunt.Model.Model_Locker;
 import com.mojodigi.filehunt.R;
 import com.mojodigi.filehunt.Utils.Utility;
@@ -26,6 +27,7 @@ public class MultiSelectAdapter_Locker extends RecyclerView.Adapter<MultiSelectA
     public ArrayList<Model_Locker> selected_LockerList=new ArrayList<>();
     private fileSelectListener listener;
     Context mContext;
+    int media_Type;
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
         public ImageView FileIcon;
@@ -48,7 +50,10 @@ public class MultiSelectAdapter_Locker extends RecyclerView.Adapter<MultiSelectA
              fileSize.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
              fileMdate.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
 
+            fileName.setTextSize(Utility.getFontSizeValueHeading(mContext));
 
+            fileSize.setTextSize(Utility.getFontSizeValueSubHead(mContext));
+            fileMdate.setTextSize(Utility.getFontSizeValueSubHead(mContext));
 
 
 
@@ -67,12 +72,13 @@ public class MultiSelectAdapter_Locker extends RecyclerView.Adapter<MultiSelectA
              }
     }
 
-     public MultiSelectAdapter_Locker(Context context, ArrayList<Model_Locker> LockerList, ArrayList<Model_Locker> selectedLockerList , fileSelectListener listener) {
+     public MultiSelectAdapter_Locker(Context context, ArrayList<Model_Locker> LockerList, ArrayList<Model_Locker> selectedLockerList , fileSelectListener listener, int media_Type) {
         this.mContext=context;
         this.LockerList = LockerList;
         this.LockerListfiltered=LockerList;
         this.selected_LockerList = selectedLockerList;
         this.listener = listener;
+        this.media_Type=media_Type;
 
     }
 
@@ -93,8 +99,26 @@ public class MultiSelectAdapter_Locker extends RecyclerView.Adapter<MultiSelectA
                  holder.fileSize.setText(model.getFileSize());
 
 
-                 iconDrawable=mContext.getResources().getDrawable(R.drawable.ic_excel);
+
+
+            switch (media_Type) {
+                case 1:  // img
+                iconDrawable = mContext.getResources().getDrawable(R.drawable.locker_ic_img_plachldr);
                 holder.FileIcon.setImageDrawable(iconDrawable);
+                break;
+                case 2:  //vdo
+                    iconDrawable = mContext.getResources().getDrawable(R.drawable.locker_ic_videoplaceholder);
+                    holder.FileIcon.setImageDrawable(iconDrawable);
+                    break;
+                case 3:  // audio
+                    iconDrawable = mContext.getResources().getDrawable(R.drawable.locker_ic_audio_placeholder);
+                    holder.FileIcon.setImageDrawable(iconDrawable);
+                    break;
+                case 4:  //docs
+                    iconDrawable = mContext.getResources().getDrawable(R.drawable.locker_ic_document_placeholder);
+                    holder.FileIcon.setImageDrawable(iconDrawable);
+                    break;
+            }
 
 
 

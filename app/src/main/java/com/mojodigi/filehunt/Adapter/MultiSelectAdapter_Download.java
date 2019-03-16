@@ -59,6 +59,11 @@ public class MultiSelectAdapter_Download extends RecyclerView.Adapter<MultiSelec
             fileMdate.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
 
 
+            fileName.setTextSize(Utility.getFontSizeValueHeading(mContext));
+
+            fileSize.setTextSize(Utility.getFontSizeValueSubHead(mContext));
+            fileMdate.setTextSize(Utility.getFontSizeValueSubHead(mContext));
+
             rellayout=(RelativeLayout)view.findViewById(R.id.rellayout);
 
             view.setOnClickListener(new View.OnClickListener() {

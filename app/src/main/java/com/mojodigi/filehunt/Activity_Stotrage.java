@@ -67,6 +67,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import static com.mojodigi.filehunt.Utils.Utility.isShowHiddenFiles;
+
 public class Activity_Stotrage extends AppCompatActivity implements Adapter_Storage.ItemListener , copyAsyncTask.AsyncResponse , AlertDialogHelper.AlertDialogListener ,AdListenerInterface {
 
     private   File path = new File(Environment.getExternalStorageDirectory() + "");
@@ -322,6 +324,7 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
         {
             isPastingInInterNal=true;
             getSupportActionBar().setTitle("Internal Storage");
+
             if(toolbarStorage !=null)
             changeToolbarFont(toolbarStorage, this);
 
@@ -440,6 +443,11 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
             MenuInflater inflater = mode.getMenuInflater();
             inflater.inflate(R.menu.menu_multi_select, menu);
             context_menu = menu;
+
+            // hide the action_hide menu as no  file will be encrypted from storage ;
+            MenuItem action_hide=context_menu.findItem(R.id.action_hide);
+            if(action_hide!=null)
+                action_hide.setVisible(false);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 //hold current color of status bar
@@ -898,7 +906,9 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
                 public boolean accept(File dir, String filename) {
                     File sel = new File(dir, filename);
                     // Filters based on whether the file is hidden or not
-                    // return (sel.isFile() || sel.isDirectory()) && !sel.isHidden(); // does  not allow hidden files to be displayed ;
+                    if(!isShowHiddenFiles(mContext))
+                     return (sel.isFile() || sel.isDirectory()) && !sel.isHidden(); //   allow hidden files to be displayed ;
+                    else
                     return (sel.isFile() || sel.isDirectory()) ;
 
                 }
@@ -985,7 +995,7 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
     private void setCurrentDispPath() {
 
         String pathstr=path.getAbsolutePath();
-        Constants.pastePath=pathstr;//  this variable is used to paste the file on the path assigned to  this variable in mainActivity
+        Constants.pastePath=pathstr;     // this variable is used to paste the file on the path assigned to  this variable in mainActivity
         currentPath.setText(pathstr);
 
 
