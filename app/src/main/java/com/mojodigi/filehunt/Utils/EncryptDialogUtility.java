@@ -65,7 +65,7 @@ public class EncryptDialogUtility
                     if(status==1)
                         dialog.dismiss();
                     else
-                        encrypt_password_box.setError("Incorrect password");
+                        encrypt_password_box.setError(mcontext.getResources().getString(R.string.Incrct_pswd));
 
                 }
 

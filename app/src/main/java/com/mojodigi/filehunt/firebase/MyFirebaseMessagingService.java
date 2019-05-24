@@ -27,6 +27,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // sending reg id to your server
         sendRegistrationToServer(refreshedToken);
 
+        if(mContext==null){
+            mContext = MyFirebaseMessagingService.this;
+        }
+        if(addprefs==null){
+            addprefs = new SharedPreferenceUtil(mContext);
+        }
     }
 
     private void sendRegistrationToServer(final String token) {
@@ -38,8 +44,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         //Log.e(TAG, "From: " + remoteMessage.getFrom());
-        mContext = MyFirebaseMessagingService.this;
-        addprefs = new SharedPreferenceUtil(mContext);
+
+        if(mContext==null){
+            mContext = MyFirebaseMessagingService.this;
+        }
+        if(addprefs==null){
+            addprefs = new SharedPreferenceUtil(mContext);
+        }
+
         if (remoteMessage.getData().size() > 0) {
             //Log.e(TAG, "Data Payload: " + remoteMessage.getData().toString());
             try {
@@ -52,9 +64,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
 
-    //this method will display the notification
-    //We are passing the JSONObject that is received from
-    //firebase cloud messaging
+
     private void sendPushNotification(JSONObject json) {
         //optionally we can display the json into log
         Log.e(TAG, "Notification JSON " + json.toString());
@@ -72,9 +82,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             //String timeStamp = data.getString("timestamp");
             Log.e("packageName " , packageName);
 
-            addprefs.setValue(AddConstants.WEB_URL, webUrl);
-            addprefs.setValue(AddConstants.CLICK_PUSH_NOTIFICATION, "true");
-            AddConstants.NEWSURL = webUrl;
+//            addprefs.setValue(AddConstants.WEB_URL, webUrl);
+//            addprefs.setValue(AddConstants.CLICK_PUSH_NOTIFICATION, "true");
+//            AddConstants.NEWSURL = webUrl;
 
                 if(!webUrl.trim().isEmpty()) {
                     addprefs.setValue(AddConstants.WEB_URL, webUrl);

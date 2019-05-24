@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
     RelativeLayout addhoster;
 
     //add push notification
-    String fcm_Token ="" ;
+    private String fcm_Token ="" ;
     public   String deviceID ="";
     public   String nameOfDevice ="";
     public   String appVersionName ="";
@@ -138,15 +138,30 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mContext=MainActivity.this;
-        permissionStatus =mContext.getSharedPreferences("permissionStatus", MODE_PRIVATE);
+        if(mContext==null) {
+            mContext = MainActivity.this;
+        }
+
+
+
+        if(addprefs==null) {
+            addprefs = new SharedPreferenceUtil(mContext);
+        }
+
+        if(addprefs!=null){
+            clickPushNotification = addprefs.getStringValue(AddConstants.CLICK_PUSH_NOTIFICATION, "");
+        }
+
+        isNetworkAvailable = AddConstants.checkIsOnline(mContext);
+
+
+        permissionStatus = mContext.getSharedPreferences("permissionStatus", MODE_PRIVATE);
 
         askForPermission();
 
         if(mContext!=null)
         {
             addprefs = new SharedPreferenceUtil(mContext);
-
 
             addhoster=findViewById(R.id.addhoster);
             mAdView = (AdView) findViewById(R.id.adView);
@@ -158,8 +173,6 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
 
             smaaTobannerView = new BannerView((this).getApplication());
             smaaTobannerView.addAdListener(this);
-
-
         }
 
 
@@ -206,12 +219,9 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
 
 
 /***********************Start**********************************************/
-        isNetworkAvailable = AddConstants.checkIsOnline(mContext);
 
-        addprefs = new SharedPreferenceUtil(mContext);
-        if(addprefs!=null){
-            clickPushNotification = addprefs.getStringValue(AddConstants.CLICK_PUSH_NOTIFICATION, "");
-        }
+
+
         deviceID = Settings.Secure.getString(getBaseContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         Log.e("Android ID : ",""+deviceID);
         nameOfDevice = Build.MANUFACTURER+" "+Build.MODEL+" "+Build.VERSION.RELEASE;
@@ -223,7 +233,8 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
             Log.e("App Version Name : ",""+appVersionName);
 
             if(appVersionName!=null) {
-                String appVersion = "App Version : " + appVersionName;
+                //String appVersion = "App Version : " + appVersionName;
+                String appVersion = getResources().getString(R.string.app_version)+" "+ appVersionName;
                 setNavAppVersion(appVersion);
             }
 
@@ -232,7 +243,13 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
         }catch (Exception ex){ ex.printStackTrace();}
 
 
-        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener( MainActivity.this,
+
+        if(addprefs!=null) {
+            boolean st=addprefs.getBoolanValue(Constants.isFcmRegistered, false);
+            System.out.print(""+st);
+            if(!addprefs.getBoolanValue(Constants.isFcmRegistered, false)) {
+
+                FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener( MainActivity.this,
                 new OnSuccessListener<InstanceIdResult>() {
                     @Override
                     public void onSuccess(InstanceIdResult instanceIdResult) {
@@ -241,12 +258,15 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
 
                         if (isNetworkAvailable) {
                             Log.e("Network is available ", "PushNotification Called");
-                            // new PushNotificationCall().execute();
+                            new PushNotificationCall().execute();
                         } else {
                             Log.e("No Network", "PushNotification Call failed");
                         }
                     }
                 });
+
+            }
+        }
 
 
         Intent intent = new Intent();
@@ -275,8 +295,12 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
             startActivity(intent);
         }
 
-
-
+        if(AddConstants.NEWSURL!=null && !AddConstants.NEWSURL.trim().isEmpty() && !AddConstants.NEWSURL.equalsIgnoreCase("") && clickPushNotification.equalsIgnoreCase("true") && !clickPushNotification.trim().isEmpty()) {
+            Log.e("Helper.NEWSURL ", AddConstants.NEWSURL);
+            addprefs.setValue(AddConstants.CLICK_PUSH_NOTIFICATION, "false");
+             Intent webIntent = new Intent(MainActivity.this, WebActivity.class);
+            startActivity(webIntent);
+        }
 
     }
 
@@ -305,14 +329,9 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
             cat_adapter = new categoryAdapter(catList);
             recyclerView.setAdapter(cat_adapter);
 
-
-
             toolbar_title.setTextSize(Utility.getFontSizeValueHeading(mContext));
 
-
             strgTxt.setTextSize(Utility.getFontSizeValueSubHead(mContext));
-
-
 
             internalTxt.setTextSize(Utility.getFontSizeValueSubHead3(mContext));
             internalTxt_Ext.setTextSize(Utility.getFontSizeValueSubHead3(mContext));
@@ -420,8 +439,8 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
                 //Previously Permission Request was cancelled with 'Dont Ask Again',
                 // Redirect to Settings after showing Information about why you need the permission
                 AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                builder.setTitle("Need Permissions");
-                builder.setMessage(mContext.getString(R.string.app_name) + " app need stoarge permission.");
+                builder.setTitle(getResources().getString(R.string.permission_required));
+                builder.setMessage(mContext.getString(R.string.app_name) + getResources().getString(R.string.storage_permission));
                 builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -431,10 +450,10 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
                         Uri uri = Uri.fromParts("package", mContext.getPackageName(), null);
                         intent.setData(uri);
                         startActivityForResult(intent, REQUEST_PERMISSION_SETTING);
-                        Toast.makeText(mContext, "Go to Permissions to Grant storage access", Toast.LENGTH_LONG).show();
+                        Toast.makeText(mContext, getResources().getString(R.string.grant_storage), Toast.LENGTH_LONG).show();
                     }
                 });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton(getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
@@ -496,7 +515,8 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
                 });
                 builder.show();
             } else {
-                Toast.makeText(mContext, "Unable to get Permission", Toast.LENGTH_LONG).show();
+                //Toast.makeText(mContext, "Unable to get Permission", Toast.LENGTH_LONG).show();
+                Utility.dispToast(mContext, getResources().getString(R.string.unable_get_permission));
             }
         }
 
@@ -506,16 +526,16 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
 
     private void iniVars() {
 
-        category_Model cat_Img=new category_Model("Image");
-        category_Model cat_Apk=new category_Model("Apps");
-        category_Model cat_Animation=new category_Model("Animation");
-        category_Model cat_Audio=new category_Model("Audio");
-        category_Model cat_Video=new category_Model("Video");
-        category_Model cat_Download=new category_Model("Download");
-        category_Model cat_Document=new category_Model("Document");
-        category_Model cat_Recent=new category_Model("Recent");
-        category_Model cat_zip=new category_Model("Zip");
-        category_Model cat_Locker=new category_Model("Locker");
+        category_Model cat_Img=new category_Model(getResources().getString(R.string.cat_Images));
+        category_Model cat_Apk=new category_Model(getResources().getString(R.string.cat_Apk));
+        category_Model cat_Animation=new category_Model(getResources().getString(R.string.cat_Animation));
+        category_Model cat_Audio=new category_Model(getResources().getString(R.string.cat_Audio));
+        category_Model cat_Video=new category_Model(getResources().getString(R.string.cat_Videos));
+        category_Model cat_Download=new category_Model(getResources().getString(R.string.cat_Download));
+        category_Model cat_Document=new category_Model(getResources().getString(R.string.cat_Documents));
+        category_Model cat_Recent=new category_Model(getResources().getString(R.string.cat_Recent));
+        category_Model cat_zip=new category_Model(getResources().getString(R.string.cat_zip_title));
+        category_Model cat_Locker=new category_Model(getResources().getString(R.string.cat_hidden));
 
 
         catList.add(cat_Img);
@@ -592,10 +612,10 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
 
         DrawerObjectItemList[] drawerItem = new DrawerObjectItemList[3];
 
-        drawerItem[0] = new DrawerObjectItemList(R.drawable.ic_menu_settings, "Settings");
+        drawerItem[0] = new DrawerObjectItemList(R.drawable.ic_menu_settings, getResources().getString(R.string.nav_settings));
 //        drawerItem[1] = new DrawerObjectItemList(R.drawable.ic_menu_about, "About");
-        drawerItem[1] = new DrawerObjectItemList(R.drawable.ic_menu_share, "Share");
-        drawerItem[2] = new DrawerObjectItemList(R.drawable.ic_privacy_policy, "Privacy policy");
+        drawerItem[1] = new DrawerObjectItemList(R.drawable.ic_menu_share, getResources().getString(R.string.nav_share));
+        drawerItem[2] = new DrawerObjectItemList(R.drawable.ic_privacy_policy, getResources().getString(R.string.nav_privacy_policy));
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
@@ -737,7 +757,7 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
         // avlbMemory.setText(Utility.formatSize(Utility.getAvailableInternalMemorySize()));
         avlbMemory.setText(Utility.humanReadableByteCount(Utility.getAvailableInternalMemorySize(), true) + "(" + Utility.setdecimalPoints(String.valueOf(per), 2) + "%)");
         // totalMemmory.setText("Total "+Utility.formatSize(Utility.getTotalInternalMemorySize()));
-        totalMemmory.setText("Total " + Utility.humanReadableByteCount(Utility.getTotalInternalMemorySize(), true));
+        totalMemmory.setText(getResources().getString(R.string.total) +" "+ Utility.humanReadableByteCount(Utility.getTotalInternalMemorySize(), true));
         int progress = 100 - (int) per;
         progressBar.setProgress(progress);
 
@@ -759,7 +779,7 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
         // avlbMemory_Ext.setText(Utility.humanReadableByteCount(AvailableMemory_Ext, true) + "(" + per + "%)");   // old code
         avlbMemory_Ext.setText(Utility.humanReadableByteCount(AvailableMemory_Ext, true) + "(" + Utility.setdecimalPoints(String.valueOf(per), 2) + "%)");
 
-        totalMemmory_Ext.setText("Total " + Utility.humanReadableByteCount(TotalMemory_Ext, true));
+        totalMemmory_Ext.setText(getResources().getString(R.string.total) +" "+ Utility.humanReadableByteCount(TotalMemory_Ext, true));
         int progress = 100 - (int) per;
         progressBar_Ext.setProgress(progress);
 
@@ -896,7 +916,7 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
             return 1;
         }
         else {
-            Utility.dispToast(mContext,"Password does not match.");
+            Utility.dispToast(mContext,getResources().getString(R.string.passwordnotmatch));
             return  0;
         }
     }
@@ -1064,7 +1084,7 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
             int versionCode=0;
             try {
                 versioName = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
-                versionCode=getPackageManager().getPackageInfo(getPackageName(),0 ).versionCode;
+                versionCode = getPackageManager().getPackageInfo(getPackageName(),0 ).versionCode;
 
                 Log.d("currentVersion", "" + versioName);
             } catch (PackageManager.NameNotFoundException e) {
@@ -1104,6 +1124,11 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
                         if (mainJson.has("status")) {
                             String status = JsonParser.getkeyValue_Str(mainJson, "status");
 
+                            String newVersion=JsonParser.getkeyValue_Str(mainJson,"appVersion");
+                            addprefs.setValue(AddConstants.APP_VERSION, newVersion);
+                            //addprefs.setValue(AddConstants.APP_VERSION, "1.29");
+
+
                             if (status.equalsIgnoreCase("true")) {
 
                                 String adShow = JsonParser.getkeyValue_Str(mainJson, "AdShow");
@@ -1116,7 +1141,7 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
 
                                         String adProviderId =JsonParser.getkeyValue_Str(dataJson, "adProviderId");
                                         String adProviderName = JsonParser.getkeyValue_Str(dataJson, "adProviderName");
-                                        String newVersion=JsonParser.getkeyValue_Str(dataJson,"appVersion");
+
 
                                          String appId_PublisherId = JsonParser.getkeyValue_Str(dataJson, "appId_PublisherId");
                                          String bannerAdId = JsonParser.getkeyValue_Str(dataJson, "bannerAdId");
@@ -1141,7 +1166,7 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
                                             // IN CASE OF EXCEPTION CONSIDER  FALSE AS THE VALUE WILL NOT BE TRUE,FALSE.
                                             addprefs.setValue(AddConstants.SHOW_ADD, false);
                                         }
-                                        addprefs.setValue(AddConstants.APP_VERSION, newVersion);
+                                        //addprefs.setValue(AddConstants.APP_VERSION, newVersion);
                                         //addprefs.setValue(AddConstants.APP_VERSION, "1.22");
                                         addprefs.setValue(AddConstants.ADD_PROVIDER_ID, adProviderId);
                                         addprefs.setValue(AddConstants.APP_ID, appId_PublisherId);
@@ -1196,9 +1221,12 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
 //                                            smaaTobannerView.asyncLoadNewBanner();
 //                                            smaaToAddContainer.addView(smaaTobannerView, new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, AddConstants.dpToPx(50) ));
                                             //requestSmaatoBanerAdds
+
+
+
                                         }
 
-                                        dispUpdateDialog();
+
 
                                     } else {
                                         String message = JsonParser.getkeyValue_Str(mainJson, "message");
@@ -1213,6 +1241,12 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
 
 
                             }
+
+                            //call dispUpdateDialog
+                            dispUpdateDialog();
+
+
+
                         }
 
                     } catch (JSONException e) {
@@ -1328,7 +1362,7 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+           // super.onBackPressed();
         }
 
 
@@ -1338,7 +1372,8 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
         }
 
         this.doubleBackToExitPressedOnce = true;
-        Toast.makeText(this, "Please press again to exit.", Toast.LENGTH_SHORT).show();
+       // Toast.makeText(this, "Please press again to exit.", Toast.LENGTH_SHORT).show();
+        Utility.dispToast(mContext, getResources().getString(R.string.pressagain));
 
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -1375,7 +1410,7 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
 
 
 
-    // this web call  is also  being done  on LockScreenViewService too  as that  is the most  viewed scrren from the user;
+    // this web call send token to  server;
     public class PushNotificationCall extends AsyncTask<String,String,String>
     {
         @Override
@@ -1437,6 +1472,10 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
                                     new PushNotificationCall().execute();
                                     max_execute++;
                                 }
+                            }
+                            else {
+                                if(addprefs!=null)
+                                    addprefs.setValue(Constants.isFcmRegistered, true);
                             }
                         }
                     } catch (JSONException e) {

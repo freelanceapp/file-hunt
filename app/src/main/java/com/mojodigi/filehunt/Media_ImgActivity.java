@@ -199,7 +199,7 @@ public class Media_ImgActivity extends AppCompatActivity implements View.OnClick
                 if(AvailableInternalMemory>Size100Mb){
                     new setwallPaperAsync().execute();
                 }else {
-                    Utility.dispToast(mContext, "No space available.");
+                    Utility.dispToast(mContext, getResources().getString(R.string.nospace));
                 }
 
             return true;
@@ -247,7 +247,8 @@ public class Media_ImgActivity extends AppCompatActivity implements View.OnClick
                         delete_list.add(file);
                         if(alertDialogHelper !=null && delete_list.size()>0)
                         {
-                            alertDialogHelper.showAlertDialog("", "Delete Image", "DELETE", "CANCEL", 1, true);
+                            //alertDialogHelper.showAlertDialog("", "Delete Image", "DELETE", "CANCEL", 1, true);
+                            alertDialogHelper.showAlertDialog("", getResources().getString(R.string.delete_file_msgs), getResources().getString(R.string.menu_item_delete), getResources().getString(R.string.cancel), 1, true);
                         }
                     }
 
@@ -322,10 +323,10 @@ public class Media_ImgActivity extends AppCompatActivity implements View.OnClick
             super.onPostExecute(flag);
             if(flag==1)
             {
-                Utility.dispToast(mContext, "Wallpaper set successfully.");
+                Utility.dispToast(mContext, getResources().getString(R.string.wallpaper_success));
             }
             else {
-                Utility.dispToast(mContext, "Could not set wallpaper.");
+                Utility.dispToast(mContext, getResources().getString(R.string.wallpaper_error));
             }
             CustomProgressDialog.dismiss();
         }
@@ -352,7 +353,7 @@ public class Media_ImgActivity extends AppCompatActivity implements View.OnClick
                 }
             }
         } catch (Exception e) {
-            Utility.dispToast(mContext,"Image size too large.");
+            Utility.dispToast(mContext,getResources().getString(R.string.bigimg));
         }
         return 0;
     }
@@ -437,8 +438,8 @@ public class Media_ImgActivity extends AppCompatActivity implements View.OnClick
         @Override
         protected void onPostExecute(Integer FileCount) {
             super.onPostExecute(FileCount);
-            Toast.makeText(mContext, FileCount+" file deleted", Toast.LENGTH_SHORT).show();
-
+           // Toast.makeText(mContext, FileCount+" file deleted", Toast.LENGTH_SHORT).show();
+           Utility.dispToast(mContext,FileCount+" "+getResources().getString(R.string.filedetetd) );
 
             CustomProgressDialog.dismiss();
 

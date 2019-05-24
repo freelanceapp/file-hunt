@@ -36,8 +36,8 @@ public class MyNotificationManager {
     public static final String NOTIFICATION_CHANNEL_ID = "1001";
     public static final String NOTIFICATION_CHANNEL_NAME = "filehunt";
 
-    public static final int ID_BIG_NOTIFICATION = 001;
-    public static final int ID_SMALL_NOTIFICATION = 002;
+    public static final int ID_BIG_NOTIFICATION = 01;
+    public static final int ID_SMALL_NOTIFICATION = 02;
 
 
     private Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
@@ -76,10 +76,10 @@ public class MyNotificationManager {
                     .setContentIntent(resultPendingIntent)
                     .setContentTitle(title)
                     .setStyle(bigPictureStyle)
-                   /* .setSmallIcon(getNotificationIcon())*/
-                     .setSmallIcon(R.drawable.ic_fcm_icon)
-                    /* .setSmallIcon(R.mipmap.ic_fcm_launcher)*/
-                    .setColor(ContextCompat.getColor(mContext,R.color.white))
+                   .setSmallIcon(getNotificationIcon())
+                     /* .setSmallIcon(R.drawable.ic_fcm_icon)
+                     .setSmallIcon(R.mipmap.ic_fcm_launcher)*/
+                    .setColor(ContextCompat.getColor(mContext,R.color.colorAccent))
                     .setLargeIcon(BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.ic_launcher))
                     .setContentText(message)
                     .build();
@@ -90,7 +90,7 @@ public class MyNotificationManager {
                     .setContentIntent(resultPendingIntent)
                     .setContentTitle(title)
                     .setStyle(bigPictureStyle)
-                    .setSmallIcon(R.mipmap.ic_launcher_round)
+                    .setSmallIcon(R.drawable.ic_fcm_icon)
                     .setLargeIcon(BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.ic_launcher))
                     .setContentText(message)
                     .build();
@@ -143,10 +143,9 @@ public class MyNotificationManager {
                     .setAutoCancel(true)
                     .setContentIntent(resultPendingIntent)
                     .setContentTitle(title)
-                    /*.setSmallIcon(getNotificationIcon())*/
-                    .setSmallIcon(R.drawable.ic_fcm_icon)
-                   /* .setSmallIcon(R.mipmap.ic_fcm_launcher)*/
-                    .setColor(ContextCompat.getColor(mContext,R.color.white))
+                    .setSmallIcon(getNotificationIcon())
+                    /*.setSmallIcon(R.drawable.ic_fcm_icon)*/
+                    .setColor(ContextCompat.getColor(mContext, R.color.colorPrimaryDark))
                     .setLargeIcon(BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.ic_launcher))
                     .setContentText(message)
                     .build();
@@ -156,7 +155,7 @@ public class MyNotificationManager {
                     .setAutoCancel(true)
                     .setContentIntent(resultPendingIntent)
                     .setContentTitle(title)
-                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setSmallIcon(R.drawable.ic_fcm_icon)
                     .setLargeIcon(BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.ic_launcher))
                     .setContentText(message)
                     .build();

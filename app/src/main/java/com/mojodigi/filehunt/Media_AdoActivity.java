@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.MediaController;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.mojodigi.filehunt.AddsUtility.AddConstants;
 import com.mojodigi.filehunt.AddsUtility.SharedPreferenceUtil;
 import com.mojodigi.filehunt.Class.Constants;
 
@@ -27,8 +29,8 @@ import com.mojodigi.filehunt.Utils.UtilityStorage;
 
 import java.io.File;
 import java.util.ArrayList;
+import com.mojodigi.filehunt.Utils.Utility;
 
-import com.mojodigi.filehunt.R;
 
 public class Media_AdoActivity extends AppCompatActivity implements View.OnClickListener, AlertDialogHelper.AlertDialogListener {
 
@@ -47,18 +49,28 @@ public class Media_AdoActivity extends AppCompatActivity implements View.OnClick
     private AlertDialogHelper alertDialogHelper;
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_media__ado);
-       mContex=Media_AdoActivity.this;
+        if(mContex==null){
+
+            mContex = Media_AdoActivity.this;
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Utility.setstatusBarColorBelowM(Media_AdoActivity.this);
         }
+        if(addprefs==null){
+            addprefs = new SharedPreferenceUtil(mContex);
+        }
 
-        addprefs = new SharedPreferenceUtil(mContex);
+
         if (addprefs != null) {
             stopPosition = addprefs.getIntValue("position",0);
+
         }
 
         initAdoView();
@@ -72,11 +84,11 @@ public class Media_AdoActivity extends AppCompatActivity implements View.OnClick
         mSongNameText = (TextView) findViewById(R.id.idSongNameText);
         mAdoVideoView = (VideoView) findViewById(R.id.idAdoAudioView);
 
-        idAudioShareImgView=findViewById(R.id.idAudioShareImgView);
-        idInfoBackArrowImage=findViewById(R.id.idInfoBackArrowImage);
-        idAudioInfoImgView=findViewById(R.id.idAudioInfoImgView);
-        idAudioDeleteImgView=findViewById(R.id.idAudioDeleteImgView);
-        idSongNameText=findViewById(R.id.idSongNameText);
+        idAudioShareImgView = findViewById(R.id.idAudioShareImgView);
+        idInfoBackArrowImage = findViewById(R.id.idInfoBackArrowImage);
+        idAudioInfoImgView = findViewById(R.id.idAudioInfoImgView);
+        idAudioDeleteImgView = findViewById(R.id.idAudioDeleteImgView);
+        idSongNameText = findViewById(R.id.idSongNameText);
         idSongNameText.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContex));
 
 
@@ -93,10 +105,6 @@ public class Media_AdoActivity extends AppCompatActivity implements View.OnClick
         //mediaController.show((stopPosition / 1000));
 
 
-
-
-
-
         String selectedAudioPath = null;
         Uri selectedVideoUri = null;
 
@@ -111,7 +119,7 @@ public class Media_AdoActivity extends AppCompatActivity implements View.OnClick
             }
             else
             {
-                Utility.dispToast(mContex, "can't play file");
+                Utility.dispToast(mContex, getResources().getString(R.string.play_error));
             }
         }
 
@@ -141,6 +149,9 @@ public class Media_AdoActivity extends AppCompatActivity implements View.OnClick
             });
 
         }
+
+
+
     }
 
     @Override
@@ -187,7 +198,10 @@ public class Media_AdoActivity extends AppCompatActivity implements View.OnClick
                     delete_list.add(file);
                     if(alertDialogHelper !=null && delete_list.size()>0)
                     {
-                        alertDialogHelper.showAlertDialog("", "Delete Audio", "DELETE", "CANCEL", 1, true);
+                        //alertDialogHelper.showAlertDialog("", "Delete Audio", "DELETE", "CANCEL", 1, true);
+
+                        alertDialogHelper.showAlertDialog("", getResources().getString(R.string.delete_file_msgs), getResources().getString(R.string.menu_item_delete), getResources().getString(R.string.cancel), 1, true);
+
                     }
                 }
                 break;
@@ -245,7 +259,8 @@ public class Media_AdoActivity extends AppCompatActivity implements View.OnClick
         @Override
         protected void onPostExecute(Integer FileCount) {
             super.onPostExecute(FileCount);
-            Toast.makeText(mContex, FileCount+" file deleted", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(mContex, FileCount+" file deleted", Toast.LENGTH_SHORT).show();
+            Utility.dispToast(mContex, FileCount+" "+getResources().getString(R.string.filedetetd));
             CustomProgressDialog.dismiss();
 
             if(FileCount >0) {

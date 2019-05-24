@@ -21,6 +21,8 @@
         android:text="@string/showfiles"
         android:layout_centerInParent="true"
         android:layout_alignParentLeft="true"
+        android:layout_toLeftOf="@+id/switchHiddenfile"
+        android:layout_marginRight="@dimen/dp15"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
@@ -60,9 +62,10 @@
         android:text="@string/dispsmallfile"
         android:maxLines="2"
         android:layout_toLeftOf="@+id/switchSmallFile"
-        android:layout_marginRight="@dimen/dp10"
+        android:layout_marginRight="@dimen/dp15"
         android:layout_centerInParent="true"
         android:layout_alignParentLeft="true"
+
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
@@ -97,6 +100,8 @@
             android:text="@string/hidestorage"
             android:layout_centerInParent="true"
             android:layout_alignParentLeft="true"
+         android:layout_toLeftOf="@+id/switchHideStorage"
+            android:layout_marginRight="@dimen/dp15"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
@@ -154,25 +159,6 @@
 
         />
 
-    <RelativeLayout
-        android:background="@drawable/custom_ripple"
-       android:id="@+id/suggestAppsLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <TextView
-            android:id="@+id/txtSuggestedApps"
-            style="@style/TextViewStyleBlack"
-            android:text="@string/txtsuggestedApps"
-            android:layout_centerInParent="true"
-            android:layout_alignParentLeft="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-
-
-
-    </RelativeLayout>
 
     <View
         android:visibility="gone"

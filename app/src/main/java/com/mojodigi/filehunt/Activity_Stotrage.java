@@ -324,6 +324,7 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
         {
             isPastingInInterNal=true;
             getSupportActionBar().setTitle("Internal Storage");
+            getSupportActionBar().setTitle(getResources().getString(R.string.internalstorage));
 
             if(toolbarStorage !=null)
             changeToolbarFont(toolbarStorage, this);
@@ -472,7 +473,7 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
             switch (item.getItemId()) {
 
                 case R.id.action_move:
-                    Utility.dispToast(mContext, "Move");
+                    Utility.dispToast(mContext, getResources().getString(R.string.menu_item_move));
                     return true;
                 case R.id.action_encrypt:
                     Utility.dispToast(mContext, "encrypt");
@@ -516,7 +517,7 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
                     if(multiselect_list.size()>=1) {
                         int mFileCount = multiselect_list.size();
                         String msgDeleteFile = mFileCount > 1 ? mFileCount + " " + getResources().getString(R.string.delfiles) : mFileCount + " " + getResources().getString(R.string.delfile);
-                        alertDialogHelper.showAlertDialog("", "Delete file"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, true);
+                        alertDialogHelper.showAlertDialog("", getResources().getString(R.string.delete_file_msgs)+" ("+msgDeleteFile+")", getResources().getString(R.string.menu_item_delete), getResources().getString(R.string.cancel), 1, true);
                     }
                     return true;
                 case R.id.action_select:
@@ -845,7 +846,8 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
             folderPath = new File(currentPath.getText().toString() + "/" + folderName);
             if (folderPath != null) {
                 if (folderPath.exists()) {
-                    Toast.makeText(mContext, "Folder exists already", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(mContext, "Folder exists already", Toast.LENGTH_SHORT).show();
+                    Utility.dispToast(mContext, getResources().getString(R.string.folder_exist));
                     return false;
                 } else {
                     //create folder
@@ -1112,7 +1114,8 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
         }
         else
         {
-            Toast.makeText(mContext, "No files to share", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(mContext, "No files to share", Toast.LENGTH_SHORT).show();
+            Utility.dispToast(mContext, getResources().getString(R.string.nofile));
         }
 
 
@@ -1813,16 +1816,16 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
                             Utility.dispToast(mContext, getResources().getString(R.string.foldercreatedmsg));
                         }
                     } else {
-                        Utility.dispToast(mContext, "Error while creating folder");
+                        Utility.dispToast(mContext, getResources().getString(R.string.error_folder_create));
                     }
                 }
 
             else{
-                    Utility.dispToast(mContext, "Error while creating folder");
+                    Utility.dispToast(mContext, getResources().getString(R.string.error_folder_create));
                 }
             }
             else {
-                Utility.dispToast(mContext, "Error while creating folder");
+                Utility.dispToast(mContext, getResources().getString(R.string.error_folder_create));
             }
         }
     }

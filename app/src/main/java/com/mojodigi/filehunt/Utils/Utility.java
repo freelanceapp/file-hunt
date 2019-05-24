@@ -119,6 +119,8 @@ public class Utility extends Activity
 
 {
 
+
+
     private static final String INTERNAL_VOLUME = "internal";
     public static final String EXTERNAL_VOLUME = "external";
 
@@ -474,7 +476,9 @@ public class Utility extends Activity
             }
 
         } else {
-            Utility.dispToast(mContext, "No files to share");
+            Utility.dispToast(mContext, mContext.getResources().getString(R.string.nofile));
+
+
         }
 
     }
@@ -587,7 +591,8 @@ public class Utility extends Activity
 
             }
         } catch (ActivityNotFoundException e) {
-            Toast.makeText(ctx, "Application Not Found ", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(ctx, "Application Not Found ", Toast.LENGTH_SHORT).show();
+            Utility.dispToast(ctx, ctx.getResources().getString(R.string.app_not_found));
         } catch (Exception e) {
             String str = e.getMessage();
             System.out.println("" + str);
@@ -629,7 +634,8 @@ public class Utility extends Activity
                 }
             }
         } catch (ActivityNotFoundException e) {
-            Toast.makeText(ctx, "Application Not Found ", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(ctx, "Application Not Found ", Toast.LENGTH_SHORT).show();
+            Utility.dispToast(ctx, ctx.getResources().getString(R.string.app_not_found));
         } catch (Exception e) {
             String str = e.getMessage();
             System.out.println("" + str);
@@ -695,7 +701,8 @@ public class Utility extends Activity
 
             }
         } catch (ActivityNotFoundException e) {
-            Toast.makeText(ctx, "Application Not Found ", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(ctx, "Application Not Found ", Toast.LENGTH_SHORT).show();
+            Utility.dispToast(ctx, ctx.getResources().getString(R.string.app_not_found));
         } catch (Exception e) {
             String str = e.getMessage();
             System.out.println("" + str);
@@ -1188,6 +1195,7 @@ public class Utility extends Activity
         }
         return  "";
     }
+
     public static  String readPasswordFile()
     {
         String path = Environment.getExternalStorageDirectory() + "/" + Constants.passDir+"/"+Constants.passwordFileDes;
@@ -1348,11 +1356,12 @@ public class Utility extends Activity
 
 
                 } else {
-                    Utility.dispToast(ctx, "file  not created"); // remove this message
+
+                    Utility.dispToast(ctx, ctx.getResources().getString(R.string.filenotcreated)); // remove this message
                     return 0;
                 }
             } else {
-                Utility.dispToast(ctx, "can't create password");
+                Utility.dispToast(ctx, ctx.getResources().getString(R.string.password_create_error));
                 return 0;
             }
         }
@@ -1454,7 +1463,7 @@ public class Utility extends Activity
         TextView headertxt = dialog.findViewById(R.id.headertxt);
         final EditText Edit_Rename = dialog.findViewById(R.id.Edit_Rename);
         if (showRename_Error)
-            Edit_Rename.setError("File already exist.Try new name");
+            Edit_Rename.setError(ctx.getResources().getString(R.string.file_exists));
 
 
         TextView View_save = dialog.findViewById(R.id.View_save);

@@ -27,12 +27,12 @@
 
 
     <!-- FileHunt main  TrackingId-->
-<!--    <string name="ga_trackingId">UA-125259779-1</string>-->
+    <string name="ga_trackingId">UA-125259779-1</string>
 
 
  <!-- FileHunt gionee and karbonn mobile   TrackingId-->
 
-  <string name="ga_trackingId">UA-127059086-1</string>
+<!--  <string name="ga_trackingId">UA-127059086-1</string>-->
 
 
  <!-- FileHunt lava mobile   TrackingId-->

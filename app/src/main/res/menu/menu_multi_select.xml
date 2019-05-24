@@ -15,7 +15,7 @@
 
     <item  android:id="@+id/action_copy"
         android:visible="true"
-        android:title="Copy"/>
+        android:title="@string/action_copy"/>
 
 
     <item  android:id="@+id/action_move"
@@ -24,10 +24,10 @@
 
 
     <item  android:id="@+id/action_Share"
-        android:title="Share"/>
+        android:title="@string/action_share"/>
 
     <item  android:id="@+id/action_rename"
-        android:title="Rename"/>
+        android:title="@string/actions_rename"/>
 
     <item  android:id="@+id/action_encrypt"
         android:visible="false"
@@ -35,10 +35,10 @@
 
     <item  android:id="@+id/action_hide"
         android:visible="true"
-        android:title="Hide"/>
+        android:title="@string/action_hide"/>
 
     <item  android:id="@+id/action_details"
-        android:title="Details"/>
+        android:title="@string/action_details"/>
 
 
 </menu>

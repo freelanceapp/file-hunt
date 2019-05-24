@@ -131,7 +131,7 @@ public class Media_VdoActivity extends AppCompatActivity implements View.OnClick
 
         } else {
 
-            Utility.dispToast(mContext, "can't play file");
+            Utility.dispToast(mContext, getResources().getString(R.string.play_error));
         }
     }
 
@@ -163,7 +163,9 @@ public class Media_VdoActivity extends AppCompatActivity implements View.OnClick
                     delete_list.add(file);
                     if(alertDialogHelper !=null && delete_list.size()>0)
                     {
-                        alertDialogHelper.showAlertDialog("", "Delete Video", "DELETE", "CANCEL", 1, true);
+                        //alertDialogHelper.showAlertDialog("", "Delete Video", "DELETE", "CANCEL", 1, true);
+
+                        alertDialogHelper.showAlertDialog("", getResources().getString(R.string.delete_file_msgs), getResources().getString(R.string.menu_item_delete), getResources().getString(R.string.cancel), 1, true);
                     }
 
                 }
@@ -284,7 +286,8 @@ public class Media_VdoActivity extends AppCompatActivity implements View.OnClick
         @Override
         protected void onPostExecute(Integer FileCount) {
             super.onPostExecute(FileCount);
-            Toast.makeText(mContext, FileCount+" file deleted", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(mContext, FileCount+" file deleted", Toast.LENGTH_SHORT).show();
+            Utility.dispToast(mContext, FileCount+" "+getResources().getString(R.string.filedetetd));
             CustomProgressDialog.dismiss();
 
 

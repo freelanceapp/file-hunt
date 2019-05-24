@@ -1,5 +1,6 @@
 package com.mojodigi.filehunt.Utils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
@@ -60,8 +61,9 @@ public class AsynctaskUtility <T> extends AsyncTask<Void, Void, ArrayList<T>> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-
-        CustomProgressDialog.show(mcontext,mcontext.getResources().getString(R.string.loading_msg));
+        if(!((Activity) mcontext).isFinishing()) {
+            CustomProgressDialog.show(mcontext, mcontext.getResources().getString(R.string.loading_msg));
+        }
     }
 
     // you may separate this or combined to caller class.

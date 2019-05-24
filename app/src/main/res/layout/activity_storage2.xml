@@ -83,7 +83,7 @@
                 android:id="@+id/pasteButton"
                 android:layout_centerInParent="true"
                 android:textColor="@color/white"
-                android:text="Copy here"
+                android:text="@string/copy_here"
                 android:textAllCaps="false"
                 android:background="@drawable/custombutton"
                 android:layout_width="match_parent"

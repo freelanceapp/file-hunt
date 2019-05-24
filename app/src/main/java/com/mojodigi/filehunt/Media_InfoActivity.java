@@ -88,7 +88,7 @@ public class Media_InfoActivity extends AppCompatActivity implements View.OnClic
             mInfoFileNameText.setText(f.getName());
             mInfoFileSizeText.setText(""+Utility.humanReadableByteCount(f.length(), true));
             mInfoFilePathText.setText(f.getAbsolutePath());
-            mInfoFileTimeText.setText("Last Modified : "+Utility.LongToDate(f.lastModified()));
+            mInfoFileTimeText.setText(getResources().getString(R.string.last_modified)+Utility.LongToDate(f.lastModified()));
 
 
 
@@ -123,7 +123,7 @@ public class Media_InfoActivity extends AppCompatActivity implements View.OnClic
                     .skipMemoryCache(false).placeholder(R.drawable.ic_mp3_thumb).error(R.drawable.ic_mp3_thumb)
                     .into(mInfoFileThumbImage);
         }else {
-            Utility.dispToast(mContext, "can't load file");
+            Utility.dispToast(mContext, getResources().getString(R.string.load_error));
         }
     }
 

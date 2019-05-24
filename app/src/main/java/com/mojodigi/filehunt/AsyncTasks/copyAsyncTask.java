@@ -1,5 +1,6 @@
 package com.mojodigi.filehunt.AsyncTasks;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 
@@ -42,7 +43,14 @@ public class copyAsyncTask extends AsyncTask<Integer, Integer, Integer> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        CustomProgressDialog.show(mcontext, mcontext.getResources().getString(R.string.copying_msg));
+
+        if(!((Activity) mcontext).isFinishing())
+        {
+            //show dialog
+            CustomProgressDialog.show(mcontext, mcontext.getResources().getString(R.string.copying_msg));
+
+        }
+
     }
 
     @Override

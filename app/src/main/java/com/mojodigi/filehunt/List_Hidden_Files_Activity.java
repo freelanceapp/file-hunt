@@ -52,22 +52,22 @@ public class List_Hidden_Files_Activity extends AppCompatActivity  implements  M
         {
             case 1:  //img
                 getFilesfromAppFolder(media_Type);
-                Utility.setActivityTitle2(mContext, "Image");
+                Utility.setActivityTitle2(mContext, getResources().getString(R.string.cat_Images));
                 break;
 
             case 2:  //vdo
                 getFilesfromAppFolder(media_Type);
-                Utility.setActivityTitle2(mContext, "Video");
+                Utility.setActivityTitle2(mContext, getResources().getString(R.string.cat_Videos));
                 break;
 
             case 3:  //ado
                 getFilesfromAppFolder(media_Type);
-                Utility.setActivityTitle2(mContext, "Audio");
+                Utility.setActivityTitle2(mContext, getResources().getString(R.string.cat_Audio));
                 break;
 
             case 4:  //docs
                 getFilesfromAppFolder(media_Type);
-                Utility.setActivityTitle2(mContext, "Document");
+                Utility.setActivityTitle2(mContext, getResources().getString(R.string.cat_Documents));
                 break;
 
         }

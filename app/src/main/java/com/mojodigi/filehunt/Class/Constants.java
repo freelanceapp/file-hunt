@@ -126,7 +126,7 @@ public class Constants {
     public static int MEDIA_TYPE_VDO=2;
     public static int MEDIA_TYPE_ADO=3;
     public static int MEDIA_TYPE_DOC=4;
-
+    public static final String isFcmRegistered="fcm";
 
     public static boolean isAsyncOperationStopped=false;
 

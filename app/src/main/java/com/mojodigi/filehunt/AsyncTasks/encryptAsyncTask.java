@@ -1,5 +1,6 @@
 package com.mojodigi.filehunt.AsyncTasks;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 
@@ -48,7 +49,9 @@ public class encryptAsyncTask extends AsyncTask<Void, Void, Integer> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        CustomProgressDialog.show(mContext,mContext.getResources().getString(R.string.encmsg));
+        if(!((Activity) mContext).isFinishing()) {
+            CustomProgressDialog.show(mContext, mContext.getResources().getString(R.string.encmsg));
+        }
     }
 
     @Override

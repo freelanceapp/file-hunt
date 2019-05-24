@@ -35,7 +35,7 @@ public class LockerActivityMain extends AppCompatActivity
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext=LockerActivityMain.this;
-        Utility.setActivityTitle2(mContext, "Hidden files");
+        Utility.setActivityTitle2(mContext, getResources().getString(R.string.hdnfiles));
       setContentView(R.layout.activity_locker_main);
         iniVars();
     }
@@ -43,10 +43,10 @@ public class LockerActivityMain extends AppCompatActivity
     private void iniVars() {
 
         recyclerView = findViewById(R.id.recycler_view_locker);
-        category_Model cat_Img=new category_Model("Image");
-        category_Model cat_Video=new category_Model("Video");
-        category_Model cat_Audio=new category_Model("Audio");
-        category_Model cat_Document=new category_Model("Document");
+        category_Model cat_Img=new category_Model(getResources().getString(R.string.cat_Images));
+        category_Model cat_Video=new category_Model(getResources().getString(R.string.cat_Videos));
+        category_Model cat_Audio=new category_Model(getResources().getString(R.string.cat_Audio));
+        category_Model cat_Document=new category_Model(getResources().getString(R.string.cat_Documents));
 
 
        catList.add(cat_Img);

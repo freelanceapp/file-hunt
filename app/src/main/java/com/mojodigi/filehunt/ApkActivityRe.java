@@ -606,7 +606,7 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
             switch (item.getItemId()) {
 
                 case R.id.action_move:
-                    Utility.dispToast(mcontext,"Move");
+                    Utility.dispToast(mcontext,getResources().getString(R.string.menu_item_move));
                     return true;
                 case R.id.action_encrypt:
                     Utility.dispToast(mcontext,"encrypt");
@@ -640,7 +640,8 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
                     if(multiselect_list.size()>=1) {
                         int mFileCount = multiselect_list.size();
                         String msgDeleteFile = mFileCount > 1 ? mFileCount + " " + getResources().getString(R.string.delfiles) : mFileCount + " " + getResources().getString(R.string.delfile);
-                        alertDialogHelper.showAlertDialog("", "Delete Apk"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, true);
+                       // alertDialogHelper.showAlertDialog("", "Delete Apk"+" ("+msgDeleteFile+")", "DELETE", "CANCEL", 1, true);
+                        alertDialogHelper.showAlertDialog("", getResources().getString(R.string.delete_file_msgs)+" ("+msgDeleteFile+")", getResources().getString(R.string.menu_item_delete), getResources().getString(R.string.cancel), 1, true);
                     }
                     return true;
                 case R.id.action_select:
@@ -1008,7 +1009,8 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
              }
              else
          {
-             Toast.makeText(mcontext, "No files to share", Toast.LENGTH_SHORT).show();
+             //Toast.makeText(mcontext, "No files to share", Toast.LENGTH_SHORT).show();
+             Utility.dispToast(mcontext,getResources().getString(R.string.nofile));
          }
 
     }
@@ -1050,7 +1052,8 @@ public class ApkActivityRe extends AppCompatActivity implements AlertDialogHelpe
         }
         else
         {
-            Toast.makeText(mcontext, "No files to share", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(mcontext, "No files to share", Toast.LENGTH_SHORT).show();
+            Utility.dispToast(mcontext, getResources().getString(R.string.nofile));
         }
 
     }

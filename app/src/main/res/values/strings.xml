@@ -1,116 +1,171 @@
 <resources>
- <string name="app_name">FileHunt</string>
- <string name="app_version">App Version</string>
+    <string name="app_name">FileHunt</string>
+    <string name="app_version">App Version</string>
 
- <string name="internalstorage">Internal Storage</string>
- <string name="externalstorage">External Storage</string>
- <string name="avlbl">Available</string>
+    <string name="internalstorage">Internal Storage</string>
+    <string name="externalstorage">External Storage</string>
+    <string name="avlbl">Available</string>
 
- <!--taken from filemangaer app-->
+    <!--taken from filemangaer app-->
 
- <string name="navigation_drawer_open">Open navigation drawer</string>
- <string name="navigation_drawer_close">Close navigation drawer</string>
- <string name="nav_header_title">FileHunt</string>
- <string name="nav_header_subtitle">jmm@android.com</string>
- <string name="nav_header_desc">Navigation header</string>
+    <!-- navigation strings-->
+    <string name="nav_settings">Settings</string>
+    <string name="nav_share">Share</string>
+    <string name="nav_privacy_policy">Privacy policy</string>
 
- <string name="actions_rename">Rename</string>
 
- <string name="menu_item_delete">Delete</string>
- <string name="menu_item_move">Move</string>
- <string name="action_search">Search</string>
- <string name="action_sort">Sort</string>
- <!--taken from filemangaer app-->
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">FileHunt</string>
+    <string name="nav_header_subtitle">jmm@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="cannotload">can\'t load the site</string>
+    <string name="actions_rename">Rename</string>
 
- <string name="file_provider_authority">com.example.filehunt.provider</string>
+    <string name="menu_item_delete">Delete</string>
+    <string name="menu_item_move">Move</string>
+    <string name="action_search">Search</string>
+    <string name="action_sort">Sort</string>
+    <string name="action_hide">Hide
+</string>
 
- <string name="loading_msg">Loading...</string>
- <string name="msg_set_wall">Setting wallpaper</string>
- <string name="copying_msg">Copying...</string>
- <string name="foldercreatedmsg">folder created successfully</string>
+    <string name="delete_file_msgs">Delete file</string>
+    <string name="action_details">Details
+</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_share">Share</string>
+    <!--taken from filemangaer app-->
 
- <string name="menu_selectAll">SELECT ALL</string>
- <string name="menu_unselectAll">UNSELECT ALL</string>
- <string name="menu_paste">Paste</string>
+    <string name="file_provider_authority">com.example.filehunt.provider</string>
 
- <string name="cat_Images">Image</string>
- <string name="cat_Videos">Video</string>
- <string name="cat_Audio">Audio</string>
- <string name="cat_Documents">Document</string>
- <string name="cat_Download">Download</string>
- <string name="cat_Animation">Animation</string>
- <string name="cat_Recent">Recent</string>
- <string name="cat_Apk">Apps</string>
- <string name="cat_zip_title">Zip</string>
- <string name="cat_hidden">Locker</string>
- <string name="title_settings">Settings</string>
- <string name="password_hint">Write password</string>
- <string name="cpassword_hint">confirm password</string>
- <string name="createfolder">CREATE</string>
- <string name="save">SAVE</string>
- <string name="cancel">Cancel</string>
- <string name="create_folder">Create folder</string>
- <string name="encrypt_heading">Locked files</string>
- <string name="password">write password</string>
- <string name="setpassword">Set password</string>
+    <string name="loading_msg">Loading...</string>
+    <string name="msg_set_wall">Setting wallpaper</string>
+    <string name="copying_msg">Copying...</string>
+    <string name="foldercreatedmsg">folder created successfully</string>
+
+    <string name="menu_selectAll">SELECT ALL</string>
+    <string name="menu_unselectAll">UNSELECT ALL</string>
+    <string name="menu_paste">Paste</string>
+
+    <string name="cat_Images">Image</string>
+    <string name="cat_Videos">Video</string>
+    <string name="cat_Audio">Audio</string>
+    <string name="cat_Documents">Document</string>
+    <string name="cat_Download">Download</string>
+    <string name="cat_Animation">Animation</string>
+    <string name="cat_Recent">Recent</string>
+    <string name="cat_Apk">Apps</string>
+    <string name="cat_zip_title">Zip</string>
+    <string name="cat_hidden">Locker</string>
+
+    <string name="hdnfiles">Hidden files</string>
+
+    <string name="copy_here">Copy here</string>
+
+
+    <string name="title_settings">Settings</string>
+    <string name="password_hint">Write password</string>
+    <string name="cpassword_hint">Confirm password</string>
+    <string name="createfolder">CREATE</string>
+    <string name="save">SAVE</string>
+    <string name="cancel">Cancel</string>
+    <string name="create_folder">Create folder</string>
+    <string name="encrypt_heading">Locked files</string>
+    <string name="password">write password</string>
+    <string name="setpassword">Set password</string>
+
+    <string name="file_exists">File already exist.Try new name</string>
 
     <string name="filenotfound">Cound not get the file to hide</string>
     <string name="directorynotfound">Could not find the directory"</string>
- <string name="decmsg">Preparing files...</string>
- <string name="encmsg">Hiding files...</string>
- <string name="unlocktxt">Unlock</string>
- <string name="rename_success">File renamed successfully</string>
- <string name="rename_failed">Rename failed</string>
- <string name="emty_error">can not be empty</string>
- <string name="foldernamerequire">Folder name required</string>
- <string name="namerequired">Name is required</string>
- <string name="error">Error</string>
+    <string name="decmsg">Preparing files...</string>
+    <string name="encmsg">Hiding files...</string>
+    <string name="unlocktxt">Unlock</string>
+    <string name="rename_success">File renamed successfully</string>
+    <string name="rename_failed">Rename failed</string>
+    <string name="emty_error">can not be empty</string>
+    <string name="foldernamerequire">Folder name required</string>
+    <string name="namerequired">Name is required</string>
+    <string name="error">Error</string>
 
- <string name="delfile">file</string>
- <string name="delfiles">files</string>
- <string name="delmsg1">Items deleted</string>
- <string name="delmsg2">Item deleted</string>
+    <string name="delfile">file</string>
+    <string name="delfiles">files</string>
+    <string name="delmsg1">Items deleted</string>
+    <string name="delmsg2">Item deleted</string>
 
- <string name="needsaccesssummary">Please choose the root directory of \t</string>
- <string name="needsaccesssummary1">\tto grant write access to operate </string>
- <string name="permission_txt">Read/Write permission is required</string>
- <string name="open">OPEN</string>
- <string name="deleting_file">Deleting files </string>
+    <string name="needsaccesssummary">Please choose the root directory of \t</string>
+    <string name="needsaccesssummary1">\tto grant write access to operate </string>
+    <string name="permission_txt">Read/Write permission is required</string>
+    <string name="open">OPEN</string>
+    <string name="deleting_file">Deleting files </string>
+    <string name="bigimg">Image size too large</string>
+    <string name="nospace">No space available.</string>
+    <string name="load_error">can\'t load file</string>
+    <string name="play_error">can\'t play file</string>
+    <string name="passwordnotmatch">Password does not match</string>
+    <string name="Incrct_pswd">Incorrect password</string>
+    <string name="type_password">type a password</string>
+    <string name="nofile">No files to share</string>
+    <string name="filenotcreated">file  not created</string>
+    <string name="password_create_error">can\'t create password</string>
+    <string name="pressagain">Please press again to exit.</string>
+    <string name="folder_exist">folder already exist</string>
+    <string name="filedetetd">file deleted</string>
+    <string name="app_not_found">Application Not Found </string>
+    <string name="unable_get_permission">Unable to get Permission</string>
+    <string name="permission_required">Need Permissions</string>
+    <string name="storage_permission"> app need stoarge permission.</string>
+    <string name="grant_storage">Go to Permissions to Grant storage access</string>
 
- <string name="sortName">Name</string>
- <string name="lastModified">Last Modified(Date)</string>
- <string name="sortSize">Size</string>
- <string name="type">Group by Type</string>
+    <string name="sortName">Name</string>
+    <string name="lastModified">Last Modified(Date)</string>
+    <string name="sortSize">Size</string>
+    <string name="type">Group by Type</string>
 
- <string name="sortby">Sort By</string>
- <string name="ascending">Ascending</string>
- <string name="descending">Descending</string>
+    <string name="sortby">Sort By</string>
+    <string name="ascending">Ascending</string>
+    <string name="descending">Descending</string>
+    <string name="done">Done</string>
 
+<string name="total">Total</string>
+    <string name="last_modified">Last Modified : </string>
+    <string name="strgdevice">STORAGE DEVICES</string>
 
- <string name="strgdevice">STORAGE DEVICES</string>
+    <string name="showfiles">Show hidden files</string>
+    <string name="txtsize">Text Size</string>
+    <string name="txtsuggestedApps">Suggested apps</string>
+    <string name="txtAbout">About</string>
+    <string name="dispsmallfile">Display images less than 30 kb</string>
+    <string name="hidestorage">Hide device storage</string>
+    <string name="error_folder_create">Error while creating folder</string>
+    <string name="wallpaper_success">Wallpaper set successfully.</string>
+    <string name="wallpaper_error">Could not set wallpaper.</string>
+    <string name="set_wallpaper">Set Wallpaper</string>
 
- <string name="showfiles">Show hidden files</string>
- <string name="txtsize">Text Size</string>
- <string name="txtsuggestedApps">Suggested apps</string>
- <string name="txtAbout">About</string>
- <string name="dispsmallfile">Display images less than 30 kb</string>
- <string name="hidestorage">Hide device storage</string>
+    <string name="num_files">Number of files</string>
+    <string name="ttl_size">Total size</string>
+    <string name="cls">CLOSE</string>
 
+    <string name="dtls">Details</string>
+    <string name="fname">Name</string>
+    <string name="lcn">Location</string>
+    <string name="sz">Size</string>
+    <string name="orntn">Orientation</string>
+    <string name="rsltn">Resolution</string>
+    <string name="dt">Date</string>
 
-
-
- <!-- demo add ids -->
- <!--
+    <!-- demo add ids -->
+    <!--
 <string name="admob_app_id">ca-app-pub-5603925957932903~3576315291</string>
 <string name="banner_add_id">ca-app-pub-3940256099942544/6300978111</string>
 <string name="ad_unit_id">ca-app-pub-3940256099942544/1033173712</string>
 <string name="ad_unit_id_reward">ca-app-pub-3940256099942544/5224354917</string>
 -->
- <!-- demo add ids -->
+    <!-- demo add ids -->
 
 
- <!--actual add ids for lvvoMobile -->
- <!--
+    <!--actual add ids for lvvoMobile -->
+    <!--
 <string name="admob_app_id">ca-app-pub-5603925957932903~7136674365</string>
 
 <string name="banner_add_id">ca-app-pub-5603925957932903/9547215284</string>
@@ -118,27 +173,27 @@
 
 <string name="ad_unit_id_reward">ca-app-pub-5603925957932903/5622774574</string>
 -->
- <!--actualapp id -->
+    <!--actualapp id -->
 
 
- <!--actual add id for FileHunt blockedAccount -->
- <!--
+    <!--actual add id for FileHunt blockedAccount -->
+    <!--
 <string name="admob_app_id">ca-app-pub-5603925957932903~3576315291</string>
 <string name="banner_add_id">ca-app-pub-5603925957932903/8134685014</string>
 <string name="ad_unit_id">ca-app-pub-5603925957932903/9183865192</string>
 <string name="ad_unit_id_reward">ca-app-pub-5603925957932903/5622774574</string>
 -->
- <!--actual add id for FileHunt blockedAccount -->
+    <!--actual add id for FileHunt blockedAccount -->
 
 
- <!--actual add id for FileHunt runningAccount -->
+    <!--actual add id for FileHunt runningAccount -->
 
- <string name="admob_app_id">ca-app-pub-4867602581600600~6953664315</string>
- <string name="banner_add_id">ca-app-pub-4867602581600600/8632210515</string>
- <string name="ad_unit_id">ca-app-pub-4867602581600600/6512355771</string>
- <string name="ad_unit_id_reward">ca-app-pub-4867602581600600/6141778543</string>
+    <string name="admob_app_id">ca-app-pub-7769757158085259~2218192747</string>
+    <string name="banner_add_id">ca-app-pub-7769757158085259/4065874309</string>
+    <string name="ad_unit_id">ca-app-pub-7769757158085259/5753526349</string>
+    <string name="ad_unit_id_reward">ca-app-pub-7769757158085259/5906156319</string>
 
- <!--actual add id for FileHunt runningAccount -->
+    <!--actual add id for FileHunt runningAccount -->
 
 
 </resources>

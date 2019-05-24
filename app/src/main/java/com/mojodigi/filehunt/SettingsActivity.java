@@ -1,41 +1,22 @@
 package com.mojodigi.filehunt;
 
-import android.app.Dialog;
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.app.AppCompatActivity;
-import android.telephony.SignalStrength;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.BitmapImageViewTarget;
-import com.google.android.exoplayer2.audio.AudioTrack;
 import com.mojodigi.filehunt.AddsUtility.AddConstants;
 import com.mojodigi.filehunt.AddsUtility.SharedPreferenceUtil;
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Utils.Utility;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -44,13 +25,13 @@ public class SettingsActivity extends AppCompatActivity {
 
 
     Context mContext;
-    TextView txtDispSmallFile, txtHideexternal, txtShowHiddenFiles, txtTextSize,txtSuggestedApps;
+    TextView txtDispSmallFile, txtHideexternal, txtShowHiddenFiles, txtTextSize;
     Switch switchHiddenfile, switchHideStorage, switchSmallFile;
 
     Spinner txtSize_Spinner;
     List<Integer> spinnerArray = new ArrayList<>();
     SharedPreferenceUtil sharedPrefs;
-   RelativeLayout suggestAppsLayout;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,13 +53,13 @@ public class SettingsActivity extends AppCompatActivity {
         txtHideexternal= findViewById(R.id.txtHideexternal);
         txtShowHiddenFiles=findViewById(R.id.txtShowHiddenFiles);
         txtTextSize=findViewById(R.id.txtTextSize);
-        txtSuggestedApps=findViewById(R.id.txtSuggestedApps);
+
 
         switchHiddenfile= findViewById(R.id.switchHiddenfile);
         switchHideStorage=findViewById(R.id.switchHideStorage);
         switchSmallFile=findViewById(R.id.switchSmallFile);
         txtSize_Spinner=findViewById(R.id.txtSize_Spinner);
-        suggestAppsLayout=findViewById(R.id.suggestAppsLayout);
+
 
 
         spinnerArray.add(16);
@@ -104,7 +85,7 @@ public class SettingsActivity extends AppCompatActivity {
         txtHideexternal.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
         txtShowHiddenFiles.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
         txtTextSize.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
-        txtSuggestedApps.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
+
 
 
 
@@ -124,7 +105,7 @@ public class SettingsActivity extends AppCompatActivity {
                 txtHideexternal.setTextSize(Integer.parseInt(txtSize_Spinner.getSelectedItem().toString()));
                 txtShowHiddenFiles.setTextSize(Integer.parseInt(txtSize_Spinner.getSelectedItem().toString()));
                 txtTextSize.setTextSize(Integer.parseInt(txtSize_Spinner.getSelectedItem().toString()));
-                txtSuggestedApps.setTextSize(Integer.parseInt(txtSize_Spinner.getSelectedItem().toString()));
+
 //                Utility.setActivityTitle2(mContext,getResources().getString(R.string.title_settings));
 
 
@@ -177,87 +158,6 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
 
-     suggestAppsLayout.setOnClickListener(new View.OnClickListener() {
-         @Override
-         public void onClick(View view) {
-
-             final Dialog dialog = new Dialog(mContext);
-             dialog.setContentView(R.layout.dialog_suggest_apps);
-             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
-             TextView txtApp1=dialog.findViewById(R.id.txtApp1);
-             TextView txtApp2=dialog.findViewById(R.id.txtApp2);
-
-             txtApp1.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
-             txtApp2.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
-
-             final ImageView appicon1=dialog.findViewById(R.id.appIcon);
-             final ImageView appicon2=dialog.findViewById(R.id.appIcon2);
-
-             RelativeLayout app1Layout=dialog.findViewById(R.id.app1Layout);
-             RelativeLayout app2Layout=dialog.findViewById(R.id.app2Layout);
-
-
-
-
-             app1Layout.setOnClickListener(new View.OnClickListener() {
-                 @Override
-                 public void onClick(View view) {
-
-                     try {
-                         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + Constants.screenLock)));
-                     } catch (android.content.ActivityNotFoundException anfe) {
-                         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + Constants.screenLock)));
-                     }
-                     dialog.dismiss();
-                 }
-             });
-
-
-             app2Layout.setOnClickListener(new View.OnClickListener() {
-                 @Override
-                 public void onClick(View view) {
-
-                     try {
-                         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + Constants.videoPlayer)));
-                     } catch (android.content.ActivityNotFoundException anfe) {
-                         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + Constants.videoPlayer)));
-                     }
-                     dialog.dismiss();
-                 }
-
-             });
-
-
-
-             //its heavier to use
-
-            /* Glide.with(mContext).load(R.drawable.suggestapplockscreen).asBitmap().centerCrop().into(new BitmapImageViewTarget(appicon1) {
-                 @Override
-                 protected void setResource(Bitmap resource) {
-                     RoundedBitmapDrawable circularBitmapDrawable =
-                             RoundedBitmapDrawableFactory.create(mContext.getResources(), resource);
-                     circularBitmapDrawable.setCircular(true);
-                     appicon1.setImageDrawable(circularBitmapDrawable);
-                 }
-             });*/
-
-
-            /* Glide.with(mContext).load(R.drawable.suggestappvdo).asBitmap().centerCrop().into(new BitmapImageViewTarget(appicon2) {
-                 @Override
-                 protected void setResource(Bitmap resource) {
-                     RoundedBitmapDrawable circularBitmapDrawable =
-                             RoundedBitmapDrawableFactory.create(mContext.getResources(), resource);
-                     circularBitmapDrawable.setCircular(true);
-                     appicon2.setImageDrawable(circularBitmapDrawable);
-                 }
-             });*/
-
-
-
-             dialog.show();
-         }
-     });
 
 
 
@@ -301,7 +201,7 @@ public class SettingsActivity extends AppCompatActivity {
         txtHideexternal.setTextSize(Utility.getFontSizeValueHeading(mContext));
         txtShowHiddenFiles.setTextSize(Utility.getFontSizeValueHeading(mContext));
         txtTextSize.setTextSize(Utility.getFontSizeValueHeading(mContext));
-        txtSuggestedApps.setTextSize(Utility.getFontSizeValueHeading(mContext));
+
     }
 
     @Override

@@ -20,14 +20,17 @@ public class AddConstants
     public static  String NEWSURL="NewsUrl";
     public static final String WEB_URL="WebUrl";
     public static final String CLICK_PUSH_NOTIFICATION="ClickPushNotification";
-    public static final String API_PUSH_NOTIFICATION = "http://development.bdigimedia.com/riccha_dev/video_player/pushNotifications/setFcmToken.php";
+//this is deprecated now   //  public static final String API_PUSH_NOTIFICATION = "http://development.bdigimedia.com/riccha_dev/Filehunt/pushNotifications/setFcmToken.php";
+    public static final String API_PUSH_NOTIFICATION = "http://onetracky.com/Apps/filehunt/pushNotifications/setFcmToken.php";
 
 
     public static final String API_RESPONSE_CODE="apiResponseCode";
 
+    public static final String APP_NAME_POSTFIX= "_JMM";  // will  identify the client like  lava ,carbon etc ;
+    public static final String VENDOR_ID="JMMFH002";
 
-    public static final String APP_NAME_POSTFIX= "_KARBONN";  // will  identify the client like  lava ,carbon etc ;
-    public static final String VENDOR_ID="KARBONNFH002";
+ /*   public static final String APP_NAME_POSTFIX= "_KARBONN";  // will  identify the client like  lava ,carbon etc ;
+    public static final String VENDOR_ID="KARBONNFH002";*/
 
 //        public static final String APP_NAME_POSTFIX= "_GIONEE";  // will  identify the client like  lava ,carbon etc ;
 //        public static final String VENDOR_ID="GIONEEFH002";
@@ -45,6 +48,7 @@ public class AddConstants
 
 
     public static final String API_URL="http://development.bdigimedia.com/riccha_dev/App-Ad-Mgmt/getAdDetailsByAppName.php";
+    //public static final String API_URL="http://development.bdigimedia.com/riccha_dev/App-Ad-Mgmt/getAdDetailsByAppName1.php";   //test api
 
     public static final String ADD_PROVIDER_ID="addProvId";
     //sharedPrefKeys
@@ -195,9 +199,11 @@ public class AddConstants
             object.put("deviceName", nameOfDevice);
             object.put("fcmToken", fcm_Token);
             object.put("appVer", appVersion);
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        Log.d("Json request", ""+object.toString());
         return object;
     }
 
