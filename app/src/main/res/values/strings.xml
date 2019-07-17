@@ -125,7 +125,7 @@
     <string name="sortby">Sort By</string>
     <string name="ascending">Ascending</string>
     <string name="descending">Descending</string>
-    <string name="done">Done</string>
+    <string name="done">OK</string>
 
 <string name="total">Total</string>
     <string name="last_modified">Last Modified : </string>
@@ -153,6 +153,60 @@
     <string name="orntn">Orientation</string>
     <string name="rsltn">Resolution</string>
     <string name="dt">Date</string>
+
+    <string name="grant">Grant</string>
+    <string name="need_permission">Need Permissions</string>
+    <string name="storage_needed">needs to access your storage.</string>
+
+
+
+    <!--  junk clean string-->
+    <!--will  translate these string after lunch-->
+    <string name="ok" >OK</string>
+    <string name="calculation" >Calculating...</string>
+    <string name="cleanup" >Cleaned</string>
+    <string name="found_together" >Found together : </string>
+    <string name="scanning" >Scanning :</string>
+    <string name="cleardata" >Clear data</string>
+    <string name="process_clean" >Process cleanup</string>
+    <string name="apk_clean" >Useless installation package</string>
+    <string name="tmp_clean" >Temporary Files</string>
+    <string name="log_clean" >Log file</string>
+    <string name="cache_clean" >Cache garbage</string>
+    <string name="system_cache" >System cache</string>
+    <string name="title_activity_junk_clean" >Recommended cleaning</string>
+
+    <string name="byte_short" translatable="false">B</string>
+    <!-- Suffix added to a number to signify size in kilobytes. -->
+    <string name="kilo_byte_short" translatable="false">KB</string>
+    <!-- Suffix added to a number to signify size in megabytes. -->
+    <string name="mega_byte_short" translatable="false">MB</string>
+    <!-- Suffix added to a number to signify size in gigabytes. -->
+    <string name="giga_byte_short" translatable="false">GB</string>
+    <!-- Suffix added to a number to signify size in terabytes. -->
+    <string name="tera_byte_short" translatable="false">TB</string>
+    <!-- Suffix added to a number to signify size in petabytes. -->
+    <string name="peta_byte_short" translatable="false">PB</string>
+
+
+
+    <string name="clean_file_size_suffix"  translatable="false">%1$s%2$s</string>
+
+    <string name="do_junk_clean" >Clean up</string>
+    <string name="boost_phone" >Boost phone</string>
+    <string name="duplicate_images" >Duplicate images</string>
+    <string name="boosting" >Boosting your device</string>
+    <string name="avlbl_ram" >Available Ram</string>
+    <string name="boost_device" >Boost Device</string>
+
+
+    <!--  junk clean string-->
+
+    <string name="need_perm" >needs permission</string>
+    <string name="custom_ui">custom UI disables certain standard permissions needed by</string>
+    <string name="need_enable">you need to enable them for</string>
+    <string name="towork">to work.</string>
+
 
     <!-- demo add ids -->
     <!--
@@ -188,10 +242,10 @@
 
     <!--actual add id for FileHunt runningAccount -->
 
-    <string name="admob_app_id">ca-app-pub-7769757158085259~2218192747</string>
-    <string name="banner_add_id">ca-app-pub-7769757158085259/4065874309</string>
-    <string name="ad_unit_id">ca-app-pub-7769757158085259/5753526349</string>
-    <string name="ad_unit_id_reward">ca-app-pub-7769757158085259/5906156319</string>
+    <string name="admob_app_id" translatable="false">ca-app-pub-7769757158085259~2218192747</string>
+    <string name="banner_add_id" translatable="false">ca-app-pub-7769757158085259/4065874309</string>
+    <string name="ad_unit_id" translatable="false">ca-app-pub-7769757158085259/5753526349</string>
+    <string name="ad_unit_id_reward" translatable="false">ca-app-pub-7769757158085259/5906156319</string>
 
     <!--actual add id for FileHunt runningAccount -->
 

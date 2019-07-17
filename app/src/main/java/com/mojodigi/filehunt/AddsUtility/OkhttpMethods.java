@@ -5,7 +5,9 @@ import android.content.Context;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
+import okhttp3.CacheControl;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
@@ -72,7 +74,9 @@ public class OkhttpMethods {
         RequestBody body = RequestBody.create(JSON, json);
         Request request = new Request.Builder()
                 .url(url)
-                .post(body)
+                .post(body).cacheControl(new CacheControl.Builder()
+                        .maxAge(0, TimeUnit.SECONDS)
+                        .build())
                 .build();
         Response response = client.newCall(request).execute();
         SharedPreferenceUtil appPref=new  SharedPreferenceUtil(mContext);
@@ -90,6 +94,7 @@ public class OkhttpMethods {
         return response.body().string();
 
     }
+
 
     public void PostFile() throws Exception
     {

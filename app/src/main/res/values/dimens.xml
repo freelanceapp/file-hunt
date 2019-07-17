@@ -50,6 +50,17 @@
     <dimen name="cardview_horizontal_padding">6dp</dimen>
     <dimen name="cardview_vertical_padding">2dp</dimen>
 
+    <!--to be used in junk clean module-->
+    <!--- For ExpandableListView -->
+
+    <dimen name="btn_margin">12dp</dimen>
+    <dimen name="group_right_padding">12dp</dimen>
+    <dimen name="item_top_margin">6dp</dimen>
+    <dimen name="item_horizontal_margin">6dp</dimen>
+    <dimen name="item_horizontal_padding">6dp</dimen>
+    <dimen name="item_level2_left_padding">12dp</dimen>
+
+    <!--to be used in junk clean module-->
 
 
 

@@ -64,8 +64,8 @@ public class MediaImageAdapter extends PagerAdapter {
 
        final   SubsamplingScaleImageView mZoomageView = (SubsamplingScaleImageView) imageLayout
                 .findViewById(R.id.idMediaZoomView);
-          //mZoomageView.setImage(ImageSource.uri(IMAGES.get(position)));
-       // Glide.with(context).load(IMAGES.get(position)).thumbnail(0.5f).crossFade().diskCacheStrategy(DiskCacheStrategy.ALL).into(mZoomageView);
+       //mZoomageView.setImage(ImageSource.uri(IMAGES.get(position)));
+       //Glide.with(context).load(IMAGES.get(position)).thumbnail(0.5f).crossFade().diskCacheStrategy(DiskCacheStrategy.ALL).into(mZoomageView);
 
         Glide.with(context).load(IMAGES.get(position)).asBitmap().into(new SimpleTarget<Bitmap>() {
             @Override

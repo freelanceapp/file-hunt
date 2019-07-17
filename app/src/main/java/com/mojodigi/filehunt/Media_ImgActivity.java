@@ -325,9 +325,14 @@ public class Media_ImgActivity extends AppCompatActivity implements View.OnClick
             {
                 Utility.dispToast(mContext, getResources().getString(R.string.wallpaper_success));
             }
+            else if(flag==2)
+            {
+                Utility.dispToast(mContext,getResources().getString(R.string.bigimg));
+            }
             else {
                 Utility.dispToast(mContext, getResources().getString(R.string.wallpaper_error));
             }
+
             CustomProgressDialog.dismiss();
         }
     }
@@ -348,13 +353,23 @@ public class Media_ImgActivity extends AppCompatActivity implements View.OnClick
                 bitmap = Bitmap.createScaledBitmap(bitmap,500,500,true);
                 if(bitmap!=null) {
                     mWallpaperManager.setBitmap(bitmap);
-                    // Utility.dispToast(mContext,"Wallpaper set successfully");
+
+
+                    bitmap.recycle();// clears old bitmap
+                    bitmap=null;
                     return 1;
                 }
             }
-        } catch (Exception e) {
-            Utility.dispToast(mContext,getResources().getString(R.string.bigimg));
         }
+        catch (OutOfMemoryError e)
+        {
+            return 2;
+        }
+        catch (Exception e) {
+            //
+            return  0;
+        }
+
         return 0;
     }
 

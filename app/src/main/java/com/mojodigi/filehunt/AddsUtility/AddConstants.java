@@ -1,18 +1,17 @@
 package com.mojodigi.filehunt.AddsUtility;
 
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.mojodigi.filehunt.R;
+import com.mojodigi.filehunt.Utils.Utility;
+
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import static com.smaato.soma.SOMA.getPackageName;
 
 public class AddConstants
 {
@@ -46,8 +45,11 @@ public class AddConstants
 
 
 
+    public static  final String BASE_URL="http://development.bdigimedia.com/";
 
-    public static final String API_URL="http://development.bdigimedia.com/riccha_dev/App-Ad-Mgmt/getAdDetailsByAppName.php";
+    public static final String API_URL=BASE_URL+"riccha_dev/App-Ad-Mgmt/getAdDetailsByAppName.php";
+    public static final String CUSTOM_ADD_API_URL=BASE_URL+"riccha_dev/App-Ad-Mgmt/showCampaignsByCountry.php";
+
     //public static final String API_URL="http://development.bdigimedia.com/riccha_dev/App-Ad-Mgmt/getAdDetailsByAppName1.php";   //test api
 
     public static final String ADD_PROVIDER_ID="addProvId";
@@ -82,6 +84,7 @@ public class AddConstants
     public static final String KEY_TEXT_SIZE_INDEX="txtSize";
 
 
+    public static final String AutoStartKey="autostartkey";
     //sharedPrefKeys
 
     public static final  int SMALL_FILE_SIZE=30;   // in kb;
@@ -112,9 +115,20 @@ public class AddConstants
     public static final String key_deviceId="deviceId";
     public static final String key_AppVersioName="versionName";
     public static final String key_AppversionCode="versionCode";
+    public static final String key_Locale="locale";
+    public static final String key_countryCode="countryCode";
 
 
-  //AddProviderskeys    will  decide  which type of adds  need to  be displayed in mobile app;
+
+
+    public static final String CUSTOM_ADD_RUNNING="custmAddRunning";
+    public static final String LANDING_URL="landingUrl";
+    public static final String BANNER_PATH="bannerPath";
+    public static final String COUNTRY_CODE="country_code";
+    public static final String FACEBOOKADDSTATUS="facebookAddStatus";
+
+
+    //AddProviderskeys    will  decide  which type of adds  need to  be displayed in mobile app;
   // this values will  be compared with  the server key addProvId and on the basis od that adds will be displayed;
 
 
@@ -124,6 +138,29 @@ public class AddConstants
     public static final String  FaceBookAddProividerId="4";
 
 
+
+    public static JSONObject prepareCustomAddJsonRequest(Context mContext, String valueVendorId)
+    {
+        //country  mobile being used;
+        String countryCodeValue = Utility.getCountryCode(mContext);
+        String locale =Utility.getLocale(mContext);
+
+        System.out.print( ""+countryCodeValue +""+locale);
+
+        JSONObject object  =  new JSONObject();
+        try {
+
+            object.put(key_appName, mContext.getString(R.string.app_name));
+            object.put(key_countryCode,countryCodeValue );
+            object.put(key_Locale, locale);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        Log.d("JsonRequestAdds", ""+object.toString());
+        return object;
+    }
 
     public static JSONObject prepareAddJsonRequest(Context mContext, String valueVendorId, String versionName,int versionCode)
     {

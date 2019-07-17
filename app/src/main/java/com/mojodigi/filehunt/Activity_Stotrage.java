@@ -1591,9 +1591,14 @@ public class Activity_Stotrage extends AppCompatActivity implements Adapter_Stor
             // pathList.clear();
             //pathList.add(initial_path);
             loadFileList();
+            /*if null check  added to  handle attempt to invoke virtual method
+            'void com.mojodigi.filehunt.Adapter.Adapter_Storage.notifyDataSetChanged()'
+            on a null object reference  reported by  appemtrica  on 03-05-2019*/
+            if(multiSelectAdapter!=null) {
+           multiSelectAdapter.notifyDataSetChanged();
+           setCurrentDispPath();
+       }
 
-            multiSelectAdapter.notifyDataSetChanged();
-            setCurrentDispPath();
             return 0;
 
         }

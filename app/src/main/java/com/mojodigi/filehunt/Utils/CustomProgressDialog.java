@@ -1,15 +1,20 @@
 package com.mojodigi.filehunt.Utils;
 
 
+import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Build;
+import android.widget.Toast;
 
 public class CustomProgressDialog {
 
     private static ProgressDialog progressDialog;
 
     public static void show(final Context context, String messageResourceString) {
+
+
         if (progressDialog != null) {
             progressDialog.dismiss();
         }
@@ -26,6 +31,9 @@ public class CustomProgressDialog {
         progressDialog = new ProgressDialog(context, style);
         progressDialog.setMessage(messageResourceString);
         progressDialog.setCancelable(true);
+
+        boolean isActivityFinishing=((Activity)context).isFinishing();
+        if(!isActivityFinishing)
         progressDialog.show();
 
 

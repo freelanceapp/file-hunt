@@ -3,10 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.mojodigi.filehunt">
 
+    <uses-permission android:name="android.permission.GET_PACKAGE_SIZE" />
+    <uses-permission android:name="android.permission.CLEAR_APP_CACHE" />
+    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
     <uses-permission
         android:name="android.permission.PACKAGE_USAGE_STATS"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -36,7 +40,6 @@
             android:theme="@style/MainActivityTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -109,7 +112,15 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".List_Hidden_Files_Activity"
-            android:screenOrientation="portrait" /> <!-- newely  added for google adds -->
+            android:screenOrientation="portrait" />
+           <activity android:name=".junkCleanModule.JunkCleanActivity" android:screenOrientation="portrait">
+           </activity>
+
+        <activity android:name=".junkCleanModule.Actitivcity_Boost_Phone" android:screenOrientation="portrait">
+
+        </activity>
+
+        <!-- newely  added for google adds -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-5603925957932903~3576315291" /> <!-- test app ids added -->

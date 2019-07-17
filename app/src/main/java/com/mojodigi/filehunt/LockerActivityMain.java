@@ -165,19 +165,14 @@ public class LockerActivityMain extends AppCompatActivity
 
             public categoryViewHolder(View view) {
                 super(view);
-
                 catName =  view.findViewById(R.id.catName);
                 catIcon =  view.findViewById(R.id.cat_Icon);
                 container_Layout=view.findViewById(R.id.container_Layout);
-
                 catName.setTextSize(Utility.getFontSizeValueHeading(mContext));
-
-
             }
         }
 
         public categoryAdapter(List<category_Model> catList) {
-
             this.catList=catList;
         }
 

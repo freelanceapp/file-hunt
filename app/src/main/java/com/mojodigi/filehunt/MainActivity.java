@@ -3,6 +3,7 @@ package com.mojodigi.filehunt;
 import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -21,7 +22,6 @@ import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
-import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -48,23 +48,29 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.mojodigi.filehunt.Adapter.DrawerNavListAdapter;
-import com.mojodigi.filehunt.Adapter.MultiSelectAdapter;
 import com.mojodigi.filehunt.AddsUtility.AddConstants;
 import com.mojodigi.filehunt.AddsUtility.AddMobUtils;
 import com.mojodigi.filehunt.AddsUtility.JsonParser;
 import com.mojodigi.filehunt.AddsUtility.OkhttpMethods;
 import com.mojodigi.filehunt.AddsUtility.SharedPreferenceUtil;
+import com.mojodigi.filehunt.AsyncTasks.WebCallGetCustomAdds;
 import com.mojodigi.filehunt.Class.Constants;
 import com.mojodigi.filehunt.Model.DrawerObjectItemList;
 import com.mojodigi.filehunt.Model.category_Model;
 import com.mojodigi.filehunt.Utils.EncryptDialogUtility;
 import com.mojodigi.filehunt.Utils.Utility;
 import com.mojodigi.filehunt.Utils.UtilityStorage;
+import com.mojodigi.filehunt.junkCleanModule.Actitivcity_Boost_Phone;
+import com.mojodigi.filehunt.junkCleanModule.JunkCleanActivity;
+import com.mojodigi.filehunt.junkCleanModule.ViewDialog;
 import com.smaato.soma.AdDownloaderInterface;
 import com.smaato.soma.AdListenerInterface;
 import com.smaato.soma.BannerView;
@@ -78,10 +84,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static com.mojodigi.filehunt.Class.Constants.POSITION;
 
-public class MainActivity extends AppCompatActivity implements  AdListenerInterface ,EncryptDialogUtility.EncryptDialogListener {
+public class MainActivity extends AppCompatActivity implements  AdListenerInterface ,EncryptDialogUtility.EncryptDialogListener,WebCallGetCustomAdds.cumstomAddListener {
 
 
     Toolbar toolbar;
@@ -92,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
     ProgressBar progressBar, progressBar_Ext;
     TextView avlbMemory, totalMemmory, internalTxt, avlbTxt,appNameTxt;
     TextView avlbMemory_Ext, totalMemmory_Ext, internalTxt_Ext, avlbTxt_Ext , navAppVersion_Txt,strgTxt,toolbar_title;
+    TextView cpu_txt,boo_txt;
     RelativeLayout storage_section;
     LinearLayout ext_layout,internalLLayout;
 
@@ -133,6 +142,15 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
     private ListView mDrawerList;
 
 
+    LinearLayout boost_phone_layout,clearJunkBtn,freeRamBtn,duplicateImgBtn;
+
+    ImageView customAddImage;
+    Timer timer;
+    TimerTask timerTask;
+    final Handler handler = new Handler();
+
+
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,7 +180,6 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
         if(mContext!=null)
         {
             addprefs = new SharedPreferenceUtil(mContext);
-
             addhoster=findViewById(R.id.addhoster);
             mAdView = (AdView) findViewById(R.id.adView);
             adContainer = findViewById(R.id.adMobView);
@@ -244,6 +261,13 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
 
 
 
+
+
+
+        //this part is now inside getPushtoken () function
+
+           /*
+
         if(addprefs!=null) {
             boolean st=addprefs.getBoolanValue(Constants.isFcmRegistered, false);
             System.out.print(""+st);
@@ -269,31 +293,48 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
         }
 
 
-        Intent intent = new Intent();
-        String manufacturer = android.os.Build.MANUFACTURER;
-        switch (manufacturer) {
 
-            case "xiaomi":
-                intent.setComponent(new ComponentName("com.miui.securitycenter",
-                        "com.miui.permcenter.autostart.AutoStartManagementActivity"));
-                break;
-            case "oppo":
-                intent.setComponent(new ComponentName("com.coloros.safecenter",
-                        "com.coloros.safecenter.permission.startup.StartupAppListActivity"));
+        if(addprefs!=null) {
 
-                break;
-            case "vivo":
-                intent.setComponent(new ComponentName("com.vivo.permissionmanager",
-                        "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"));
-                break;
-        }
+            boolean status=addprefs.getBoolanValue(AddConstants.AutoStartKey, false);
+            if(!status) {
+                Intent intent = new Intent();
+                String manufacturer = android.os.Build.MANUFACTURER;
+                showAutoStartPermDialog(manufacturer, intent);
+                switch (manufacturer) {
 
-        List<ResolveInfo> arrayListInfo =  getPackageManager().queryIntentActivities(intent,
-                PackageManager.MATCH_DEFAULT_ONLY);
+                    case "xiaomi":
+                        intent.setComponent(new ComponentName("com.miui.securitycenter",
+                                "com.miui.permcenter.autostart.AutoStartManagementActivity"));
+                        break;
+                    case "oppo":
+                        intent.setComponent(new ComponentName("com.coloros.safecenter",
+                                "com.coloros.safecenter.permission.startup.StartupAppListActivity"));
 
-        if (arrayListInfo.size() > 0) {
-            startActivity(intent);
-        }
+                        break;
+                    case "vivo":
+                        intent.setComponent(new ComponentName("com.vivo.permissionmanager",
+                                "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"));
+                        break;
+                }
+
+                List<ResolveInfo> arrayListInfo = getPackageManager().queryIntentActivities(intent,
+                        PackageManager.MATCH_DEFAULT_ONLY);
+
+                if (arrayListInfo.size() > 0) {
+                    // startActivity(intent);
+                    showAutoStartPermDialog(manufacturer, intent);
+
+
+                }
+            }
+        }*/
+
+
+
+           //this part is now inside getPushtoken () function
+
+
 
         if(AddConstants.NEWSURL!=null && !AddConstants.NEWSURL.trim().isEmpty() && !AddConstants.NEWSURL.equalsIgnoreCase("") && clickPushNotification.equalsIgnoreCase("true") && !clickPushNotification.trim().isEmpty()) {
             Log.e("Helper.NEWSURL ", AddConstants.NEWSURL);
@@ -303,6 +344,114 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
         }
 
     }
+
+    private  void getPushToken()
+    {
+
+        try {
+
+            //here  on
+
+            if (addprefs != null) {
+                boolean st = addprefs.getBoolanValue(Constants.isFcmRegistered, false);
+                System.out.print("" + st);
+                if (!addprefs.getBoolanValue(Constants.isFcmRegistered, false)) {
+
+                    FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this,
+                            new OnSuccessListener<InstanceIdResult>() {
+                                @Override
+                                public void onSuccess(InstanceIdResult instanceIdResult) {
+                                    fcm_Token = instanceIdResult.getToken();
+                                    Log.e("New Token : ", fcm_Token);
+
+                                    if (isNetworkAvailable) {
+                                        Log.e("Network is available ", "PushNotification Called");
+                                        new PushNotificationCall().execute();
+                                    } else {
+                                        Log.e("No Network", "PushNotification Call failed");
+                                    }
+                                }
+                            });
+
+                }
+            }
+
+
+            if (addprefs != null) {
+
+                boolean isAutoStartPermGranted = addprefs.getBoolanValue(AddConstants.AutoStartKey, false);
+                if (!isAutoStartPermGranted) {
+                    Intent intent = new Intent();
+                    String manufacturer = android.os.Build.MANUFACTURER;
+                    //showAutoStartPermDialog(manufacturer, intent);
+                    switch (manufacturer) {
+
+                        case "xiaomi":
+                            intent.setComponent(new ComponentName("com.miui.securitycenter",
+                                    "com.miui.permcenter.autostart.AutoStartManagementActivity"));
+                            break;
+                        case "oppo":
+                            intent.setComponent(new ComponentName("com.coloros.safecenter",
+                                    "com.coloros.safecenter.permission.startup.StartupAppListActivity"));
+
+                            break;
+                        case "vivo":
+                            intent.setComponent(new ComponentName("com.vivo.permissionmanager",
+                                    "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"));
+                            break;
+                    }
+
+                    List<ResolveInfo> arrayListInfo = getPackageManager().queryIntentActivities(intent,
+                            PackageManager.MATCH_DEFAULT_ONLY);
+
+                    if (arrayListInfo.size() > 0) {
+                        // startActivity(intent);
+                        showAutoStartPermDialog(manufacturer, intent);
+
+
+                    }
+                }
+            }
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private void showAutoStartPermDialog(String brandName, final Intent intent)
+    {
+        String appName=mContext.getResources().getString(R.string.app_name);
+        final Dialog dialog =  new Dialog(mContext);
+        dialog.setContentView(R.layout.autostart_dialog);
+        TextView heading_Txt=dialog.findViewById(R.id.headingTxt);
+        TextView desc_Txt=dialog.findViewById(R.id.desc_Txt);
+        TextView ok_Txt=dialog.findViewById(R.id.ok);
+
+        ok_Txt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                try {
+                    if (intent != null) {
+                        addprefs.setValue(AddConstants.AutoStartKey, true);
+                        dialog.dismiss();
+                        startActivity(intent);
+                    }
+                }catch (ActivityNotFoundException e)
+                {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+
+        heading_Txt.setText(appName+" "+mContext.getResources().getString(R.string.need_permission));
+        desc_Txt.setText(brandName+" "+mContext.getResources().getString(R.string.custom_ui)+" "+appName+".\n"+mContext.getResources().getString(R.string.need_enable)+" "+appName+" "+mContext.getResources().getString(R.string.towork));
+
+        dialog.show();
+
+    }
+
 
 
     public void setNavAppVersion(String appVersion){
@@ -344,6 +493,10 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
             avlbTxt_Ext.setTextSize(Utility.getFontSizeValueSubHead2(mContext));
 
             appNameTxt.setTextSize(Utility.getFontSizeValueHeading(mContext));
+
+            cpu_txt.setTextSize(Utility.getFontSizeValueHeading(mContext));
+            boo_txt.setTextSize(Utility.getFontSizeValueHeading(mContext));
+
 
             if(drawerNavListAdapter!=null)
             drawerNavListAdapter.notifyDataSetChanged();
@@ -416,10 +569,10 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
                 //Show Information about why you need the permission
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                builder.setTitle("Need Permissions");
-                builder.setMessage(mContext.getString(R.string.app_name) + " needs to access your storage.");
+                builder.setTitle(mContext.getResources().getString(R.string.need_permission));
+                builder.setMessage(mContext.getString(R.string.app_name) + mContext.getResources().getString(R.string.storage_needed));
 
-                builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(mContext.getResources().getString(R.string.grant), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
@@ -427,7 +580,7 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
 
                     }
                 });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton(mContext.getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
@@ -441,7 +594,7 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
                 AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                 builder.setTitle(getResources().getString(R.string.permission_required));
                 builder.setMessage(mContext.getString(R.string.app_name) + getResources().getString(R.string.storage_permission));
-                builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(mContext.getResources().getString(R.string.grant), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
@@ -472,6 +625,7 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
             //You already have the permission, just go ahead.
             initActivityComponents();
             iniVars();
+            getPushToken();
 
         }
     }
@@ -493,21 +647,22 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
             if (allgranted) {
                 initActivityComponents();
                 iniVars();
+                getPushToken();
 
 
             } else if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext, permissionsRequired[0]) || ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext, permissionsRequired[1])) {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                builder.setTitle("Need Permissions");
-                builder.setMessage(mContext.getString(R.string.app_name) + " app needs storage permission.");
-                builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
+                builder.setTitle(mContext.getResources().getString(R.string.need_permission));
+                builder.setMessage(mContext.getString(R.string.app_name) + mContext.getResources().getString(R.string.storage_needed));
+                builder.setPositiveButton(mContext.getResources().getString(R.string.grant), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
                         ActivityCompat.requestPermissions((Activity) mContext,permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
                     }
                 });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton(mContext.getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
@@ -552,7 +707,7 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
 
 
 
-         cat_adapter = new categoryAdapter(catList);
+        cat_adapter = new categoryAdapter(catList);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(linearLayoutManager); // set LayoutManager to RecyclerView
         recyclerView.addItemDecoration(new DividerItemDecoration(mContext, DividerItemDecoration.HORIZONTAL));
@@ -571,9 +726,9 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
                 if (sdCardPath != null && Utility.isPathExist(sdCardPath, mContext) ) {
                     ext_layout.setVisibility(View.VISIBLE);
                     fillProgressBar_Ext();
-
                 }
                 else {
+
                     ext_layout.setVisibility(View.GONE);
                 }
             } catch (Exception e) {
@@ -687,6 +842,70 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
          strgTxt=findViewById(R.id.strgTxt);
 
 
+
+         //  new module
+
+        boost_phone_layout=findViewById(R.id.boost_phone_layout);
+        boost_phone_layout.setVisibility(View.VISIBLE);
+        clearJunkBtn=findViewById(R.id.clearJunkBtn);
+        freeRamBtn=findViewById(R.id.freeRamBtn);
+        //duplicateImgBtn=findViewById(R.id.duplicateImgBtn);
+
+         cpu_txt=findViewById(R.id.cpu_txt);
+         boo_txt=findViewById(R.id.boo_txt);
+
+        cpu_txt.setTextSize(Utility.getFontSizeValueHeading(mContext));
+        boo_txt.setTextSize(Utility.getFontSizeValueHeading(mContext));
+
+        //TextView dup_txt=findViewById(R.id.dup_txt);
+
+        cpu_txt.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
+        boo_txt.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
+        //dup_txt.setTypeface(Utility.typeFace_adobe_caslonpro_Regular(mContext));
+        ViewDialog dialog=new ViewDialog(this);
+
+        clearJunkBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                redirectToActivity(JunkCleanActivity.class);
+
+
+            }
+        });
+
+
+        freeRamBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                redirectToActivity(Actitivcity_Boost_Phone.class);
+
+
+            }
+        });
+
+
+        /* duplicateImgBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+
+
+            }
+        });
+*/
+
+
+
+
+        // new module
+
+
+
+
+
         //setTypeFce
         //setTypeFce
         if(mContext!=null) {
@@ -740,8 +959,42 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
 
 
 
+        customAddImage=findViewById(R.id.customAddImage);
 
+        startTimer();
     }
+
+    public void startTimer() {
+        //set a new Timer
+        timer = new Timer();
+
+        //initialize the TimerTask's job
+        initializeTimerTask();
+
+        //schedule the timer, after the first 2000ms the TimerTask will run every 60000ms
+        timer.schedule(timerTask, 5000, 60000); //
+    }
+
+    public void initializeTimerTask() {
+
+        timerTask = new TimerTask() {
+            public void run() {
+
+                //use a handler to run a toast that shows the current timestamp
+                handler.post(new Runnable() {
+                    public void run() {
+
+                        if(isNetworkAvailable) {
+                            new WebCallGetCustomAdds(mContext, MainActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                        }
+                    }
+                });
+            }
+        };
+    }
+
+
+
 
     private void fillProgressBar() {
 
@@ -921,7 +1174,68 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
         }
     }
 
+    @Override
+    public void onRefreshAdd() {
 
+        dispCustomAdd();
+
+    }
+
+    private  void dispCustomAdd()
+    {
+        try {
+
+            if (!MainActivity.this.isFinishing())
+            {
+                String country_code = Utility.getCountryCode(mContext);
+                if (country_code == null || country_code.equalsIgnoreCase("")) {
+                    country_code = Utility.getLocale(mContext);
+                }
+                boolean countryCodeMatch = country_code.equalsIgnoreCase(addprefs.getStringValue(AddConstants.COUNTRY_CODE, "")) ? true : false;
+
+                if (addprefs != null && addprefs.getStringValue(AddConstants.CUSTOM_ADD_RUNNING, "0").equalsIgnoreCase("1") && countryCodeMatch) {
+                    String banner = addprefs.getStringValue(AddConstants.BANNER_PATH, "0");
+
+                    if (!banner.equalsIgnoreCase("")) {
+                        Glide.with(mContext).load(banner)
+                                .diskCacheStrategy(DiskCacheStrategy.ALL).priority(Priority.IMMEDIATE)
+                                .skipMemoryCache(false).placeholder(R.drawable.image_holder).error(R.drawable.image_holder)
+                                .into(customAddImage);
+                        customAddImage.setVisibility(View.VISIBLE);
+                        final String landingUrl = addprefs.getStringValue(AddConstants.LANDING_URL, "0");
+                        customAddImage.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+
+                                if (landingUrl != null) {
+
+                                    Intent i = new Intent(Intent.ACTION_VIEW);
+                                    i.setData(Uri.parse(landingUrl));
+                                    startActivity(i);
+
+                                }
+
+
+                            }
+                        });
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+           System.out.print(""+e.getMessage());
+        }
+
+    }
+
+    public void stoptimertask() {
+        //stop the timer, if it's not already null
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
+    }
 
 
     public class categoryAdapter extends RecyclerView.Adapter<categoryAdapter.categoryViewHolder> {
@@ -1275,6 +1589,16 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
     protected void onDestroy() {
         super.onDestroy();
 
+         try
+         {
+             stoptimertask();
+         }
+         catch (Exception e)
+         {
+
+         }
+
+
         // clear any  copied data on app  close just  like filego  app;
         if(Constants.filesToCopy.size()>=1)
         {
@@ -1396,7 +1720,6 @@ public class MainActivity extends AppCompatActivity implements  AdListenerInterf
         share.putExtra(Intent.EXTRA_SUBJECT, "FileHunt");
         share.putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=com.mojodigi.filehunt&hl=en");
         startActivity(Intent.createChooser(share, "FileHunt"));
-
 
     }
 

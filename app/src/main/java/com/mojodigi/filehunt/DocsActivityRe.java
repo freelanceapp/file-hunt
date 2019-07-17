@@ -406,7 +406,6 @@ public class DocsActivityRe extends AppCompatActivity implements AlertDialogHelp
             else {
                 multiselect_list.add(docsList.get(position));
                 // to  rename file contain old file;
-
                 if(multiselect_list.size()==1) {
                     fileTorename = docsList.get(position);
                     renamePosition=position;
